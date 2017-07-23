@@ -5,15 +5,35 @@
 #include "settingsdialog.h"
 #include "ui_settingsdialog.h"
 
-SettingsDialog::SettingsDialog(QWidget *parent) :
+#include <qDebug>
+
+SettingsDialog::SettingsDialog(QSettings *st, QWidget *parent) :
+    settingsPtr(st),
     QDialog(parent),
     ui(new Ui::SettingsDialog)
 {
     ui->setupUi(this);
     setWindowTitle(tr("设置"));
+    qDebug()<<"aa";
+    /*connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &SettingsDialog::onAccepted);
+    connect(ui->toolbarStyleComboBox, &QComboBox::currentTextChanged, this, &SettingsDialog::onChanged);
+    connect(ui->hideCheckBox, &QCheckBox::stateChanged, this, &SettingsDialog::onChanged);
+    connect(ui->startAtLoginCheckbox, &QCheckBox::stateChanged, this, &SettingsDialog::onChanged);
+    connect(ui->oneInstanceCheckBox, &QCheckBox::stateChanged, this, &SettingsDialog::onChanged);
+    connect(ui->nativeMenuBarCheckBox, &QCheckBox::stateChanged, this, &SettingsDialog::onChanged);*/
 }
 
 SettingsDialog::~SettingsDialog()
 {
     delete ui;
+}
+
+void SettingsDialog::onChanged()
+{
+
+}
+
+void SettingsDialog::onAccepted()
+{
+
 }

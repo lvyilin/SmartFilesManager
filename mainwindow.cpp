@@ -10,10 +10,12 @@
 #include <QMenu>
 #include <QMessageBox>
 
+#include <qDebug>
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    settingsDialog(new SettingsDialog)
+    settingsDialog(Q_NULLPTR)
 {
     ui->setupUi(this);
     setWindowTitle(QCoreApplication::applicationName());
@@ -52,20 +54,38 @@ void MainWindow::iconActivated(QSystemTrayIcon::ActivationReason reason)
     }
 }
 
+void MainWindow::reallyQuit()
+{
+    writeSettings();
+    QCoreApplication::quit();
+}
+
 void MainWindow::init()
 {
+    readSettings();
+
     createTrayIcon();
     connect(trayIcon, &QSystemTrayIcon::activated, this, &MainWindow::iconActivated);
     trayIcon->show();
+}
+
+void MainWindow::readSettings()
+{
+
+}
+
+void MainWindow::writeSettings()
+{
+
 }
 
 void MainWindow::createTrayIcon()
 {
     trayIconMenu = new QMenu(this);
     trayIconMenu->addAction(tr("显示主窗口"),this,&QWidget::showNormal);
-    trayIconMenu->addAction(tr("打开设置"),settingsDialog,&QDialog::exec);
+    trayIconMenu->addAction(tr("打开设置"),this,&MainWindow::openSettings);
     trayIconMenu->addSeparator();
-    trayIconMenu->addAction(tr("退出程序"),this,&QCoreApplication::quit);
+    trayIconMenu->addAction(tr("退出程序"),this,&MainWindow::reallyQuit);
 
     trayIcon = new QSystemTrayIcon(QIcon(":/images/icons/tray.png"),this);
 
@@ -75,10 +95,30 @@ void MainWindow::createTrayIcon()
 
 void MainWindow::on_actionExit_triggered()
 {
-    QCoreApplication::quit();
+    reallyQuit();
 }
 
 void MainWindow::on_actionSettings_triggered()
 {
-    settingsDialog->exec();
+   openSettings();
+}
+
+void MainWindow::openSettings()
+{
+    if (!settingsDialog)
+        settingsDialog = new SettingsDialog(&settings,this);
+
+    if (settingsDialog->exec() != QDialog::Accepted)
+        return;
+}
+
+void MainWindow::about()
+{
+    QMessageBox::about(this, tr("关于"),
+            tr("这是一段对智能文件管家的介绍"));
+}
+
+void MainWindow::on_actionAbout_triggered()
+{
+    about();
 }
