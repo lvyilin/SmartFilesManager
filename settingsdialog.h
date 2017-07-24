@@ -2,6 +2,8 @@
 #define SETTINGSDIALOG_H
 
 #include <QDialog>
+#include <QFileDialog>
+#include <QStandardItemModel>
 class QSettings;
 
 namespace Ui {
@@ -19,10 +21,16 @@ public:
 private:
     Ui::SettingsDialog *ui;
     QSettings *settingsPtr;
+    QStandardItemModel *pathModel;
+
+    bool isUniquePath(const QString &path);
 
 private slots:
     void onAccepted();
     void onChanged();
+    void checkRemoveButtonStatus(const QModelIndex &index);
+    void on_pushButtonAddPath_clicked();
+    void on_pushButtonRemovePath_clicked();
 };
 
 

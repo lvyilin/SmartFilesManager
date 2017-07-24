@@ -6,6 +6,9 @@
 #include "ui_settingsdialog.h"
 
 #include <qDebug>
+#include <QMessageBox>
+#include <QStandardPaths>
+#include <QItemSelectionModel>
 
 SettingsDialog::SettingsDialog(QSettings *st, QWidget *parent) :
     settingsPtr(st),
@@ -14,13 +17,12 @@ SettingsDialog::SettingsDialog(QSettings *st, QWidget *parent) :
 {
     ui->setupUi(this);
     setWindowTitle(tr("设置"));
-    qDebug()<<"aa";
-    /*connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &SettingsDialog::onAccepted);
-    connect(ui->toolbarStyleComboBox, &QComboBox::currentTextChanged, this, &SettingsDialog::onChanged);
-    connect(ui->hideCheckBox, &QCheckBox::stateChanged, this, &SettingsDialog::onChanged);
-    connect(ui->startAtLoginCheckbox, &QCheckBox::stateChanged, this, &SettingsDialog::onChanged);
-    connect(ui->oneInstanceCheckBox, &QCheckBox::stateChanged, this, &SettingsDialog::onChanged);
-    connect(ui->nativeMenuBarCheckBox, &QCheckBox::stateChanged, this, &SettingsDialog::onChanged);*/
+
+    pathModel = new QStandardItemModel();
+    ui->pathView->setModel(pathModel);
+
+    ui->pushButtonRemovePath->setEnabled(false);
+    connect(ui->pathView,SIGNAL(clicked(QModelIndex)),this,SLOT(checkRemoveButtonStatus(QModelIndex)));
 }
 
 SettingsDialog::~SettingsDialog()
@@ -36,4 +38,42 @@ void SettingsDialog::onChanged()
 void SettingsDialog::onAccepted()
 {
 
+}
+
+void SettingsDialog::checkRemoveButtonStatus(const QModelIndex &index)
+{
+    const bool valid = index.isValid();
+    ui->pushButtonRemovePath->setEnabled(valid);
+}
+
+void SettingsDialog::on_pushButtonAddPath_clicked()
+{
+    const QString directoryName =
+            QFileDialog::getExistingDirectory(this,
+                                              tr("选择监控路径"),
+                                              QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation));
+    if (!directoryName.isEmpty())
+    {
+        if(isUniquePath(directoryName))
+            pathModel->setItem(pathModel->rowCount(),
+                               new QStandardItem(QString(directoryName)));
+        else
+            QMessageBox::information(this,tr("提示"),tr("路径已存在，请重新输入"));
+    }
+}
+
+bool SettingsDialog::isUniquePath(const QString &path)
+{
+    for(int i=0;i<pathModel->rowCount();i++)
+    {
+        if(path==pathModel->item(i)->text())
+            return false;
+    }
+    return true;
+}
+
+void SettingsDialog::on_pushButtonRemovePath_clicked()
+{
+    pathModel->removeRow(ui->pathView->currentIndex().row());
+    checkRemoveButtonStatus(ui->pathView->currentIndex());
 }
