@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>612</width>
-    <height>434</height>
+    <width>566</width>
+    <height>402</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,8 +16,8 @@
   <widget class="QDialogButtonBox" name="buttonBox">
    <property name="geometry">
     <rect>
-     <x>320</x>
-     <y>390</y>
+     <x>390</x>
+     <y>360</y>
      <width>156</width>
      <height>23</height>
     </rect>
@@ -31,17 +31,17 @@
     <rect>
      <x>20</x>
      <y>10</y>
-     <width>281</width>
+     <width>521</width>
      <height>141</height>
     </rect>
    </property>
    <property name="title">
-    <string>运行策略</string>
+    <string>常规</string>
    </property>
    <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
-      <x>30</x>
+      <x>180</x>
       <y>20</y>
       <width>221</width>
       <height>101</height>
@@ -67,19 +67,6 @@
          </property>
         </widget>
        </item>
-       <item>
-        <spacer name="horizontalSpacer_3">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
       </layout>
      </item>
      <item>
@@ -94,22 +81,22 @@
        <item>
         <widget class="QTimeEdit" name="timeEdit"/>
        </item>
-       <item>
-        <spacer name="horizontalSpacer_2">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
       </layout>
      </item>
     </layout>
+   </widget>
+   <widget class="QCheckBox" name="checkBoxStartAtBoot">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>30</y>
+      <width>71</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>开机运行</string>
+    </property>
    </widget>
   </widget>
   <widget class="QGroupBox" name="groupBoxScan">
@@ -122,14 +109,14 @@
     </rect>
    </property>
    <property name="title">
-    <string>扫描设置</string>
+    <string>扫描路径</string>
    </property>
    <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
-      <x>30</x>
+      <x>20</x>
       <y>120</y>
-      <width>171</width>
+      <width>191</width>
       <height>41</height>
      </rect>
     </property>
@@ -137,41 +124,32 @@
      <item>
       <widget class="QLabel" name="labelScanInterval">
        <property name="text">
-        <string>扫描间隔</string>
+        <string>更新索引间隔:</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="comboBoxScanInterval">
-       <item>
-        <property name="text">
-         <string>每天</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>每12小时</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>每1小时</string>
-        </property>
-       </item>
+      <widget class="QLabel" name="label">
+       <property name="layoutDirection">
+        <enum>Qt::LeftToRight</enum>
+       </property>
+       <property name="text">
+        <string>每</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
       </widget>
      </item>
      <item>
-      <spacer name="horizontalSpacer_5">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+      <widget class="QSpinBox" name="spinBoxScanInterval"/>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_2">
+       <property name="text">
+        <string>小时</string>
        </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
+      </widget>
      </item>
     </layout>
    </widget>
@@ -209,6 +187,19 @@
       <width>401</width>
       <height>91</height>
      </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButtonScan">
+    <property name="geometry">
+     <rect>
+      <x>230</x>
+      <y>130</y>
+      <width>81</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>立即更新</string>
     </property>
    </widget>
   </widget>

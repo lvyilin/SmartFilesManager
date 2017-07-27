@@ -26,11 +26,13 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
-    settingsdialog.cpp
+    settingsdialog.cpp \
+    confighelper.cpp
 
 HEADERS += \
         mainwindow.h \
-    settingsdialog.h
+    settingsdialog.h \
+    confighelper.h
 
 FORMS += \
         mainwindow.ui \

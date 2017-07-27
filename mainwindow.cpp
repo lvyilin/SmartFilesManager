@@ -15,11 +15,17 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
+    configHelper(new ConfigHelper(this)),
     settingsDialog(Q_NULLPTR)
 {
     ui->setupUi(this);
     setWindowTitle(QCoreApplication::applicationName());
-    init();
+
+    configHelper->readSettings();
+
+    createTrayIcon();
+    connect(trayIcon, &QSystemTrayIcon::activated, this, &MainWindow::iconActivated);
+    trayIcon->show();
 }
 
 MainWindow::~MainWindow()
@@ -29,65 +35,48 @@ MainWindow::~MainWindow()
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-#ifdef Q_OS_OSX
+    #ifdef Q_OS_OSX
     if (!event->spontaneous() || !isVisible())
     {
         return;
     }
-#endif
-    if (trayIcon->isVisible()) {
+    #endif
+    if (trayIcon->isVisible())
+    {
         hide();
-        trayIcon->showMessage(tr("智能文件管家"),tr("后台运行中"));
+        trayIcon->showMessage(tr("智能文件管家"), tr("后台运行中"));
         event->ignore();
     }
 }
 
 void MainWindow::iconActivated(QSystemTrayIcon::ActivationReason reason)
 {
-    switch (reason) {
-    case QSystemTrayIcon::Trigger:
-    case QSystemTrayIcon::DoubleClick:
-        show();
-        break;
-    default:
-        ;
+    switch (reason)
+    {
+        case QSystemTrayIcon::Trigger:
+        case QSystemTrayIcon::DoubleClick:
+            show();
+            break;
+        default:
+            ;
     }
 }
 
 void MainWindow::reallyQuit()
 {
-    writeSettings();
     QCoreApplication::quit();
 }
 
-void MainWindow::init()
-{
-    readSettings();
-
-    createTrayIcon();
-    connect(trayIcon, &QSystemTrayIcon::activated, this, &MainWindow::iconActivated);
-    trayIcon->show();
-}
-
-void MainWindow::readSettings()
-{
-
-}
-
-void MainWindow::writeSettings()
-{
-
-}
 
 void MainWindow::createTrayIcon()
 {
     trayIconMenu = new QMenu(this);
-    trayIconMenu->addAction(tr("显示主窗口"),this,&QWidget::showNormal);
-    trayIconMenu->addAction(tr("打开设置"),this,&MainWindow::openSettings);
+    trayIconMenu->addAction(tr("显示主窗口"), this, &QWidget::showNormal);
+    trayIconMenu->addAction(tr("打开设置"), this, &MainWindow::openSettings);
     trayIconMenu->addSeparator();
-    trayIconMenu->addAction(tr("退出程序"),this,&MainWindow::reallyQuit);
+    trayIconMenu->addAction(tr("退出程序"), this, &MainWindow::reallyQuit);
 
-    trayIcon = new QSystemTrayIcon(QIcon(":/images/icons/tray.png"),this);
+    trayIcon = new QSystemTrayIcon(QIcon(":/images/icons/tray.png"), this);
 
     trayIcon->setContextMenu(trayIconMenu);
     trayIcon->setToolTip(tr("打开智能文件管家"));
@@ -100,13 +89,13 @@ void MainWindow::on_actionExit_triggered()
 
 void MainWindow::on_actionSettings_triggered()
 {
-   openSettings();
+    openSettings();
 }
 
 void MainWindow::openSettings()
 {
     if (!settingsDialog)
-        settingsDialog = new SettingsDialog(&settings,this);
+        settingsDialog = new SettingsDialog(configHelper, this);
 
     if (settingsDialog->exec() != QDialog::Accepted)
         return;
@@ -115,7 +104,7 @@ void MainWindow::openSettings()
 void MainWindow::about()
 {
     QMessageBox::about(this, tr("关于"),
-            tr("这是一段对智能文件管家的介绍"));
+                       tr("这是一段对智能文件管家的介绍"));
 }
 
 void MainWindow::on_actionAbout_triggered()

@@ -4,33 +4,36 @@
 #include <QDialog>
 #include <QFileDialog>
 #include <QStandardItemModel>
-class QSettings;
+
+#include <confighelper.h>
 
 namespace Ui {
-class SettingsDialog;
+    class SettingsDialog;
 }
 
-class SettingsDialog : public QDialog
-{
-    Q_OBJECT
+class SettingsDialog : public QDialog {
+        Q_OBJECT
 
-public:
-    explicit SettingsDialog(QSettings *settings, QWidget *parent = 0);
-    ~SettingsDialog();
+    public:
+        explicit SettingsDialog(ConfigHelper *ch, QWidget *parent = 0);
+        ~SettingsDialog();
 
-private:
-    Ui::SettingsDialog *ui;
-    QSettings *settingsPtr;
-    QStandardItemModel *pathModel;
+    private:
+        Ui::SettingsDialog *ui;
+        ConfigHelper *configHelper;
 
-    bool isUniquePath(const QString &path);
+        bool isUniquePath(const QString &path);
 
-private slots:
-    void onAccepted();
-    void onChanged();
-    void checkRemoveButtonStatus(const QModelIndex &index);
-    void on_pushButtonAddPath_clicked();
-    void on_pushButtonRemovePath_clicked();
+    private slots:
+        void onAccepted();
+        void onChanged();
+        void onCancel();
+        void checkRemoveButtonStatus(const QModelIndex &index);
+        void on_pushButtonAddPath_clicked();
+        void on_pushButtonRemovePath_clicked();
+        void radioBtnCpuToggle();
+        void radioBtnTimeToggle();
+        void on_pushButtonScan_clicked();
 };
 
 

@@ -3,8 +3,9 @@
 
 #include <QMainWindow>
 #include <QSystemTrayIcon>
-#include <QList>
-#include <QSettings>
+#include <QStandardItemModel>
+#include "confighelper.h"
+
 class SettingsDialog;
 
 namespace Ui {
@@ -36,10 +37,6 @@ private slots:
 private:
     Ui::MainWindow *ui;
 
-    void init();
-    void readSettings();
-    void writeSettings();
-
     void reallyQuit();
 
     void createTrayIcon();
@@ -52,10 +49,10 @@ private:
     void buildIndex();
     void updateIndex();
 
+    ConfigHelper *configHelper;
     QSystemTrayIcon *trayIcon;
     QMenu *trayIconMenu;
     SettingsDialog *settingsDialog;
-    QSettings settings;
 
 };
 
