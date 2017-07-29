@@ -2,11 +2,12 @@
 #pragma execution_character_set("utf-8")
 #endif    //解决MSVC编译UTF-8(BOM)导致的中文编码问题
 
-/*
-    TODO
-    Model未保存撤销问题
-*/
-
+/*TODO
+ * Model未保存撤销问题
+ * 使用QStringListModel
+ * 改model-based 为 widget-based (?)
+ * 增加路径改变信号
+ */
 
 #include "settingsdialog.h"
 #include "ui_settingsdialog.h"

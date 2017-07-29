@@ -5,6 +5,7 @@
 #include <QSystemTrayIcon>
 #include <QStandardItemModel>
 #include "confighelper.h"
+#include "dbhelper.h"
 
 class SettingsDialog;
 
@@ -12,8 +13,7 @@ namespace Ui {
 class MainWindow;
 }
 
-class MainWindow : public QMainWindow
-{
+class MainWindow : public QMainWindow {
     Q_OBJECT
 
 public:
@@ -28,6 +28,8 @@ private slots:
     void openSettings();
     void about();
 
+    void updateIndex();
+
     void on_actionExit_triggered();
 
     void on_actionSettings_triggered();
@@ -41,18 +43,15 @@ private:
 
     void createTrayIcon();
 
-    //设置触发器
     void setTaskTimer();
 
-    //文件索引
     bool hasIndex();
-    void buildIndex();
-    void updateIndex();
 
     ConfigHelper *configHelper;
     QSystemTrayIcon *trayIcon;
     QMenu *trayIconMenu;
     SettingsDialog *settingsDialog;
+    DBHelper *dbHelper;
 
 };
 

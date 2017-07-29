@@ -8,32 +8,35 @@
 #include <confighelper.h>
 
 namespace Ui {
-    class SettingsDialog;
+class SettingsDialog;
 }
 
 class SettingsDialog : public QDialog {
-        Q_OBJECT
+    Q_OBJECT
 
-    public:
-        explicit SettingsDialog(ConfigHelper *ch, QWidget *parent = 0);
-        ~SettingsDialog();
+public:
+    explicit SettingsDialog(ConfigHelper *ch, QWidget *parent = 0);
+    ~SettingsDialog();
 
-    private:
-        Ui::SettingsDialog *ui;
-        ConfigHelper *configHelper;
+signals:
+    void pathChanged();
 
-        bool isUniquePath(const QString &path);
+private:
+    Ui::SettingsDialog *ui;
+    ConfigHelper *configHelper;
 
-    private slots:
-        void onAccepted();
-        void onChanged();
-        void onCancel();
-        void checkRemoveButtonStatus(const QModelIndex &index);
-        void on_pushButtonAddPath_clicked();
-        void on_pushButtonRemovePath_clicked();
-        void radioBtnCpuToggle();
-        void radioBtnTimeToggle();
-        void on_pushButtonScan_clicked();
+    bool isUniquePath(const QString &path);
+
+private slots:
+    void onAccepted();
+    void onChanged();
+    void onCancel();
+    void checkRemoveButtonStatus(const QModelIndex &index);
+    void on_pushButtonAddPath_clicked();
+    void on_pushButtonRemovePath_clicked();
+    void radioBtnCpuToggle();
+    void radioBtnTimeToggle();
+    void on_pushButtonScan_clicked();
 };
 
 

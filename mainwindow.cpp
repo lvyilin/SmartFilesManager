@@ -23,6 +23,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     configHelper->readSettings();
 
+    dbHelper = new DBHelper(QString("SFM"), QString("sfm.db"), this);
+
     createTrayIcon();
     connect(trayIcon, &QSystemTrayIcon::activated, this, &MainWindow::iconActivated);
     trayIcon->show();
@@ -53,12 +55,12 @@ void MainWindow::iconActivated(QSystemTrayIcon::ActivationReason reason)
 {
     switch (reason)
     {
-        case QSystemTrayIcon::Trigger:
-        case QSystemTrayIcon::DoubleClick:
-            show();
-            break;
-        default:
-            ;
+    case QSystemTrayIcon::Trigger:
+    case QSystemTrayIcon::DoubleClick:
+        show();
+        break;
+    default:
+        ;
     }
 }
 
@@ -105,6 +107,11 @@ void MainWindow::about()
 {
     QMessageBox::about(this, tr("关于"),
                        tr("这是一段对智能文件管家的介绍"));
+}
+
+void MainWindow::updateIndex()
+{
+
 }
 
 void MainWindow::on_actionAbout_triggered()

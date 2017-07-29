@@ -27,12 +27,14 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
     settingsdialog.cpp \
-    confighelper.cpp
+    confighelper.cpp \
+    dbhelper.cpp
 
 HEADERS += \
         mainwindow.h \
     settingsdialog.h \
-    confighelper.h
+    confighelper.h \
+    dbhelper.h
 
 FORMS += \
         mainwindow.ui \
