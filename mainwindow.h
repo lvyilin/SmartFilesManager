@@ -4,6 +4,8 @@
 #include <QMainWindow>
 #include <QSystemTrayIcon>
 #include <QStandardItemModel>
+#include <QDirIterator>
+#include <QSet>
 #include "confighelper.h"
 #include "dbhelper.h"
 
@@ -40,18 +42,15 @@ private:
     Ui::MainWindow *ui;
 
     void reallyQuit();
-
     void createTrayIcon();
-
-    void setTaskTimer();
-
-    bool hasIndex();
+    void setTaskTimer();//TODO
 
     ConfigHelper *configHelper;
     QSystemTrayIcon *trayIcon;
     QMenu *trayIconMenu;
     SettingsDialog *settingsDialog;
     DBHelper *dbHelper;
+    QSet<QString> monitorSet;
 
 };
 

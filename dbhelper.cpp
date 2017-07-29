@@ -15,6 +15,19 @@ DBHelper::DBHelper(QString &conName, QString &dbName, QObject *parent) : QObject
         qDebug() << "Database: connection ok";
     }
 
-    //TODO: 建表
+}
+
+bool DBHelper::hasIndex()
+{
+    return false;
+}
+
+void DBHelper::addFile(QString &path)
+{
+
+}
+
+void DBHelper::addFiles(QSet<QString> &pathSet)
+{
 
 }

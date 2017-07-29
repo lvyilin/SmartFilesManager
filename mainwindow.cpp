@@ -2,6 +2,10 @@
 #pragma execution_character_set("utf-8")
 #endif    //解决MSVC编译UTF-8(BOM)导致的中文编码问题
 
+/*TODO
+ * updateIndex() 优化：去除已包含过的子目录
+ */
+
 #include "settingsdialog.h"
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -11,6 +15,9 @@
 #include <QMessageBox>
 
 #include <qDebug>
+
+static const QStringList supportedFormats({"*.docx", "*.txt"}) ;
+const int MAX_FILES_NUMBER = 100;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -28,6 +35,8 @@ MainWindow::MainWindow(QWidget *parent) :
     createTrayIcon();
     connect(trayIcon, &QSystemTrayIcon::activated, this, &MainWindow::iconActivated);
     trayIcon->show();
+
+    connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), this, SLOT(updateIndex())); //需修改
 }
 
 MainWindow::~MainWindow()
@@ -111,7 +120,44 @@ void MainWindow::about()
 
 void MainWindow::updateIndex()
 {
+    ui->statusBar->showMessage(tr("正在索引文件..."));
+    if (!(dbHelper->hasIndex()))
+    {
+        for (int i = 0; i < configHelper->pathModel->rowCount(); i++)
+        {
+            QDirIterator it(configHelper->pathModel->item(i)->text(),
+                            supportedFormats,
+                            QDir::Files,
+                            QDirIterator::Subdirectories);
+            int filesCount = 0;
+            while (it.hasNext() && filesCount < MAX_FILES_NUMBER)//限制单次添加文件数
+            {
+                monitorSet << it.next();
+                ++filesCount;
+            }
+            if (MAX_FILES_NUMBER == filesCount)
+            {
+                //提示修改文件夹路径
+            }
+        }
+    }
+    else
+    {
+        //TODO:更新索引
+        //Using filewatch
+    }
 
+    //debug
+    foreach (auto iter, monitorSet)
+    {
+        qDebug() << iter;
+    }
+    qDebug() << "Files num: " << monitorSet.count();
+
+    //保存
+    dbHelper->addFiles(monitorSet);
+
+    ui->statusBar->showMessage(tr("完毕"), 5000);
 }
 
 void MainWindow::on_actionAbout_triggered()

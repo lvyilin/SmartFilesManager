@@ -4,7 +4,6 @@
 
 /*TODO
  * Model未保存撤销问题
- * 使用QStringListModel
  * 改model-based 为 widget-based (?)
  * 增加路径改变信号
  */
