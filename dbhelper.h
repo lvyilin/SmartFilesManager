@@ -4,6 +4,8 @@
 #include <QObject>
 #include <QSqlDatabase>
 #include <QSqlError>
+#include <QtSql>
+#include <QtCore/QCoreApplication>
 
 class DBHelper : public QObject {
     Q_OBJECT
@@ -28,11 +30,15 @@ public:
      */
     void addFiles(QSet<QString> &pathSet);
 
+
+    QSet<QString> getFiles();
+
 signals:
 
 public slots:
 private:
     QSqlDatabase db;
+    QSqlQuery query;
 };
 
 #endif // DBHELPER_H
