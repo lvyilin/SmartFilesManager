@@ -14,38 +14,72 @@ DBHelper::DBHelper(QString &conName, QString &dbName, QObject *parent) : QObject
     {
         qDebug() << "Database: connection ok";
     }
-    if(!query.exec("create table Paths(id integer PRIMARY KEY AUTOINCREMENT, name varchar(255) NOT NULL)"))
-        qDebug()<<"false";//判断表格是否建立成功
+
+    query = new QSqlQuery(db);
+    createPathsTable();
 }
 
 bool DBHelper::hasIndex()
 {
-    if(!query.next())
+    query->exec("SELECT name FROM paths");
+    if (!query->next())
+    {
+        qDebug() << "hasIndex(): false";
         return false;  //判断表格是否已经存在
+    }
     return true;
+
 }
 
 void DBHelper::addFile(QString &path)
-{ 
-    query.exec(QString("INSERT INTO Paths(%1)").arg(path));
+{
+    query->bindValue(":name", path);
+    bool res = query->exec();
+    //    qDebug() << "add File result:" << res << query->lastError();
 }
 
 void DBHelper::addFiles(QSet<QString> &pathSet)
 {
-    foreach (QString Path , pathSet)
+    query->prepare("insert into paths(id,name) "
+                   "values(:id, :name)");
+    foreach (QString Path, pathSet)
     {
         addFile(Path);
     }
 }
 
+void DBHelper::close()
+{
+    db.close();
+}
+
 QSet<QString> DBHelper::getFiles()
 {
     QSet<QString> temp;
-    QSqlQuery query("SELECT name FROM Paths");
-        while (query.next())
+    query->exec("SELECT name FROM paths");
+    qDebug() << "Paths in db:";
+    while (query->next())
+    {
+        QString s = query->value(0).toString();
+        temp.insert(s);
+        qDebug() << s;
+    }
+    return temp;
+}
+
+void DBHelper::createPathsTable()
+{
+    QStringList tables = db.tables();
+    if (tables.contains("paths", Qt::CaseInsensitive))
+    {
+        qDebug() << "table had created before";
+    }
+    else
+    {
+        if (!query->exec("create table paths(id integer primary key autoincrement, name varchar(255) not null)"))
         {
-            QString country = query.value(0).toString();
-            temp.insert(country);
+            qDebug() << "table create false" << query->lastError().text();
         }
-        return temp;
+        else qDebug() << "table create success";
+    }
 }

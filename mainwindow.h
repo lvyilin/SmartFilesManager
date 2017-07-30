@@ -6,6 +6,7 @@
 #include <QStandardItemModel>
 #include <QDirIterator>
 #include <QSet>
+#include <QFileSystemWatcher>
 #include "confighelper.h"
 #include "dbhelper.h"
 
@@ -30,7 +31,8 @@ private slots:
     void openSettings();
     void about();
 
-    void updateIndex();
+    void buildMonitorSet();
+    void updateIndex(QString needUpdatePath);
 
     void on_actionExit_triggered();
 
@@ -44,6 +46,7 @@ private:
     void reallyQuit();
     void createTrayIcon();
     void setTaskTimer();//TODO
+    void setFilesMonitor();
 
     ConfigHelper *configHelper;
     QSystemTrayIcon *trayIcon;
@@ -51,6 +54,7 @@ private:
     SettingsDialog *settingsDialog;
     DBHelper *dbHelper;
     QSet<QString> monitorSet;
+    QFileSystemWatcher *watcher;
 
 };
 

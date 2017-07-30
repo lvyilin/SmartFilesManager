@@ -36,7 +36,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(trayIcon, &QSystemTrayIcon::activated, this, &MainWindow::iconActivated);
     trayIcon->show();
 
-    connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), this, SLOT(updateIndex())); //需修改
+    buildMonitorSet();
+    //    setFilesMonitor();
 }
 
 MainWindow::~MainWindow()
@@ -75,6 +76,7 @@ void MainWindow::iconActivated(QSystemTrayIcon::ActivationReason reason)
 
 void MainWindow::reallyQuit()
 {
+    dbHelper->close();
     QCoreApplication::quit();
 }
 
@@ -91,6 +93,13 @@ void MainWindow::createTrayIcon()
 
     trayIcon->setContextMenu(trayIconMenu);
     trayIcon->setToolTip(tr("打开智能文件管家"));
+}
+
+void MainWindow::setFilesMonitor()
+{
+    watcher->addPaths(monitorSet.toList());
+    connect(watcher, SIGNAL(fileChanged(QString)), this, SLOT(updateIndex(QString)));
+
 }
 
 void MainWindow::on_actionExit_triggered()
@@ -118,34 +127,36 @@ void MainWindow::about()
                        tr("这是一段对智能文件管家的介绍"));
 }
 
-void MainWindow::updateIndex()
+void MainWindow::buildMonitorSet()
 {
-    ui->statusBar->showMessage(tr("正在索引文件..."));
+    ui->statusBar->showMessage(tr("正在添加文件至监控列表..."));
     if (!(dbHelper->hasIndex()))
     {
+        int filesCount = 0;
         for (int i = 0; i < configHelper->pathModel->rowCount(); i++)
         {
             QDirIterator it(configHelper->pathModel->item(i)->text(),
                             supportedFormats,
                             QDir::Files,
                             QDirIterator::Subdirectories);
-            int filesCount = 0;
-            while (it.hasNext() && filesCount < MAX_FILES_NUMBER)//限制单次添加文件数
+            while (it.hasNext() && filesCount < MAX_FILES_NUMBER)
             {
                 monitorSet << it.next();
                 ++filesCount;
             }
             if (MAX_FILES_NUMBER == filesCount)
-            {
-                //提示修改文件夹路径
-            }
+                break;
         }
+        if (MAX_FILES_NUMBER == filesCount)
+        {
+            QMessageBox::warning(this,
+                                 tr("操作中断"),
+                                 tr("超过文件数限制%1，请前往\"设置\"修改监控文件夹并缩小监控范围。").arg(MAX_FILES_NUMBER));
+        }
+        dbHelper->addFiles(monitorSet);
     }
     else
-    {
-        //TODO:更新索引
-        //Using filewatch
-    }
+        monitorSet = dbHelper->getFiles();
 
     //debug
     foreach (auto iter, monitorSet)
@@ -154,10 +165,12 @@ void MainWindow::updateIndex()
     }
     qDebug() << "Files num: " << monitorSet.count();
 
-    //保存
-    dbHelper->addFiles(monitorSet);
-
     ui->statusBar->showMessage(tr("完毕"), 5000);
+}
+
+void MainWindow::updateIndex(QString needUpdatePath)
+{
+    qDebug() << "need update path:" << needUpdatePath;
 }
 
 void MainWindow::on_actionAbout_triggered()

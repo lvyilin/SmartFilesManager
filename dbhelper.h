@@ -4,8 +4,7 @@
 #include <QObject>
 #include <QSqlDatabase>
 #include <QSqlError>
-#include <QtSql>
-#include <QtCore/QCoreApplication>
+#include <QSqlQuery>
 
 class DBHelper : public QObject {
     Q_OBJECT
@@ -29,6 +28,7 @@ public:
      * @param pathSet 文件路径集合
      */
     void addFiles(QSet<QString> &pathSet);
+    void close();
 
 
     QSet<QString> getFiles();
@@ -37,8 +37,9 @@ signals:
 
 public slots:
 private:
+    void createPathsTable();
     QSqlDatabase db;
-    QSqlQuery query;
+    QSqlQuery *query;
 };
 
 #endif // DBHELPER_H
