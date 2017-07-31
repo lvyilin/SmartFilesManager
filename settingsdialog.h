@@ -4,12 +4,22 @@
 #include <QDialog>
 #include <QFileDialog>
 #include <QStandardItemModel>
-
+#include <QStringList>
+#include <QStack>
+#include <QModelIndex>
 #include <confighelper.h>
 
 namespace Ui {
 class SettingsDialog;
 }
+
+struct UndoAction
+{
+    int type;//0 = add 1 = remove
+    QString text;
+    QStandardItem *item;
+    int rowIdx;
+};
 
 class SettingsDialog : public QDialog {
     Q_OBJECT
@@ -24,7 +34,7 @@ signals:
 private:
     Ui::SettingsDialog *ui;
     ConfigHelper *configHelper;
-
+    QStack<UndoAction> undoStack;
     bool isUniquePath(const QString &path);
 
 private slots:

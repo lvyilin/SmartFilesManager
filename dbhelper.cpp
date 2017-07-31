@@ -34,7 +34,7 @@ bool DBHelper::hasIndex()
 void DBHelper::addFile(QString &path)
 {
     query->bindValue(":name", path);
-    bool res = query->exec();
+    query->exec();
     //    qDebug() << "add File result:" << res << query->lastError();
 }
 
@@ -46,6 +46,11 @@ void DBHelper::addFiles(QSet<QString> &pathSet)
     {
         addFile(Path);
     }
+}
+
+void DBHelper::cleanFiles()
+{
+    query->exec("drop table paths");
 }
 
 void DBHelper::close()

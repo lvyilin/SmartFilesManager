@@ -3,9 +3,9 @@
 #endif    //解决MSVC编译UTF-8(BOM)导致的中文编码问题
 
 /*TODO
- * Model未保存撤销问题
  * 改model-based 为 widget-based (?)
  * 增加路径改变信号
+ * !!将model改变并保存信号与rebuildMonitorSet连接!!QStack
  */
 
 #include "settingsdialog.h"
@@ -80,15 +80,39 @@ void SettingsDialog::onAccepted()
                                   ui->timeEdit->time(),
                                   ui->spinBoxScanInterval->value());
     }
-
     configHelper->saveSettings();
+
     ui->buttonBox->button(QDialogButtonBox::Save)->setEnabled(false);
+
+    if (!(undoStack.isEmpty()))
+    {
+        qDebug() << "emitted!";
+        emit pathChanged();
+    }
+    undoStack.clear();
+
     this->accept();
 }
 
 void SettingsDialog::onCancel()
 {
-    emit configHelper->pathModel->revert();
+    qDebug() << "stack count" << undoStack.count();
+    const int stackCount = undoStack.count();
+    for (int i = 0; i < stackCount; i++)
+    {
+        UndoAction act = undoStack.pop();
+        if (act.type == 0)
+        {
+            qDebug() << "rm " << act.item->row();
+            configHelper->pathModel->removeRow(act.item->row());
+        }
+        else
+        {
+            qDebug() << "add: " << act.text;
+            configHelper->pathModel->insertRow(act.rowIdx, act.item);
+        }
+    }
+    undoStack.clear();
     ui->buttonBox->button(QDialogButtonBox::Save)->setEnabled(false);
     this->reject();
 }
@@ -109,9 +133,14 @@ void SettingsDialog::on_pushButtonAddPath_clicked()
     {
         if (isUniquePath(directoryName))
         {
-            auto path = new QStandardItem(QString(directoryName));
+            auto path = new QStandardItem(directoryName);
             path->setFlags(Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
             configHelper->pathModel->appendRow(path);
+
+            UndoAction act = {0, directoryName};
+            act.item = path;
+            undoStack.push(act);
+
             emit onChanged();
         }
         else
@@ -131,7 +160,14 @@ bool SettingsDialog::isUniquePath(const QString &path)
 
 void SettingsDialog::on_pushButtonRemovePath_clicked()
 {
-    configHelper->pathModel->removeRow(ui->pathView->currentIndex().row());
+    int idx = ui->pathView->currentIndex().row();
+
+    QString s = configHelper->pathModel->item(idx)->text();
+    UndoAction act = {1, s};
+    act.rowIdx = idx;
+    act.item = configHelper->pathModel->takeRow(idx).first();
+    undoStack.push(act);
+
     checkRemoveButtonStatus(ui->pathView->currentIndex());
     emit onChanged();
 }

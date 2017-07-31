@@ -30,9 +30,9 @@ private slots:
     void iconActivated(QSystemTrayIcon::ActivationReason reason);
     void openSettings();
     void about();
+    void rebuildMonitorSet();
 
-    void buildMonitorSet();
-    void updateIndex(QString needUpdatePath);
+    void updateMonitorList();
 
     void on_actionExit_triggered();
 
@@ -47,6 +47,7 @@ private:
     void createTrayIcon();
     void setTaskTimer();//TODO
     void setFilesMonitor();
+    void buildMonitorSet(bool renew = false);
 
     ConfigHelper *configHelper;
     QSystemTrayIcon *trayIcon;

@@ -28,6 +28,9 @@ public:
      * @param pathSet 文件路径集合
      */
     void addFiles(QSet<QString> &pathSet);
+
+    void cleanFiles();
+
     void close();
 
 

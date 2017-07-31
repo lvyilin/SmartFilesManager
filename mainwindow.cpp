@@ -23,7 +23,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     configHelper(new ConfigHelper(this)),
-    settingsDialog(Q_NULLPTR)
+    settingsDialog(new SettingsDialog(configHelper, this))
 {
     ui->setupUi(this);
     setWindowTitle(QCoreApplication::applicationName());
@@ -36,6 +36,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(trayIcon, &QSystemTrayIcon::activated, this, &MainWindow::iconActivated);
     trayIcon->show();
 
+    connect(settingsDialog, &SettingsDialog::pathChanged, this, &MainWindow::rebuildMonitorSet);
     buildMonitorSet();
     //    setFilesMonitor();
 }
@@ -95,10 +96,10 @@ void MainWindow::createTrayIcon()
     trayIcon->setToolTip(tr("打开智能文件管家"));
 }
 
-void MainWindow::setFilesMonitor()
+void MainWindow::setFilesMonitor()//TODO
 {
     watcher->addPaths(monitorSet.toList());
-    connect(watcher, SIGNAL(fileChanged(QString)), this, SLOT(updateIndex(QString)));
+    connect(watcher, SIGNAL(fileChanged(QString)), this, SLOT(updateMonitorList(QString)));
 
 }
 
@@ -114,9 +115,6 @@ void MainWindow::on_actionSettings_triggered()
 
 void MainWindow::openSettings()
 {
-    if (!settingsDialog)
-        settingsDialog = new SettingsDialog(configHelper, this);
-
     if (settingsDialog->exec() != QDialog::Accepted)
         return;
 }
@@ -127,9 +125,20 @@ void MainWindow::about()
                        tr("这是一段对智能文件管家的介绍"));
 }
 
-void MainWindow::buildMonitorSet()
+void MainWindow::rebuildMonitorSet()
 {
-    ui->statusBar->showMessage(tr("正在添加文件至监控列表..."));
+    qDebug() << "start to rebuild monitor list..";
+    buildMonitorSet(true);
+}
+
+void MainWindow::buildMonitorSet(bool renew)
+{
+    ui->statusBar->showMessage(tr("正在更新监控列表..."));
+    if (renew == true)
+    {
+        monitorSet.clear();
+        dbHelper->cleanFiles();
+    }
     if (!(dbHelper->hasIndex()))
     {
         int filesCount = 0;
@@ -168,9 +177,9 @@ void MainWindow::buildMonitorSet()
     ui->statusBar->showMessage(tr("完毕"), 5000);
 }
 
-void MainWindow::updateIndex(QString needUpdatePath)
+void MainWindow::updateMonitorList()
 {
-    qDebug() << "need update path:" << needUpdatePath;
+
 }
 
 void MainWindow::on_actionAbout_triggered()
