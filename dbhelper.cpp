@@ -28,7 +28,6 @@ bool DBHelper::hasIndex()
         return false;  //判断表格是否已经存在
     }
     return true;
-
 }
 
 void DBHelper::addFile(QString &path)

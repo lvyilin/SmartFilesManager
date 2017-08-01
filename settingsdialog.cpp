@@ -2,12 +2,6 @@
 #pragma execution_character_set("utf-8")
 #endif    //解决MSVC编译UTF-8(BOM)导致的中文编码问题
 
-/*TODO
- * 改model-based 为 widget-based (?)
- * 增加路径改变信号
- * !!将model改变并保存信号与rebuildMonitorSet连接!!QStack
- */
-
 #include "settingsdialog.h"
 #include "ui_settingsdialog.h"
 
@@ -86,7 +80,6 @@ void SettingsDialog::onAccepted()
 
     if (!(undoStack.isEmpty()))
     {
-        qDebug() << "emitted!";
         emit pathChanged();
     }
     undoStack.clear();

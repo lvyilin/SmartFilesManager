@@ -7,6 +7,7 @@
 #include <QDirIterator>
 #include <QSet>
 #include <QFileSystemWatcher>
+#include <QFileSystemModel>
 #include "confighelper.h"
 #include "dbhelper.h"
 
@@ -32,7 +33,7 @@ private slots:
     void about();
     void rebuildMonitorSet();
 
-    void updateMonitorList();
+    void updateIndex(QString updateFile);
 
     void on_actionExit_triggered();
 
@@ -56,6 +57,7 @@ private:
     DBHelper *dbHelper;
     QSet<QString> monitorSet;
     QFileSystemWatcher *watcher;
+    QFileSystemModel *fileModel;
 
 };
 

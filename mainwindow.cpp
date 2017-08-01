@@ -38,7 +38,19 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(settingsDialog, &SettingsDialog::pathChanged, this, &MainWindow::rebuildMonitorSet);
     buildMonitorSet();
+
     //    setFilesMonitor();
+    watcher = new QFileSystemWatcher(this);
+    watcher->addPaths(QStringList(monitorSet.toList()));
+    connect(watcher, SIGNAL(fileChanged(QString)), this, SLOT(updateIndex(QString)));
+
+    fileModel = new QFileSystemModel(this);
+    fileModel->setRootPath(configHelper->pathModel->item(0)->text());
+    fileModel->setNameFilters(supportedFormats);
+    fileModel->setFilter(QDir::Dirs | QDir::Files | QDir::NoDot | QDir::NoDotDot | QDir::NoSymLinks);
+    qDebug() << "file  model :" << fileModel->rootPath() << fileModel->rootDirectory();
+    ui->treeView->setModel(fileModel);
+    ui->treeView->setRootIndex(fileModel->index(fileModel->rootPath()));
 }
 
 MainWindow::~MainWindow()
@@ -98,9 +110,12 @@ void MainWindow::createTrayIcon()
 
 void MainWindow::setFilesMonitor()//TODO
 {
-    watcher->addPaths(monitorSet.toList());
-    connect(watcher, SIGNAL(fileChanged(QString)), this, SLOT(updateMonitorList(QString)));
-
+    //may can be ignore while using QFileSystemModel
+    /*
+       watcher = new QFileSystemWatcher(this);
+       watcher->addPaths(QStringList(monitorSet.toList()));
+       connect(watcher, SIGNAL(fileChanged(QString)), this, SLOT(updateIndex(QString)));
+    */
 }
 
 void MainWindow::on_actionExit_triggered()
@@ -177,9 +192,9 @@ void MainWindow::buildMonitorSet(bool renew)
     ui->statusBar->showMessage(tr("完毕"), 5000);
 }
 
-void MainWindow::updateMonitorList()
+void MainWindow::updateIndex(QString updateFile)
 {
-
+    qDebug() << "files changed: " << updateFile;
 }
 
 void MainWindow::on_actionAbout_triggered()
