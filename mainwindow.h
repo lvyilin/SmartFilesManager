@@ -8,6 +8,7 @@
 #include <QSet>
 #include <QFileSystemWatcher>
 #include <QFileSystemModel>
+#include <QFileInfo>
 #include "confighelper.h"
 #include "dbhelper.h"
 
@@ -31,7 +32,7 @@ private slots:
     void iconActivated(QSystemTrayIcon::ActivationReason reason);
     void openSettings();
     void about();
-    void rebuildMonitorSet();
+    void rebuildFilesList();
 
     void updateIndex(QString updateFile);
 
@@ -48,15 +49,15 @@ private:
     void createTrayIcon();
     void setTaskTimer();//TODO
     void setFilesMonitor();
-    void buildMonitorSet(bool renew = false);
+    void buildFilesList(bool renew = false);
 
     ConfigHelper *configHelper;
     QSystemTrayIcon *trayIcon;
     QMenu *trayIconMenu;
     SettingsDialog *settingsDialog;
     DBHelper *dbHelper;
-    QSet<QString> monitorSet;
-    QFileSystemWatcher *watcher;
+    QList<File> filesList;
+    //    QFileSystemWatcher *watcher;
     QFileSystemModel *fileModel;
 
 };

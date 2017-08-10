@@ -36,21 +36,21 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(trayIcon, &QSystemTrayIcon::activated, this, &MainWindow::iconActivated);
     trayIcon->show();
 
-    connect(settingsDialog, &SettingsDialog::pathChanged, this, &MainWindow::rebuildMonitorSet);
-    buildMonitorSet();
+    connect(settingsDialog, &SettingsDialog::pathChanged, this, &MainWindow::rebuildFilesList);
+    buildFilesList();
 
     //    setFilesMonitor();
-    watcher = new QFileSystemWatcher(this);
-    watcher->addPaths(QStringList(monitorSet.toList()));
-    connect(watcher, SIGNAL(fileChanged(QString)), this, SLOT(updateIndex(QString)));
+    //    watcher = new QFileSystemWatcher(this);
+    //    watcher->addPaths(QStringList(monitorSet.toList()));
+    //    connect(watcher, SIGNAL(fileChanged(QString)), this, SLOT(updateIndex(QString)));
 
-    fileModel = new QFileSystemModel(this);
-    fileModel->setRootPath(configHelper->pathModel->item(0)->text());
-    fileModel->setNameFilters(supportedFormats);
-    fileModel->setFilter(QDir::Dirs | QDir::Files | QDir::NoDot | QDir::NoDotDot | QDir::NoSymLinks);
-    qDebug() << "file  model :" << fileModel->rootPath() << fileModel->rootDirectory();
-    ui->treeView->setModel(fileModel);
-    ui->treeView->setRootIndex(fileModel->index(fileModel->rootPath()));
+    //    fileModel = new QFileSystemModel(this);
+    //    fileModel->setRootPath(configHelper->pathModel->item(0)->text());
+    //    fileModel->setNameFilters(supportedFormats);
+    //    fileModel->setFilter(QDir::Dirs | QDir::Files | QDir::NoDot | QDir::NoDotDot | QDir::NoSymLinks);
+    //    qDebug() << "file  model :" << fileModel->rootPath() << fileModel->rootDirectory();
+    //    ui->treeView->setModel(fileModel);
+    //    ui->treeView->setRootIndex(fileModel->index(fileModel->rootPath()));
 }
 
 MainWindow::~MainWindow()
@@ -140,18 +140,18 @@ void MainWindow::about()
                        tr("这是一段对智能文件管家的介绍"));
 }
 
-void MainWindow::rebuildMonitorSet()
+void MainWindow::rebuildFilesList()
 {
     qDebug() << "start to rebuild monitor list..";
-    buildMonitorSet(true);
+    buildFilesList(true);
 }
 
-void MainWindow::buildMonitorSet(bool renew)
+void MainWindow::buildFilesList(bool renew)
 {
     ui->statusBar->showMessage(tr("正在更新监控列表..."));
     if (renew == true)
     {
-        monitorSet.clear();
+        filesList.clear();
         dbHelper->cleanFiles();
     }
     if (!(dbHelper->hasIndex()))
@@ -160,12 +160,24 @@ void MainWindow::buildMonitorSet(bool renew)
         for (int i = 0; i < configHelper->pathModel->rowCount(); i++)
         {
             QDirIterator it(configHelper->pathModel->item(i)->text(),
-                            supportedFormats,
+                            //                            supportedFormats,
                             QDir::Files,
                             QDirIterator::Subdirectories);
             while (it.hasNext() && filesCount < MAX_FILES_NUMBER)
             {
-                monitorSet << it.next();
+                QString thisPath = it.next();
+                QFileInfo thisInfo(thisPath);
+
+                File thisFile;
+                thisFile.path = thisPath;
+                thisFile.name = thisInfo.fileName();
+                thisFile.format = thisInfo.suffix();
+                thisFile.createTime = thisInfo.created();
+                thisFile.modifyTime = thisInfo.lastModified();
+                thisFile.size = thisInfo.size();
+                thisFile.isFinished = false;
+
+                filesList << thisFile;
                 ++filesCount;
             }
             if (MAX_FILES_NUMBER == filesCount)
@@ -175,19 +187,19 @@ void MainWindow::buildMonitorSet(bool renew)
         {
             QMessageBox::warning(this,
                                  tr("操作中断"),
-                                 tr("超过文件数限制%1，请前往\"设置\"修改监控文件夹并缩小监控范围。").arg(MAX_FILES_NUMBER));
+                                 tr("超过单文件夹文件数限制%1，请前往\"设置\"修改文件夹路径以缩小范围。").arg(MAX_FILES_NUMBER));
         }
-        dbHelper->addFiles(monitorSet);
+        dbHelper->addFiles(filesList);
     }
     else
-        monitorSet = dbHelper->getFiles();
+        filesList = dbHelper->getFiles();
 
     //debug
-    foreach (auto iter, monitorSet)
+    foreach (auto iter, filesList)
     {
-        qDebug() << iter;
+        qDebug() << iter.path;
     }
-    qDebug() << "Files num: " << monitorSet.count();
+    qDebug() << "Files num: " << filesList.count();
 
     ui->statusBar->showMessage(tr("完毕"), 5000);
 }

@@ -16,40 +16,44 @@ DBHelper::DBHelper(QString &conName, QString &dbName, QObject *parent) : QObject
     }
 
     query = new QSqlQuery(db);
-    createPathsTable();
+    createTable();
 }
 
 bool DBHelper::hasIndex()
 {
+    //0810@YL: 需求更改，需修改
     query->exec("SELECT name FROM paths");
     if (!query->next())
     {
         qDebug() << "hasIndex(): false";
-        return false;  //判断表格是否已经存在
+        return false;
     }
     return true;
 }
 
-void DBHelper::addFile(QString &path)
+void DBHelper::addFile(File &file)
 {
-    query->bindValue(":name", path);
-    query->exec();
+    //0810@YL: 需求更改，需修改
+    //    query->bindValue(":name", file);
+    //    query->exec();
     //    qDebug() << "add File result:" << res << query->lastError();
 }
 
-void DBHelper::addFiles(QSet<QString> &pathSet)
+void DBHelper::addFiles(QList<File> &filesList)
 {
-    query->prepare("insert into paths(id,name) "
-                   "values(:id, :name)");
-    foreach (QString Path, pathSet)
-    {
-        addFile(Path);
-    }
+    //0810@YL: 需求更改，需修改
+    //    query->prepare("insert into paths(id,name) "
+    //                   "values(:id, :name)");
+    //    foreach (QString Path, pathSet)
+    //    {
+    //        addFile(Path);
+    //    }
 }
 
 void DBHelper::cleanFiles()
 {
-    query->exec("drop table paths");
+    //0810@YL：改动：删除所有条目，不删除表
+    query->exec("DELETE * FROM paths");
 }
 
 void DBHelper::close()
@@ -57,33 +61,35 @@ void DBHelper::close()
     db.close();
 }
 
-QSet<QString> DBHelper::getFiles()
+QList<File> DBHelper::getFiles()
 {
-    QSet<QString> temp;
-    query->exec("SELECT name FROM paths");
-    qDebug() << "Paths in db:";
-    while (query->next())
-    {
-        QString s = query->value(0).toString();
-        temp.insert(s);
-        qDebug() << s;
-    }
-    return temp;
+    //0810@YL: 需求变动，需修改
+
+    //    QSet<QString> temp;
+    //    query->exec("SELECT name FROM paths");
+    //    qDebug() << "Paths in db:";
+    //    while (query->next())
+    //    {
+    //        QString s = query->value(0).toString();
+    //        temp.insert(s);
+    //        qDebug() << s;
+    //    }
+    //    return temp;
+    return QList<File>();
 }
 
-void DBHelper::createPathsTable()
+void DBHelper::createTable()
 {
-    QStringList tables = db.tables();
-    if (tables.contains("paths", Qt::CaseInsensitive))
+    //0810@YL: 使用create table if not exists代替(待定)
+
+    //    QStringList tables = db.tables();
+    //    if (tables.contains("paths", Qt::CaseInsensitive))
+    //    {
+    //        qDebug() << "table had created before";
+    //    }
+    if (!query->exec("create table if not exists paths(id integer primary key autoincrement, name varchar(255) not null)"))
     {
-        qDebug() << "table had created before";
+        qDebug() << "table create false" << query->lastError().text();
     }
-    else
-    {
-        if (!query->exec("create table paths(id integer primary key autoincrement, name varchar(255) not null)"))
-        {
-            qDebug() << "table create false" << query->lastError().text();
-        }
-        else qDebug() << "table create success";
-    }
+    else qDebug() << "table create success";
 }
