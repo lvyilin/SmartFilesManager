@@ -55,7 +55,7 @@ public:
      * @param num 工作列表文件数目，默认500
      * @return 返回一个包含num个文件的列表
      */
-    QList<File> getWorkList(int num = 500);
+    QList<File> &getWorkList(int num = 500);
 
     /**
      * @brief setFinished 将指定文件is_finished设为已完成

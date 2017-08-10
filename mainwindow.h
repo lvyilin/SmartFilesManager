@@ -6,9 +6,8 @@
 #include <QStandardItemModel>
 #include <QDirIterator>
 #include <QSet>
-#include <QFileSystemWatcher>
-#include <QFileSystemModel>
 #include <QFileInfo>
+#include <QTimer>
 #include "confighelper.h"
 #include "dbhelper.h"
 
@@ -33,8 +32,7 @@ private slots:
     void openSettings();
     void about();
     void rebuildFilesList();
-
-    void updateIndex(QString updateFile);
+    void processWorkList();
 
     void on_actionExit_triggered();
 
@@ -47,9 +45,8 @@ private:
 
     void reallyQuit();
     void createTrayIcon();
-    void setTaskTimer();//TODO
-    void setFilesMonitor();
-    void buildFilesList(bool renew = false);
+    void setTaskTimer();
+    void updateFilesList(bool renew = false);
 
     ConfigHelper *configHelper;
     QSystemTrayIcon *trayIcon;
@@ -57,8 +54,7 @@ private:
     SettingsDialog *settingsDialog;
     DBHelper *dbHelper;
     QList<File> filesList;
-    //    QFileSystemWatcher *watcher;
-    QFileSystemModel *fileModel;
+    QList<File> workList;
 
 };
 
