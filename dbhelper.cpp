@@ -92,4 +92,41 @@ void DBHelper::createTable()
         qDebug() << "table create false" << query->lastError().text();
     }
     else qDebug() << "table create success";
+
+    if(!query->exec("create table if not exists labels("
+                    "id integer primary key autoincrement NOT NULL,"
+                    "name varchar(255) NOT NULL,"
+                    "parent int NOT NULL,"
+                    "is_leaf bool NOT NULL,"
+                    "view_type varchar(255) NOT NULL"
+                    ")"))
+        qDebug() << "labels create false"<< query->lastError().text();
+        else
+        qDebug() << "table create success";
+
+    if(!query->exec("create table if not exists files("
+                    "id integer primary key autoincrement NOT NULL,"
+                    "name varchar(255) NOT NULL,"
+                    "format varchar(10) NOT NULL,"
+                    "path varchar(255) NOT NULL,"
+                    "size "
+                    "unsigned big int NOT NULL,"
+                    "create_time DATATIME NOT NULL,"
+                    "modify_time DATATIME NOT NULL,"
+                    "is_finished bool NOT NULL)"))
+        qDebug() << "files create false"<< query->lastError().text();
+        else
+        qDebug() << "table create success";
+
+    if(!query->exec("create table if not exists file_labels(files_id integer,label_id integer,FOREIGN KEY(files_id) REFERENCES files(id),FOREIGN KEY(label_id) REFERENCES labels(id),constraint pk_t2 primary key (files_id,label_id))"))
+        qDebug() << "file_labels create false"<< query->lastError().text();
+        else
+        qDebug() << "table create success";
+
+    if(!query->exec("create table if not exists file_relation(relation int NOT NULL, relation_type int NOT NULL, "
+                    "files_id integer,label_id integer,FOREIGN KEY(files_id) REFERENCES files(id),FOREIGN KEY(label_id) REFERENCES labels(id),constraint pk_t2 primary key (files_id,label_id))"))
+        qDebug() << "file_relations create false"<< query->lastError().text();
+        else
+        qDebug() << "table create success";
+        query->exec("PRAGMA foreign_keys = ON"); //打开外键约束
 }
