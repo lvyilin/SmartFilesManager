@@ -29,6 +29,7 @@ MainWindow::MainWindow(QWidget *parent) :
     //ui
     ui->setupUi(this);
     setWindowTitle(QCoreApplication::applicationName());
+    connect(ui->processButton, SIGNAL(clicked(bool)), this, SLOT(processWorkList()));
     //primary init
     configHelper->readSettings();
     settingsDialog = new SettingsDialog(configHelper, this);
@@ -163,11 +164,11 @@ void MainWindow::rebuildFilesList()
 void MainWindow::processWorkList()
 {
     qDebug() << "【Triggered!】 start process work list...";
-    workList = dbHelper->getWorkList("doc", 100);
+    workList = dbHelper->getWorkList("docx", 100);
     qDebug() << "work list: ";
     foreach (auto iter, workList)
     {
-        qDebug() << iter.name;
+        qDebug() << iter.path;
     }
 
     emit onFinishedWorkList();

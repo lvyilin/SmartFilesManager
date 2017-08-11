@@ -1,6 +1,5 @@
 ﻿#include "dbhelper.h"
 #include <qDebug>
-
 DBHelper::DBHelper(QString &conName, QString &dbName, QObject *parent) : QObject(parent)
 {
     db = QSqlDatabase::addDatabase("QSQLITE", conName); //添加数据库驱动 已制定链接名称
@@ -21,7 +20,6 @@ DBHelper::DBHelper(QString &conName, QString &dbName, QObject *parent) : QObject
 
 bool DBHelper::hasIndex()
 {
-    //0810@YL: 需求更改，需修改
     query->exec("SELECT name FROM files");
     if (!query->next())
     {
@@ -32,32 +30,21 @@ bool DBHelper::hasIndex()
 
 void DBHelper::addFile(File &file)
 {
-    query->bindValue(":name", file.name);
-    query->bindValue(":format", file.format);
-    query->bindValue(":path", file.path);
-    query->bindValue(":size", file.size);
-    query->bindValue(":create_time", file.createTime);
-    query->bindValue(":midify", file.modifyTime);
-    query->bindValue(":is_finished", file.isFinished);
-    if (!query->exec())
-        qDebug() << "add false" << query->lastError().text();
-    else
-        qDebug() << "add success";
+    query->addBindValue(file.name);
+    query->addBindValue(file.format);
+    query->addBindValue(file.path);
+    query->addBindValue(file.size);
+    query->addBindValue(file.createTime.toString(Qt::ISODate));
+    query->addBindValue(file.modifyTime.toString(Qt::ISODate));
+    query->addBindValue(file.isFinished);
 
+    query->exec();
 }
 
 void DBHelper::addFiles(QList<File> &filesList)
 {
-    //0810@YL: 需求更改，需修改
-    //        query->prepare("insert into paths(id,name) "
-    //                   "values(:id, :name)");
-    //    foreach (QString Path, pathSet)
-    //    {
-    //        addFile(Path);
-    //    }
-
-    query->prepare("insert into files (id, name, format, path, size, create_time, modify_time, is_finished)"
-                   "values(:id, :name, :format, :path, :size, :create_time, :midify_time, is_finished)");
+    query->prepare("insert into files (name, format, path, size, create_time, modify_time, is_finished) "
+                   "values(:name, :format, :path, :size, :create_time, :modify_time, :is_finished)");
     foreach (File file, filesList)
     {
         addFile(file);
@@ -67,7 +54,6 @@ void DBHelper::addFiles(QList<File> &filesList)
 
 void DBHelper::cleanFiles()
 {
-    //0810@YL：改动：删除所有条目，不删除表
     query->prepare("delete from files");
     if (!query->exec())
         qDebug() << query->lastError();
@@ -83,8 +69,12 @@ void DBHelper::close()
 QList<File> &DBHelper::getWorkList(QString format, int num)
 {
     int i = 0;
-    query->exec(QString("select * from files where is_finished = 0 and format = %1").arg(format));
-    while (!query->next() || i++ < num)
+    if (!query->exec(QString("select * from files where is_finished = 0 and format = \"%1\"").arg(format)))
+    {
+        qDebug() << "【getWorkList】 error: " << query->lastError().text();
+        return unfinishedFile;
+    }
+    while (query->next() && i++ < num)
     {
         File temp;
         temp.name = query->value(1).toString();
@@ -101,12 +91,6 @@ QList<File> &DBHelper::getWorkList(QString format, int num)
 
 void DBHelper::createTable()
 {
-    if (!query->exec("create table if not exists paths(id integer primary key autoincrement, name varchar(255) not null)"))
-    {
-        qDebug() << "table create false" << query->lastError().text();
-    }
-    else qDebug() << "table create success";
-
     if (!query->exec("create table if not exists labels("
                      "id integer primary key autoincrement NOT NULL,"
                      "name varchar(255) NOT NULL,"
@@ -125,9 +109,9 @@ void DBHelper::createTable()
                      "path varchar(255) NOT NULL,"
                      "size "
                      "unsigned big int NOT NULL,"
-                     "create_time DATATIME NOT NULL,"
-                     "modify_time DATATIME NOT NULL,"
-                     "is_finished bool NOT NULL)"))
+                     "create_time DATETIME NOT NULL,"
+                     "modify_time DATETIME NOT NULL,"
+                     "is_finished BOOLEAN NOT NULL)"))
         qDebug() << "files create false" << query->lastError().text();
     else
         qDebug() << "table create success";
