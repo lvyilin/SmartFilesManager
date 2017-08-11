@@ -64,7 +64,6 @@ public:
     void setFinished(File file);
 
 signals:
-
 public slots:
 private:
     void createTable();

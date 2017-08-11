@@ -24,6 +24,11 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+signals:
+    /**
+     * @brief onFinishedWorkList 用于提醒上次是否成功运行
+     */
+    void onFinishedWorkList();
 protected:
     void closeEvent(QCloseEvent *event) override;
 
@@ -45,7 +50,7 @@ private:
 
     void reallyQuit();
     void createTrayIcon();
-    void setTaskTimer();
+    void setTrigger();
     void updateFilesList(bool renew = false);
 
     ConfigHelper *configHelper;
@@ -55,6 +60,7 @@ private:
     DBHelper *dbHelper;
     QList<File> filesList;
     QList<File> workList;
+    QTimer *triggerTimer;
 
 };
 

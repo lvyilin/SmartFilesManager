@@ -24,22 +24,24 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     configHelper(new ConfigHelper(this)),
-    settingsDialog(new SettingsDialog(configHelper, this))
+    triggerTimer(Q_NULLPTR)
 {
+    //ui
     ui->setupUi(this);
     setWindowTitle(QCoreApplication::applicationName());
-
+    //primary init
     configHelper->readSettings();
-
+    settingsDialog = new SettingsDialog(configHelper, this);
     dbHelper = new DBHelper(QString("SFM"), QString("sfm.db"), this);
-
+    //tray
     createTrayIcon();
     connect(trayIcon, &QSystemTrayIcon::activated, this, &MainWindow::iconActivated);
     trayIcon->show();
-
+    //less important init
     connect(settingsDialog, &SettingsDialog::pathChanged, this, &MainWindow::rebuildFilesList);
+    //    connect(this, &MainWindow::onFinishedWorkList, this, &MainWindow::setTrigger);若运行过快会导致因在同时刻而多次触发
 
-    setTaskTimer();
+    setTrigger();
     updateFilesList();
 }
 
@@ -98,20 +100,29 @@ void MainWindow::createTrayIcon()
     trayIcon->setToolTip(tr("打开智能文件管家"));
 }
 
-void MainWindow::setTaskTimer()
+void MainWindow::setTrigger()
 {
     if (configHelper->getRunningStrategy() == ConfigHelper::TimeTrigger)
     {
-        QTimer *taskTimer = new QTimer(this);
-        taskTimer->setTimerType(Qt::VeryCoarseTimer);
+        if (!triggerTimer)
+        {
+            triggerTimer = new QTimer(this);
+            triggerTimer->setSingleShot(true);
+            triggerTimer->setTimerType(Qt::VeryCoarseTimer);
+            connect(triggerTimer, SIGNAL(timeout()), this, SLOT(processWorkList()));
+        }
+        else if (triggerTimer->isActive())
+            triggerTimer->stop();
+
         int itv = QTime::currentTime().msecsTo(configHelper->getTimeTriggerPoint());
         if (itv < 0)
         {
-            itv = QTime::currentTime().msecsTo(QTime(23, 59)) +
+            itv = QTime::currentTime().msecsTo(QTime(23, 59, 59, 999)) +
                   QTime(0, 0).msecsTo(configHelper->getTimeTriggerPoint());
         }
-        taskTimer->start(itv);
-        connect(taskTimer, SIGNAL(timeout()), this, SLOT(processWorkList()));
+        triggerTimer->start(itv);
+
+        qDebug() << "[setTrigger] time trigger after" << QTime::fromMSecsSinceStartOfDay(itv).toString();
     }
     else
     {
@@ -131,8 +142,10 @@ void MainWindow::on_actionSettings_triggered()
 
 void MainWindow::openSettings()
 {
-    if (settingsDialog->exec() != QDialog::Accepted)
-        return;
+    if (settingsDialog->exec() == QDialog::Accepted)
+    {
+        setTrigger();//重新设置触发器
+    }
 }
 
 void MainWindow::about()
@@ -143,13 +156,17 @@ void MainWindow::about()
 
 void MainWindow::rebuildFilesList()
 {
-    qDebug() << "start to rebuild files list..";
+    qDebug() << "[rebuildFilesList] start to rebuild files list..";
     updateFilesList(true);
 }
 
 void MainWindow::processWorkList()
 {
+    qDebug() << "【Triggered!】 start process work list...";
     //    workList = dbHelper->getWorkList(100);
+
+
+    emit onFinishedWorkList();
 }
 
 void MainWindow::updateFilesList(bool renew)
@@ -198,12 +215,11 @@ void MainWindow::updateFilesList(bool renew)
     {
         dbHelper->addFiles(filesList);
 
-        //debug
         foreach (auto iter, filesList)
         {
-            qDebug() << iter.path;
+            qDebug() << "[updateFilesList] " << iter.path;
         }
-        qDebug() << "Files num: " << filesList.count();
+        qDebug() << "[updateFilesList] files num: " << filesList.count();
 
         ui->statusBar->showMessage(tr("完毕"), 5000);
     }
