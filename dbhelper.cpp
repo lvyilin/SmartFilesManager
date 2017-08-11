@@ -1,6 +1,5 @@
 ﻿#include "dbhelper.h"
 #include <qDebug>
-#include <QSqlTableModel>
 
 DBHelper::DBHelper(QString &conName, QString &dbName, QObject *parent) : QObject(parent)
 {
@@ -23,10 +22,9 @@ DBHelper::DBHelper(QString &conName, QString &dbName, QObject *parent) : QObject
 bool DBHelper::hasIndex()
 {
     //0810@YL: 需求更改，需修改
-    query->exec("SELECT name FROM paths");
+    query->exec("SELECT name FROM files");
     if (!query->next())
     {
-        qDebug() << "hasIndex(): false";
         return false;
     }
     return true;
@@ -34,11 +32,6 @@ bool DBHelper::hasIndex()
 
 void DBHelper::addFile(File &file)
 {
-    //0810@YL: 需求更改，需修改
-    //    query->bindValue(":name", file);
-    //    query->exec();
-    //    qDebug() << "add File result:" << res << query->lastError();
-
     query->bindValue(":name", file.name);
     query->bindValue(":format", file.format);
     query->bindValue(":path", file.path);
@@ -108,13 +101,6 @@ QList<File> &DBHelper::getWorkList(QString format, int num)
 
 void DBHelper::createTable()
 {
-    //0810@YL: 使用create table if not exists代替(待定)
-
-    //    QStringList tables = db.tables();
-    //    if (tables.contains("paths", Qt::CaseInsensitive))
-    //    {
-    //        qDebug() << "table had created before";
-    //    }
     if (!query->exec("create table if not exists paths(id integer primary key autoincrement, name varchar(255) not null)"))
     {
         qDebug() << "table create false" << query->lastError().text();
