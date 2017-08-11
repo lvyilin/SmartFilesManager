@@ -23,7 +23,7 @@ public:
     bool isStartAtBoot();
     RunningStrategy getRunningStrategy();
     int getCpuTriggerPercent();
-    QTime getTimeTriggerPoint();
+    QTime &getTimeTriggerPoint();
     int getScanInterval();
 
     void setSettings(bool st, int cpuPct, int intv);

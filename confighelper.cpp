@@ -43,7 +43,7 @@ void ConfigHelper::saveSettings()
     settings->setValue("ScanIntervalHours", QVariant(scanIntervalHours));
 
     int pathSize = pathModel->rowCount();
-    qDebug() << pathSize;
+    qDebug() << "[saveSettings] path size: " << pathSize;
     settings->beginWriteArray(pathProfix);
     for (int i = 0; i < pathSize; i++)
     {
@@ -69,7 +69,7 @@ int ConfigHelper::getCpuTriggerPercent()
     return cpuTriggerPercent;
 }
 
-QTime ConfigHelper::getTimeTriggerPoint()
+QTime &ConfigHelper::getTimeTriggerPoint()
 {
     return timeTriggerPoint;
 }

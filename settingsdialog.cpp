@@ -89,19 +89,19 @@ void SettingsDialog::onAccepted()
 
 void SettingsDialog::onCancel()
 {
-    qDebug() << "stack count" << undoStack.count();
+    qDebug() << "[onCancel] stack count" << undoStack.count();
     const int stackCount = undoStack.count();
     for (int i = 0; i < stackCount; i++)
     {
         UndoAction act = undoStack.pop();
         if (act.type == 0)
         {
-            qDebug() << "rm " << act.item->row();
+            qDebug() << "[onCanel] rm " << act.item->row();
             configHelper->pathModel->removeRow(act.item->row());
         }
         else
         {
-            qDebug() << "add: " << act.text;
+            qDebug() << "[onCanel] add: " << act.text;
             configHelper->pathModel->insertRow(act.rowIdx, act.item);
         }
     }

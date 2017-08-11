@@ -56,7 +56,11 @@ public:
      * @param num 工作列表文件数目，默认500
      * @return 返回一个包含num个文件的列表
      */
+<<<<<<< HEAD
     QList<File> &getWorkList(QString format, int num = 50);
+=======
+    QList<File> &getWorkList(int num = 500);
+>>>>>>> eaccc6e4b81920953ebce5221f36c03391675d9d
 
     /**
      * @brief setFinished 将指定文件is_finished设为已完成
@@ -65,7 +69,6 @@ public:
     void setFinished(File file);
 
 signals:
-
 public slots:
 private:
     void createTable();

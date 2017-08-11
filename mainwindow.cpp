@@ -13,44 +13,36 @@
 #include <QCloseEvent>
 #include <QMenu>
 #include <QMessageBox>
+#include <QTime>
 
 #include <qDebug>
 
 static const QStringList supportedFormats({"*.docx", "*.txt"}) ;
-const int MAX_FILES_NUMBER = 100;
+const int MAX_FILES_NUMBER = 500;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     configHelper(new ConfigHelper(this)),
-    settingsDialog(new SettingsDialog(configHelper, this))
+    triggerTimer(Q_NULLPTR)
 {
+    //ui
     ui->setupUi(this);
     setWindowTitle(QCoreApplication::applicationName());
-
+    //primary init
     configHelper->readSettings();
-
+    settingsDialog = new SettingsDialog(configHelper, this);
     dbHelper = new DBHelper(QString("SFM"), QString("sfm.db"), this);
-
+    //tray
     createTrayIcon();
     connect(trayIcon, &QSystemTrayIcon::activated, this, &MainWindow::iconActivated);
     trayIcon->show();
-
+    //less important init
     connect(settingsDialog, &SettingsDialog::pathChanged, this, &MainWindow::rebuildFilesList);
-    buildFilesList();
+    //    connect(this, &MainWindow::onFinishedWorkList, this, &MainWindow::setTrigger);若运行过快会导致因在同时刻而多次触发
 
-    //    setFilesMonitor();
-    //    watcher = new QFileSystemWatcher(this);
-    //    watcher->addPaths(QStringList(monitorSet.toList()));
-    //    connect(watcher, SIGNAL(fileChanged(QString)), this, SLOT(updateIndex(QString)));
-
-    //    fileModel = new QFileSystemModel(this);
-    //    fileModel->setRootPath(configHelper->pathModel->item(0)->text());
-    //    fileModel->setNameFilters(supportedFormats);
-    //    fileModel->setFilter(QDir::Dirs | QDir::Files | QDir::NoDot | QDir::NoDotDot | QDir::NoSymLinks);
-    //    qDebug() << "file  model :" << fileModel->rootPath() << fileModel->rootDirectory();
-    //    ui->treeView->setModel(fileModel);
-    //    ui->treeView->setRootIndex(fileModel->index(fileModel->rootPath()));
+    setTrigger();
+    updateFilesList();
 }
 
 MainWindow::~MainWindow()
@@ -108,14 +100,34 @@ void MainWindow::createTrayIcon()
     trayIcon->setToolTip(tr("打开智能文件管家"));
 }
 
-void MainWindow::setFilesMonitor()//TODO
+void MainWindow::setTrigger()
 {
-    //may can be ignore while using QFileSystemModel
-    /*
-       watcher = new QFileSystemWatcher(this);
-       watcher->addPaths(QStringList(monitorSet.toList()));
-       connect(watcher, SIGNAL(fileChanged(QString)), this, SLOT(updateIndex(QString)));
-    */
+    if (configHelper->getRunningStrategy() == ConfigHelper::TimeTrigger)
+    {
+        if (!triggerTimer)
+        {
+            triggerTimer = new QTimer(this);
+            triggerTimer->setSingleShot(true);
+            triggerTimer->setTimerType(Qt::VeryCoarseTimer);
+            connect(triggerTimer, SIGNAL(timeout()), this, SLOT(processWorkList()));
+        }
+        else if (triggerTimer->isActive())
+            triggerTimer->stop();
+
+        int itv = QTime::currentTime().msecsTo(configHelper->getTimeTriggerPoint());
+        if (itv < 0)
+        {
+            itv = QTime::currentTime().msecsTo(QTime(23, 59, 59, 999)) +
+                  QTime(0, 0).msecsTo(configHelper->getTimeTriggerPoint());
+        }
+        triggerTimer->start(itv);
+
+        qDebug() << "[setTrigger] time trigger after" << QTime::fromMSecsSinceStartOfDay(itv).toString();
+    }
+    else
+    {
+        //CPU trigger here
+    }
 }
 
 void MainWindow::on_actionExit_triggered()
@@ -130,8 +142,10 @@ void MainWindow::on_actionSettings_triggered()
 
 void MainWindow::openSettings()
 {
-    if (settingsDialog->exec() != QDialog::Accepted)
-        return;
+    if (settingsDialog->exec() == QDialog::Accepted)
+    {
+        setTrigger();//重新设置触发器
+    }
 }
 
 void MainWindow::about()
@@ -142,71 +156,73 @@ void MainWindow::about()
 
 void MainWindow::rebuildFilesList()
 {
-    qDebug() << "start to rebuild monitor list..";
-    buildFilesList(true);
+    qDebug() << "[rebuildFilesList] start to rebuild files list..";
+    updateFilesList(true);
 }
 
-void MainWindow::buildFilesList(bool renew)
+void MainWindow::processWorkList()
 {
-    ui->statusBar->showMessage(tr("正在更新监控列表..."));
+    qDebug() << "【Triggered!】 start process work list...";
+    //    workList = dbHelper->getWorkList(100);
+
+
+    emit onFinishedWorkList();
+}
+
+void MainWindow::updateFilesList(bool renew)
+{
+    ui->statusBar->showMessage(tr("正在更新文件列表..."));
     if (renew == true)
     {
         filesList.clear();
         dbHelper->cleanFiles();
     }
-    if (!(dbHelper->hasIndex()))
+    int filesCount = 0;
+    for (int i = 0; i < configHelper->pathModel->rowCount(); i++)
     {
-        int filesCount = 0;
-        for (int i = 0; i < configHelper->pathModel->rowCount(); i++)
+        QDirIterator it(configHelper->pathModel->item(i)->text(),
+                        //                            supportedFormats,
+                        QDir::Files,
+                        QDirIterator::Subdirectories);
+        while (it.hasNext() && filesCount < MAX_FILES_NUMBER)
         {
-            QDirIterator it(configHelper->pathModel->item(i)->text(),
-                            //                            supportedFormats,
-                            QDir::Files,
-                            QDirIterator::Subdirectories);
-            while (it.hasNext() && filesCount < MAX_FILES_NUMBER)
-            {
-                QString thisPath = it.next();
-                QFileInfo thisInfo(thisPath);
+            QString thisPath = it.next();
+            QFileInfo thisInfo(thisPath);
 
-                File thisFile;
-                thisFile.path = thisPath;
-                thisFile.name = thisInfo.fileName();
-                thisFile.format = thisInfo.suffix();
-                thisFile.createTime = thisInfo.created();
-                thisFile.modifyTime = thisInfo.lastModified();
-                thisFile.size = thisInfo.size();
-                thisFile.isFinished = false;
+            File thisFile;
+            thisFile.path = thisPath;
+            thisFile.name = thisInfo.fileName();
+            thisFile.format = thisInfo.suffix();
+            thisFile.createTime = thisInfo.created();
+            thisFile.modifyTime = thisInfo.lastModified();
+            thisFile.size = thisInfo.size();
+            thisFile.isFinished = false;
 
-                filesList << thisFile;
-                ++filesCount;
-            }
-            if (MAX_FILES_NUMBER == filesCount)
-                break;
+            filesList << thisFile;
+            ++filesCount;
         }
         if (MAX_FILES_NUMBER == filesCount)
-        {
-            QMessageBox::warning(this,
-                                 tr("操作中断"),
-                                 tr("超过单文件夹文件数限制%1，请前往\"设置\"修改文件夹路径以缩小范围。").arg(MAX_FILES_NUMBER));
-        }
-        dbHelper->addFiles(filesList);
+            break;
+    }
+    if (MAX_FILES_NUMBER == filesCount)
+    {
+        QMessageBox::warning(this,
+                             tr("操作中断"),
+                             tr("超过单文件夹文件数限制%1，请前往\"设置\"修改文件夹路径以缩小范围。").arg(MAX_FILES_NUMBER));
+        ui->statusBar->showMessage(tr("添加文件失败"), 5000);
     }
     else
-        filesList = dbHelper->getFiles();
-
-    //debug
-    foreach (auto iter, filesList)
     {
-        qDebug() << iter.path;
+        dbHelper->addFiles(filesList);
+
+        foreach (auto iter, filesList)
+        {
+            qDebug() << "[updateFilesList] " << iter.path;
+        }
+        qDebug() << "[updateFilesList] files num: " << filesList.count();
+
+        ui->statusBar->showMessage(tr("完毕"), 5000);
     }
-    qDebug() << "Files num: " << filesList.count();
-
-    ui->statusBar->showMessage(tr("完毕"), 5000);
-}
-
-void MainWindow::updateIndex(QString updateFile)
-{
-    qDebug() << "files changed: " << updateFile;
 }
 
 void MainWindow::on_actionAbout_triggered()

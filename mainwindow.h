@@ -6,9 +6,8 @@
 #include <QStandardItemModel>
 #include <QDirIterator>
 #include <QSet>
-#include <QFileSystemWatcher>
-#include <QFileSystemModel>
 #include <QFileInfo>
+#include <QTimer>
 #include "confighelper.h"
 #include "dbhelper.h"
 
@@ -25,6 +24,11 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+signals:
+    /**
+     * @brief onFinishedWorkList 用于提醒上次是否成功运行
+     */
+    void onFinishedWorkList();
 protected:
     void closeEvent(QCloseEvent *event) override;
 
@@ -33,8 +37,7 @@ private slots:
     void openSettings();
     void about();
     void rebuildFilesList();
-
-    void updateIndex(QString updateFile);
+    void processWorkList();
 
     void on_actionExit_triggered();
 
@@ -47,9 +50,8 @@ private:
 
     void reallyQuit();
     void createTrayIcon();
-    void setTaskTimer();//TODO
-    void setFilesMonitor();
-    void buildFilesList(bool renew = false);
+    void setTrigger();
+    void updateFilesList(bool renew = false);
 
     ConfigHelper *configHelper;
     QSystemTrayIcon *trayIcon;
@@ -57,8 +59,8 @@ private:
     SettingsDialog *settingsDialog;
     DBHelper *dbHelper;
     QList<File> filesList;
-    //    QFileSystemWatcher *watcher;
-    QFileSystemModel *fileModel;
+    QList<File> workList;
+    QTimer *triggerTimer;
 
 };
 

@@ -56,7 +56,7 @@ void DBHelper::addFile(File &file)
 void DBHelper::addFiles(QList<File> &filesList)
 {
     //0810@YL: 需求更改，需修改
-    //    query->prepare("insert into paths(id,name) "
+    //        query->prepare("insert into paths(id,name) "
     //                   "values(:id, :name)");
     //    foreach (QString Path, pathSet)
     //    {
