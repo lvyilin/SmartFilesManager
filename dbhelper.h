@@ -23,6 +23,7 @@ public:
     explicit DBHelper(QString &conName, QString &dbName, QObject *parent = nullptr);
 
     /**
+
      * @brief hasIndex 是否文件表是否有文件条目
      * @return 真值
      */
@@ -55,7 +56,7 @@ public:
      * @param num 工作列表文件数目，默认500
      * @return 返回一个包含num个文件的列表
      */
-    QList<File> getWorkList(int num = 500);
+    QList<File> &getWorkList(QString format, int num = 50);
 
     /**
      * @brief setFinished 将指定文件is_finished设为已完成
@@ -72,6 +73,7 @@ private:
 
     QSqlDatabase db;
     QSqlQuery *query;
+    QList<File> UnfinishedFile ;
 };
 
 #endif // DBHELPER_H
