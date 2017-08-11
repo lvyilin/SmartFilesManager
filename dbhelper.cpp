@@ -56,8 +56,8 @@ void DBHelper::addFiles(QList<File> &filesList)
     //        addFile(Path);
     //    }
 
-    query->prepare("inseret into files (id, name, format, path, size, create_time, midify_time, is_finished)"
-                   "value(:id, :name, :format, :path, :size, :create_time, :midify_time, is_finished)");
+    query->prepare("insert into files (id, name, format, path, size, create_time, modify_time, is_finished)"
+                   "values(:id, :name, :format, :path, :size, :create_time, :midify_time, is_finished)");
     foreach (File file, filesList)
     {
         addFile(file);

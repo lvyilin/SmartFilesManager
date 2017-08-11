@@ -163,8 +163,12 @@ void MainWindow::rebuildFilesList()
 void MainWindow::processWorkList()
 {
     qDebug() << "【Triggered!】 start process work list...";
-    //    workList = dbHelper->getWorkList(100);
-
+    workList = dbHelper->getWorkList("doc", 100);
+    qDebug() << "work list: ";
+    foreach (auto iter, workList)
+    {
+        qDebug() << iter.name;
+    }
 
     emit onFinishedWorkList();
 }
