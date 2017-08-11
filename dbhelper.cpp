@@ -101,9 +101,9 @@ QList<File> &DBHelper::getWorkList(QString format, int num)
         temp.createTime = query->value(5).toDateTime();
         temp.modifyTime = query->value(6).toDateTime();
         temp.isFinished = query->value(7).toBool();
-        UnfinishedFile.append(temp);
+        unfinishedFile.append(temp);
     }
-    return UnfinishedFile;
+    return unfinishedFile;
 }
 
 void DBHelper::createTable()
