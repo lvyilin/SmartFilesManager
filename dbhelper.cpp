@@ -28,7 +28,7 @@ bool DBHelper::hasIndex()
     return true;
 }
 
-void DBHelper::addFile(File &file)
+bool DBHelper::addFile(File &file)
 {
     query->addBindValue(file.name);
     query->addBindValue(file.format);
@@ -37,8 +37,7 @@ void DBHelper::addFile(File &file)
     query->addBindValue(file.createTime.toString(Qt::ISODate));
     query->addBindValue(file.modifyTime.toString(Qt::ISODate));
     query->addBindValue(file.isFinished);
-
-    query->exec();
+    return query->exec();
 }
 
 void DBHelper::addFiles(QList<File> &filesList)
@@ -47,9 +46,15 @@ void DBHelper::addFiles(QList<File> &filesList)
                    "values(:name, :format, :path, :size, :create_time, :modify_time, :is_finished)");
     foreach (File file, filesList)
     {
-        addFile(file);
+        if (!addFile(file))
+        {
+            query->exec(QString("delete from files where path = \"%1\"").arg(file.path));
+            query->prepare("insert into files (name, format, path, size, create_time, modify_time, is_finished) "
+                           "values(:name, :format, :path, :size, :create_time, :modify_time, :is_finished)");
+            if (!addFile(file))
+                qDebug() << "update false" << query->lastError() ;
+        }
     }
-
 }
 
 void DBHelper::cleanFiles()
@@ -106,7 +111,7 @@ void DBHelper::createTable()
                      "id integer primary key autoincrement NOT NULL,"
                      "name varchar(255) NOT NULL,"
                      "format varchar(10) NOT NULL,"
-                     "path varchar(255) NOT NULL,"
+                     "path varchar(255) NOT NULL UNIQUE,"
                      "size "
                      "unsigned big int NOT NULL,"
                      "create_time DATETIME NOT NULL,"

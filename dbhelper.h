@@ -68,8 +68,7 @@ signals:
 public slots:
 private:
     void createTable();
-    void addFile(File &file);
-
+    bool addFile(File &file);
     QSqlDatabase db;
     QSqlQuery *query;
     QList<File> unfinishedFile ;
