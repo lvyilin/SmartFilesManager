@@ -17,14 +17,14 @@
 
 #include <qDebug>
 
-static const QStringList supportedFormats({"*.docx", "*.txt"}) ;
 const int MAX_FILES_NUMBER = 500;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     configHelper(new ConfigHelper(this)),
-    triggerTimer(Q_NULLPTR)
+    triggerTimer(Q_NULLPTR),
+    analyser(new Analyser(this))
 {
     //ui
     ui->setupUi(this);
@@ -168,7 +168,7 @@ void MainWindow::processWorkList()
     qDebug() << "work list: ";
     foreach (auto iter, workList)
     {
-        qDebug() << iter.path;
+        qDebug() << iter.path << iter.isFinished;
     }
 
     emit onFinishedWorkList();
@@ -197,7 +197,7 @@ void MainWindow::updateFilesList(bool renew)
             File thisFile;
             thisFile.path = thisPath;
             thisFile.name = thisInfo.fileName();
-            thisFile.format = thisInfo.suffix();
+            thisFile.format = thisInfo.suffix().toLower();
             thisFile.createTime = thisInfo.created();
             thisFile.modifyTime = thisInfo.lastModified();
             thisFile.size = thisInfo.size();

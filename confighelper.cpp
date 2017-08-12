@@ -13,7 +13,7 @@ const QString ConfigHelper::pathProfix = "ScanPaths";
 
 void ConfigHelper::readSettings()
 {
-
+    firstTimeUsing = settings->value("FirstTimeUsing", QVariant(true)).toBool();
     startAtBoot = settings->value("StartAtBoot", QVariant(false)).toBool();
     onlyOneInstace = settings->value("OnlyOneInstance", QVariant(true)).toBool();
     runningStrategy = static_cast<RunningStrategy>(settings->value("RunningStrategy", QVariant(static_cast<int>(CpuTrigger))).toInt());
@@ -35,6 +35,7 @@ void ConfigHelper::readSettings()
 
 void ConfigHelper::saveSettings()
 {
+    settings->setValue("FirstTimeUsing", QVariant(false));
     settings->setValue("StartAtBoot", QVariant(startAtBoot));
     settings->setValue("OnlyOneInstance", QVariant(onlyOneInstace));
     settings->setValue("RunningStrategy", QVariant(runningStrategy));
@@ -52,6 +53,11 @@ void ConfigHelper::saveSettings()
     }
     settings->endArray();
 
+}
+
+bool ConfigHelper::isFirstTimeUsing()
+{
+    return firstTimeUsing;
 }
 
 bool ConfigHelper::isStartAtBoot()

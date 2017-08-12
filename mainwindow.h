@@ -10,6 +10,7 @@
 #include <QTimer>
 #include "confighelper.h"
 #include "dbhelper.h"
+#include "analyser.h"
 
 class SettingsDialog;
 
@@ -61,7 +62,7 @@ private:
     QList<File> filesList;
     QList<File> workList;
     QTimer *triggerTimer;
-
+    Analyser *analyser;
 };
 
 #endif // MAINWINDOW_H

@@ -20,6 +20,7 @@ public:
     void readSettings();
     void saveSettings();
 
+    bool isFirstTimeUsing();
     bool isStartAtBoot();
     RunningStrategy getRunningStrategy();
     int getCpuTriggerPercent();
@@ -36,6 +37,7 @@ signals:
 public slots:
 
 private:
+    bool firstTimeUsing;
     bool startAtBoot;
     bool onlyOneInstace;//TODO:check if only one instance
     RunningStrategy runningStrategy;
