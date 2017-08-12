@@ -64,6 +64,11 @@ public:
      */
     void setFinished(File file);
 
+    /**
+     * @brief initlabels 初始化labels表格
+     */
+    void initlabels();
+
 signals:
 public slots:
 private:
