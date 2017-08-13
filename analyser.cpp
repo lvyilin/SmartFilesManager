@@ -1,7 +1,8 @@
 ﻿#include "analyser.h"
 
-Analyser::Analyser(File f, QObject *parent) :
+Analyser::Analyser(File f, DBHelper *dh, QObject *parent) :
     QObject(parent),
+    dbHelper(dh),
     file(f)
 {
 

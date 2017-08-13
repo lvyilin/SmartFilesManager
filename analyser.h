@@ -2,12 +2,12 @@
 #define ANALYSER_H
 
 #include <QObject>
-struct File;
+#include "dbhelper.h"
 
 class Analyser : public QObject {
     Q_OBJECT
 public:
-    explicit Analyser(File f, QObject *parent = nullptr);
+    explicit Analyser(File f, DBHelper *dh, QObject *parent = nullptr);
 
     bool isSupportedFormat(QString format);
 
@@ -16,6 +16,7 @@ public slots:
 private:
     const QStringList supportedFormat = {"docx", "txt"};
     File file;
+    DBHelper *dbHelper;
 };
 
 #endif // ANALYSER_H

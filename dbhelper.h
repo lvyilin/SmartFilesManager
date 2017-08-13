@@ -67,7 +67,7 @@ public:
     /**
      * @brief initlabels 初始化labels表格
      */
-    void initlabels();
+    void initLabels();
 
 signals:
 public slots:

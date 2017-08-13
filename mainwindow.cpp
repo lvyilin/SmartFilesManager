@@ -23,8 +23,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     configHelper(new ConfigHelper(this)),
-    triggerTimer(Q_NULLPTR),
-    analyser(new Analyser(this))
+    triggerTimer(Q_NULLPTR)
 {
     //ui
     ui->setupUi(this);
@@ -34,6 +33,8 @@ MainWindow::MainWindow(QWidget *parent) :
     configHelper->readSettings();
     settingsDialog = new SettingsDialog(configHelper, this);
     dbHelper = new DBHelper(QString("SFM"), QString("sfm.db"), this);
+    if (configHelper->isFirstTimeUsing())
+        dbHelper->initLabels();
     //tray
     createTrayIcon();
     connect(trayIcon, &QSystemTrayIcon::activated, this, &MainWindow::iconActivated);

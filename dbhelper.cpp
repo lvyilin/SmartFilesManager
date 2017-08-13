@@ -77,6 +77,7 @@ void DBHelper::close()
 
 QList<File> &DBHelper::getWorkList(QString format, int num)
 {
+    unfinishedFile.clear();
     int i = 0;
     if (!query->exec(QString("select * from files where is_finished = 0 and format = \"%1\"").arg(format)))
     {
@@ -138,7 +139,7 @@ void DBHelper::createTable()
     query->exec("PRAGMA foreign_keys = ON"); //打开外键约束
 }
 
-void DBHelper::addlabel()
+void DBHelper::initLabels()
 {
     if (!query->exec("insert into labels(name,level,is_leaf,view_type) values(\"格式\",1,0,\"格式视图\")"))
         qDebug() << query->lastError();
