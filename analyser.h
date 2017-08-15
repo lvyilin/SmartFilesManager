@@ -13,7 +13,7 @@ public:
 
     bool isSupportedFormat(QString format);
     QStringList getSupportedFormatsList();
-    void processFile(File &file);
+    bool processFile(File &file);
 signals:
 public slots:
 private:
@@ -21,6 +21,7 @@ private:
     const QStringList supportedFormatFilter = {"*.docx", "*.txt"};
     DBHelper *dbHelper;
     QMimeDatabase mimeDb;
+    QString docxExtract(File &file);
 };
 
 #endif // ANALYSER_H

@@ -43,7 +43,6 @@ MainWindow::MainWindow(QWidget *parent) :
     //less important init
     connect(settingsDialog, &SettingsDialog::pathChanged, this, &MainWindow::rebuildFilesList);
     //    connect(this, &MainWindow::onFinishedWorkList, this, &MainWindow::setTrigger);若运行过快会导致因在同时刻而多次触发
-
     setTrigger();
     updateFilesList();
 }
@@ -55,16 +54,11 @@ MainWindow::~MainWindow()
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-    #ifdef Q_OS_OSX
-    if (!event->spontaneous() || !isVisible())
-    {
-        return;
-    }
-    #endif
     if (trayIcon->isVisible())
     {
         hide();
-        trayIcon->showMessage(tr("智能文件管家"), tr("后台运行中"));
+        if (configHelper->isFirstTimeUsing())
+            trayIcon->showMessage(tr("智能文件管家"), tr("后台运行中"));
         event->ignore();
     }
 }
@@ -75,7 +69,7 @@ void MainWindow::iconActivated(QSystemTrayIcon::ActivationReason reason)
     {
     case QSystemTrayIcon::Trigger:
     case QSystemTrayIcon::DoubleClick:
-        show();
+        showNormal();
         break;
     default:
         ;
@@ -84,6 +78,7 @@ void MainWindow::iconActivated(QSystemTrayIcon::ActivationReason reason)
 
 void MainWindow::reallyQuit()
 {
+    qDebug() << "Save exit, Bye!";
     dbHelper->close();
     QCoreApplication::quit();
 }
@@ -149,6 +144,11 @@ void MainWindow::openSettings()
     {
         setTrigger();//重新设置触发器
     }
+    if (this->isHidden())
+    {
+        this->showMinimized();
+        this->hide();
+    }
 }
 
 void MainWindow::about()
@@ -167,19 +167,25 @@ void MainWindow::processWorkList()
 {
     qDebug() << "【Triggered!】 start process work list...";
     workList = dbHelper->getWorkList("docx", 100);
-    qDebug() << "work list: ";
+    qDebug() << "[processWorkList] work list: ";
     foreach (auto iter, workList)
     {
         qDebug() << iter.path << iter.isFinished;
     }
 
+    int successCount, failCount;
+    successCount = failCount = 0;
     foreach (File file, workList)
     {
-        analyser->processFile(file);
+        if (analyser->processFile(file))
+            ++successCount;
+        else ++failCount;
     }
 
+    notifyResult(successCount, failCount);
     emit onFinishedWorkList();
 }
+
 
 void MainWindow::updateFilesList(bool renew)
 {
@@ -235,6 +241,21 @@ void MainWindow::updateFilesList(bool renew)
 
         ui->statusBar->showMessage(tr("完毕"), 5000);
     }
+}
+
+void MainWindow::notifyResult(int success, int fail)
+{
+    trayIcon->showMessage(tr("智能文件管家"),
+                          tr("索引建立完成, 成功%1个，失败%2个, 打开主页面以查看结果")
+                          .arg(success)
+                          .arg(fail));
+    connect(trayIcon, SIGNAL(messageClicked()), this, SLOT(showWindowAndDisconnect()));
+}
+
+void MainWindow::showWindowAndDisconnect()
+{
+    disconnect(trayIcon, SIGNAL(messageClicked()), this, SLOT(showWindowAndDisconnect()));
+    show();
 }
 
 void MainWindow::on_actionAbout_triggered()

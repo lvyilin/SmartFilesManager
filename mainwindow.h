@@ -39,7 +39,7 @@ private slots:
     void about();
     void rebuildFilesList();
     void processWorkList();
-
+    void showWindowAndDisconnect();
     void on_actionExit_triggered();
 
     void on_actionSettings_triggered();
@@ -53,7 +53,7 @@ private:
     void createTrayIcon();
     void setTrigger();
     void updateFilesList(bool renew = false);
-
+    void notifyResult(int success, int fail);
     ConfigHelper *configHelper;
     QSystemTrayIcon *trayIcon;
     QMenu *trayIconMenu;
