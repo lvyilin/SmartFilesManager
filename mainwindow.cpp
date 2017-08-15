@@ -35,6 +35,7 @@ MainWindow::MainWindow(QWidget *parent) :
     dbHelper = new DBHelper(QString("SFM"), QString("sfm.db"), this);
     if (configHelper->isFirstTimeUsing())
         dbHelper->initLabels();
+    analyser = new Analyser(dbHelper, this);
     //tray
     createTrayIcon();
     connect(trayIcon, &QSystemTrayIcon::activated, this, &MainWindow::iconActivated);
@@ -172,6 +173,11 @@ void MainWindow::processWorkList()
         qDebug() << iter.path << iter.isFinished;
     }
 
+    foreach (File file, workList)
+    {
+        analyser->processFile(file);
+    }
+
     emit onFinishedWorkList();
 }
 
@@ -187,7 +193,7 @@ void MainWindow::updateFilesList(bool renew)
     for (int i = 0; i < configHelper->pathModel->rowCount(); i++)
     {
         QDirIterator it(configHelper->pathModel->item(i)->text(),
-                        //                            supportedFormats,
+                        analyser->getSupportedFormatsList(),
                         QDir::Files,
                         QDirIterator::Subdirectories);
         while (it.hasNext() && filesCount < MAX_FILES_NUMBER)

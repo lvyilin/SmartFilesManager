@@ -2,21 +2,25 @@
 #define ANALYSER_H
 
 #include <QObject>
+#include <QMimeDatabase>
+#include <QMimeType>
 #include "dbhelper.h"
 
 class Analyser : public QObject {
     Q_OBJECT
 public:
-    explicit Analyser(File f, DBHelper *dh, QObject *parent = nullptr);
+    explicit Analyser(DBHelper *dh, QObject *parent = nullptr);
 
     bool isSupportedFormat(QString format);
-
+    QStringList getSupportedFormatsList();
+    void processFile(File &file);
 signals:
 public slots:
 private:
     const QStringList supportedFormat = {"docx", "txt"};
-    File file;
+    const QStringList supportedFormatFilter = {"*.docx", "*.txt"};
     DBHelper *dbHelper;
+    QMimeDatabase mimeDb;
 };
 
 #endif // ANALYSER_H

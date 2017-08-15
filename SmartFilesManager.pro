@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui sql
+QT       += core gui sql xml
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -44,3 +44,18 @@ FORMS += \
 
 RESOURCES += \
     images.qrc
+
+
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/deps/zlib/ -lzlib
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/deps/zlib/ -lzlibd
+else:unix: LIBS += -L$$PWD/deps/zlib/ -lzlib
+
+INCLUDEPATH += $$PWD/deps/zlib/include
+DEPENDPATH += $$PWD/deps/zlib/include
+
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/deps/quazip/ -lquazip
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/deps/quazip/ -lquazipd
+else:unix: LIBS += -L$$PWD/deps/quazip/ -lquazip
+
+INCLUDEPATH += $$PWD/deps/quazip/include
+DEPENDPATH += $$PWD/deps/quazip/include
