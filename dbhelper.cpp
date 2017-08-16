@@ -4,7 +4,7 @@
 
 #include "dbhelper.h"
 #include <qDebug>
-DBHelper::DBHelper(QString &conName, QString &dbName, QObject *parent) : QObject(parent)
+DBHelper::DBHelper(const QString &conName, const QString &dbName, QObject *parent) : QObject(parent)
 {
     db = QSqlDatabase::addDatabase("QSQLITE", conName); //添加数据库驱动 已制定链接名称
     db.setDatabaseName(dbName); //数据库链接命名
@@ -22,7 +22,7 @@ DBHelper::DBHelper(QString &conName, QString &dbName, QObject *parent) : QObject
     createTable();
 }
 
-bool DBHelper::hasIndex()
+bool DBHelper::hasIndex() const
 {
     query->exec("SELECT name FROM files");
     if (!query->next())
@@ -32,7 +32,7 @@ bool DBHelper::hasIndex()
     return true;
 }
 
-bool DBHelper::addFile(File &file)
+bool DBHelper::addFile(const File &file)
 {
     query->addBindValue(file.name);
     query->addBindValue(file.format);
@@ -44,7 +44,7 @@ bool DBHelper::addFile(File &file)
     return query->exec();
 }
 
-void DBHelper::addFiles(QList<File> &filesList)
+void DBHelper::addFiles(const QList<File> &filesList)
 {
     query->prepare("insert into files (name, format, path, size, create_time, modify_time, is_finished) "
                    "values(:name, :format, :path, :size, :create_time, :modify_time, :is_finished)");
@@ -75,7 +75,7 @@ void DBHelper::close()
     db.close();
 }
 
-QList<File> &DBHelper::getWorkList(QString format, int num)
+QList<File> &DBHelper::getWorkList(const QString &format, int num)
 {
     unfinishedFile.clear();
     int i = 0;
@@ -177,4 +177,14 @@ void DBHelper::initLabels()
     query->exec("insert into labels(name,level,parent,is_leaf,view_type) values(\"RAR文件\",3,7,0,\"格式视图\")");
     query->exec("insert into labels(name,level,parent,is_leaf,view_type) values(\"ZIP文件\",3,7,0,\"格式视图\")");
     query->exec("insert into labels(name,level,parent,is_leaf,view_type) values(\"IMG文件\",3,7,0,\"格式视图\")");
+}
+
+void DBHelper::setFinish(const File &file, bool finish)
+{
+
+}
+
+void DBHelper::setValid(const File &file, bool valid)
+{
+
 }

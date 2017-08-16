@@ -11,9 +11,10 @@ class Analyser : public QObject {
 public:
     explicit Analyser(DBHelper *dh, QObject *parent = nullptr);
 
-    bool isSupportedFormat(QString format);
-    QStringList getSupportedFormatsList();
-    bool processFile(File &file);
+    bool isSupportedFormat(QString format) const;
+    QStringList getSupportedFormatsList() const;
+    QStringList getSupportedFormatsFilter() const;
+    bool processFile(const File &file);
 signals:
 public slots:
 private:
@@ -21,7 +22,7 @@ private:
     const QStringList supportedFormatFilter = {"*.docx", "*.txt"};
     DBHelper *dbHelper;
     QMimeDatabase mimeDb;
-    QString docxExtract(File &file);
+    QString docxExtract(const File &file);
 };
 
 #endif // ANALYSER_H

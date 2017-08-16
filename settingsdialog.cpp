@@ -141,7 +141,7 @@ void SettingsDialog::on_pushButtonAddPath_clicked()
     }
 }
 
-bool SettingsDialog::isUniquePath(const QString &path)
+bool SettingsDialog::isUniquePath(const QString &path) const
 {
     for (int i = 0; i < configHelper->pathModel->rowCount(); i++)
     {

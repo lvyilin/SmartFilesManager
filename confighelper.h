@@ -20,16 +20,15 @@ public:
     void readSettings();
     void saveSettings();
 
-    bool isFirstTimeUsing();
-    bool isStartAtBoot();
-    RunningStrategy getRunningStrategy();
-    int getCpuTriggerPercent();
+    bool isFirstTimeUsing() const;
+    bool isStartAtBoot() const;
+    RunningStrategy getRunningStrategy() const;
+    int getCpuTriggerPercent() const;
     QTime &getTimeTriggerPoint();
-    int getScanInterval();
+    int getScanInterval() const;
 
     void setSettings(bool st, int cpuPct, int intv);
-    void setSettings(bool st, QTime timeTriPt, int intv);
-
+    void setSettings(bool st, const QTime &timeTriPt, int intv);
 
     QStandardItemModel *pathModel;
 

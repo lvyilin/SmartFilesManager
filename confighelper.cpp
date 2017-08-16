@@ -55,22 +55,22 @@ void ConfigHelper::saveSettings()
 
 }
 
-bool ConfigHelper::isFirstTimeUsing()
+bool ConfigHelper::isFirstTimeUsing() const
 {
     return firstTimeUsing;
 }
 
-bool ConfigHelper::isStartAtBoot()
+bool ConfigHelper::isStartAtBoot() const
 {
     return startAtBoot;
 }
 
-ConfigHelper::RunningStrategy ConfigHelper::getRunningStrategy()
+ConfigHelper::RunningStrategy ConfigHelper::getRunningStrategy() const
 {
     return runningStrategy;
 }
 
-int ConfigHelper::getCpuTriggerPercent()
+int ConfigHelper::getCpuTriggerPercent() const
 {
     return cpuTriggerPercent;
 }
@@ -80,7 +80,7 @@ QTime &ConfigHelper::getTimeTriggerPoint()
     return timeTriggerPoint;
 }
 
-int ConfigHelper::getScanInterval()
+int ConfigHelper::getScanInterval() const
 {
     return scanIntervalHours;
 }
@@ -94,7 +94,7 @@ void ConfigHelper::setSettings(bool st, int cpuPct, int intv)
 
 }
 
-void ConfigHelper::setSettings(bool st, QTime timeTriPt, int intv)
+void ConfigHelper::setSettings(bool st, const QTime &timeTriPt, int intv)
 {
     startAtBoot = st;
     timeTriggerPoint = timeTriPt;

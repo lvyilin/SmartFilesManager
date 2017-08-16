@@ -35,7 +35,7 @@ private:
     Ui::SettingsDialog *ui;
     ConfigHelper *configHelper;
     QStack<UndoAction> undoStack;
-    bool isUniquePath(const QString &path);
+    bool isUniquePath(const QString &path) const;
 
 private slots:
     void onAccepted();

@@ -78,7 +78,7 @@ void MainWindow::iconActivated(QSystemTrayIcon::ActivationReason reason)
 
 void MainWindow::reallyQuit()
 {
-    qDebug() << "Save exit, Bye!";
+    qDebug() << "Safely exit, Bye!";
     dbHelper->close();
     QCoreApplication::quit();
 }
@@ -166,22 +166,31 @@ void MainWindow::rebuildFilesList()
 void MainWindow::processWorkList()
 {
     qDebug() << "【Triggered!】 start process work list...";
-    workList = dbHelper->getWorkList("docx", 100);
-    qDebug() << "[processWorkList] work list: ";
-    foreach (auto iter, workList)
-    {
-        qDebug() << iter.path << iter.isFinished;
-    }
-
     int successCount, failCount;
     successCount = failCount = 0;
-    foreach (File file, workList)
+    foreach (QString format, analyser->getSupportedFormatsList())
     {
-        if (analyser->processFile(file))
-            ++successCount;
-        else ++failCount;
-    }
+        workList = dbHelper->getWorkList(format, 20);
+        qDebug() << "[processWorkList] work list: ";
+        foreach (auto iter, workList)
+        {
+            qDebug() << iter.path << iter.isFinished;
+        }
 
+        foreach (File file, workList)
+        {
+            if (analyser->processFile(file))
+            {
+                ++successCount;
+                dbHelper->setFinish(file, true);
+            }
+            else
+            {
+                ++failCount;
+                dbHelper->setValid(file, false);
+            }
+        }
+    }
     notifyResult(successCount, failCount);
     emit onFinishedWorkList();
 }
@@ -199,7 +208,7 @@ void MainWindow::updateFilesList(bool renew)
     for (int i = 0; i < configHelper->pathModel->rowCount(); i++)
     {
         QDirIterator it(configHelper->pathModel->item(i)->text(),
-                        analyser->getSupportedFormatsList(),
+                        analyser->getSupportedFormatsFilter(),
                         QDir::Files,
                         QDirIterator::Subdirectories);
         while (it.hasNext() && filesCount < MAX_FILES_NUMBER)

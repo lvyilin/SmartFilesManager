@@ -14,7 +14,7 @@ Analyser::Analyser(DBHelper *dh, QObject *parent) :
 
 }
 
-bool Analyser::isSupportedFormat(QString format)
+bool Analyser::isSupportedFormat(QString format) const
 {
     //支持所有纯文本文件
     if (mimeDb.mimeTypeForFile("*." + format).inherits("text/plain"))
@@ -22,22 +22,27 @@ bool Analyser::isSupportedFormat(QString format)
     else return supportedFormat.contains(format);
 }
 
-QStringList Analyser::getSupportedFormatsList()
+QStringList Analyser::getSupportedFormatsList() const
+{
+    return supportedFormat;
+}
+
+QStringList Analyser::getSupportedFormatsFilter() const
 {
     return supportedFormatFilter;
 }
 
-bool Analyser::processFile(File &file)
+bool Analyser::processFile(const File &file)
 {
-    if (!isSupportedFormat(file.format))
-    {
-        qDebug() << "【[Analyser】r not supported file format";
-        return false;
-    }
     QFileInfo checkFile(file.path);
     if (!(checkFile.exists() && checkFile.isReadable()))
     {
         qDebug() << "【Analyser】file not exist or unreadable!";
+        return false;
+    }
+    if (!isSupportedFormat(file.format))
+    {
+        qDebug() << "【Analyser】not supported file format";
         return false;
     }
     QMimeType mime = mimeDb.mimeTypeForFile(file.name);
@@ -58,20 +63,31 @@ bool Analyser::processFile(File &file)
         QTextStream in(&f);
         textContent = in.readAll();
         if (textContent.isNull())
+        {
+            qDebug() << "【Analyser】extract file failed" << file.name;
             return false;
+        }
     }
     //DOCX文件
     else if (file.format == "docx")
     {
         textContent = docxExtract(file);
         if (textContent.isNull())
+        {
+            qDebug() << "【Analyser】extract file failed" << file.name;
             return false;
+        }
     }
     else;
+    /*QFile saveFile(file.name + ".txt");
+    saveFile.open(QIODevice::WriteOnly | QIODevice::Text);
+    QTextStream out(&saveFile);
+    out << textContent;
+    saveFile.close();*/
     return true;
 }
 
-QString Analyser::docxExtract(File &file)
+QString Analyser::docxExtract(const File &file)
 {
     QuaZip zipper(file.path);
     if (!zipper.open(QuaZip::mdUnzip))
@@ -101,20 +117,12 @@ QString Analyser::docxExtract(File &file)
     zipper.close();
 
     QString ret;
-    //-------TODO:save to db----
-    QFile saveFile(file.name + ".txt");
-    saveFile.open(QIODevice::WriteOnly);
-    QTextStream out(&saveFile);
-
     QDomDocument xmlReader("mydoc");
     xmlReader.setContent(content, false);
     QDomNodeList qnl = xmlReader.elementsByTagName("w:t");
     for (int i = 0; i < qnl.count(); i++)
     {
-        out << qnl.item(i).toElement().text();
         ret += qnl.item(i).toElement().text();
     }
-    saveFile.close();
-    //--------------------------
     return ret;
 }
