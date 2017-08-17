@@ -224,6 +224,7 @@ void MainWindow::updateFilesList(bool renew)
             thisFile.modifyTime = thisInfo.lastModified();
             thisFile.size = thisInfo.size();
             thisFile.isFinished = false;
+            thisFile.isValid = true;
 
             filesList << thisFile;
             ++filesCount;
