@@ -4,7 +4,7 @@
 
 #include "dbhelper.h"
 #include <qDebug>
-DBHelper::DBHelper(QString &conName, QString &dbName, QObject *parent) : QObject(parent)
+DBHelper::DBHelper(const QString &conName, const QString &dbName, QObject *parent) : QObject(parent)
 {
     db = QSqlDatabase::addDatabase("QSQLITE", conName); //添加数据库驱动 已制定链接名称
     db.setDatabaseName(dbName); //数据库链接命名
@@ -22,7 +22,7 @@ DBHelper::DBHelper(QString &conName, QString &dbName, QObject *parent) : QObject
     createTable();
 }
 
-bool DBHelper::hasIndex()
+bool DBHelper::hasIndex() const
 {
     query->exec("SELECT name FROM files");
     if (!query->next())
@@ -32,7 +32,7 @@ bool DBHelper::hasIndex()
     return true;
 }
 
-bool DBHelper::addFile(File &file)
+bool DBHelper::addFile(const File &file)
 {
     query->addBindValue(file.name);
     query->addBindValue(file.format);
@@ -44,7 +44,7 @@ bool DBHelper::addFile(File &file)
     return query->exec();
 }
 
-void DBHelper::addFiles(QList<File> &filesList)
+void DBHelper::addFiles(const QList<File> &filesList)
 {
     query->prepare("insert into files (name, format, path, size, create_time, modify_time, is_finished) "
                    "values(:name, :format, :path, :size, :create_time, :modify_time, :is_finished)");
@@ -80,10 +80,11 @@ void DBHelper::close()
     db.close();
 }
 
-QList<File> &DBHelper::getWorkList(QString format, int num)
+QList<File> &DBHelper::getWorkList(const QString &format, int num)
 {
+    unfinishedFile.clear();
     int i = 0;
-    if (!query->exec(QString("select * from files where is_finished = 0 and format = \"%1\" and is_valued = 1").arg(format)))
+    if (!query->exec(QString("select * from files where is_finished = 0 and format = \"%1\" and is_valid = 1").arg(format)))
     {
         qDebug() << "【getWorkList】 error: " << query->lastError().text();
         return unfinishedFile;
@@ -127,7 +128,7 @@ void DBHelper::createTable()
                      "create_time DATETIME NOT NULL,"
                      "modify_time DATETIME NOT NULL,"
                      "is_finished BOOLEAN NOT NULL"
-                     "is_valued BOOLEAN NOT NULL DEFAULT 1)"))
+                     "is_valid BOOLEAN NOT NULL DEFAULT 1)"))
         qDebug() << "files create false" << query->lastError().text();
     else
         qDebug() << "table create success";
@@ -144,7 +145,8 @@ void DBHelper::createTable()
     query->exec("PRAGMA foreign_keys = ON"); //打开外键约束
 }
 
-void DBHelper::initlabels()
+
+void DBHelper::initLabels()
 {
     if (!query->exec("insert into labels(name,level,is_leaf,view_type) values(\"格式\",1,0,\"格式视图\")"))
         qDebug() << query->lastError();
@@ -184,7 +186,13 @@ void DBHelper::initlabels()
     query->exec("insert into labels(name,level,parent,is_leaf,view_type) values(\"IMG文件\",3,7,0,\"格式视图\")");
 }
 
-void DBHelper::setFinished(File file)
+
+void DBHelper::setFinish(const File &file, bool finish)
 {
-    query->exec(QString("update files set is_finished =1 where path = \"%1\"").arg(file.path));
+    query->exec(QString("update files set is_finished = %1 where path = \"%2\"").arg(finish).arg(file.path));
+}
+
+void DBHelper::setValid(const File &file, bool valid)
+{
+    query->exec(QString("update files set is_valid = %1 where path = \"%2\" ").arg(valid).arg(file.path));
 }

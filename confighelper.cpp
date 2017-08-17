@@ -13,7 +13,7 @@ const QString ConfigHelper::pathProfix = "ScanPaths";
 
 void ConfigHelper::readSettings()
 {
-
+    firstTimeUsing = settings->value("FirstTimeUsing", QVariant(true)).toBool();
     startAtBoot = settings->value("StartAtBoot", QVariant(false)).toBool();
     onlyOneInstace = settings->value("OnlyOneInstance", QVariant(true)).toBool();
     runningStrategy = static_cast<RunningStrategy>(settings->value("RunningStrategy", QVariant(static_cast<int>(CpuTrigger))).toInt());
@@ -35,6 +35,7 @@ void ConfigHelper::readSettings()
 
 void ConfigHelper::saveSettings()
 {
+    settings->setValue("FirstTimeUsing", QVariant(false));
     settings->setValue("StartAtBoot", QVariant(startAtBoot));
     settings->setValue("OnlyOneInstance", QVariant(onlyOneInstace));
     settings->setValue("RunningStrategy", QVariant(runningStrategy));
@@ -54,17 +55,22 @@ void ConfigHelper::saveSettings()
 
 }
 
-bool ConfigHelper::isStartAtBoot()
+bool ConfigHelper::isFirstTimeUsing() const
+{
+    return firstTimeUsing;
+}
+
+bool ConfigHelper::isStartAtBoot() const
 {
     return startAtBoot;
 }
 
-ConfigHelper::RunningStrategy ConfigHelper::getRunningStrategy()
+ConfigHelper::RunningStrategy ConfigHelper::getRunningStrategy() const
 {
     return runningStrategy;
 }
 
-int ConfigHelper::getCpuTriggerPercent()
+int ConfigHelper::getCpuTriggerPercent() const
 {
     return cpuTriggerPercent;
 }
@@ -74,7 +80,7 @@ QTime &ConfigHelper::getTimeTriggerPoint()
     return timeTriggerPoint;
 }
 
-int ConfigHelper::getScanInterval()
+int ConfigHelper::getScanInterval() const
 {
     return scanIntervalHours;
 }
@@ -88,7 +94,7 @@ void ConfigHelper::setSettings(bool st, int cpuPct, int intv)
 
 }
 
-void ConfigHelper::setSettings(bool st, QTime timeTriPt, int intv)
+void ConfigHelper::setSettings(bool st, const QTime &timeTriPt, int intv)
 {
     startAtBoot = st;
     timeTriggerPoint = timeTriPt;

@@ -20,20 +20,20 @@ struct File
 class DBHelper : public QObject {
     Q_OBJECT
 public:
-    explicit DBHelper(QString &conName, QString &dbName, QObject *parent = nullptr);
+    explicit DBHelper(const QString &conName, const QString &dbName, QObject *parent = nullptr);
 
     /**
 
      * @brief hasIndex 是否文件表是否有文件条目
      * @return 真值
      */
-    bool hasIndex();
+    bool hasIndex() const;
 
     /**
      * @brief addFiles 添加多文件
      * @param pathSet 文件路径集合
      */
-    void addFiles(QList<File> &filesList);
+    void addFiles(const QList<File> &filesList);
 
     /**
      * @brief cleanFiles 清空文件表
@@ -46,34 +46,36 @@ public:
     void close();
 
     /**
-     * @brief getFiles 获得文件（先不写，可能废除）
-     * @return 文件表所有条目
-     */
-    QList<File> getFiles();
-
-    /**
      * @brief getWorkList 获得工作列表
      * @param num 工作列表文件数目，默认500
      * @return 返回一个包含num个文件的列表
      */
-    QList<File> &getWorkList(QString format, int num = 50);
-
-    /**
-     * @brief setFinished 将指定文件is_finished设为已完成
-     * @param file 指定文件
-     */
-    void setFinished(File file);
+    QList<File> &getWorkList(const QString &format, int num = 50);
 
     /**
      * @brief initlabels 初始化labels表格
      */
-    void initlabels();
+    void initLabels();
+
+    /**
+     * @brief setFinish 将文件file的is_finished设为finish
+     * @param file 文件
+     * @param finish is_finished真值
+     */
+    void setFinish(const File &file, bool finish);
+
+    /**
+     * @brief setValid 将文件file的is_valid值设为valid
+     * @param file 文件
+     * @param valid is_valid真值
+     */
+    void setValid(const File &file, bool valid);
 
 signals:
 public slots:
 private:
     void createTable();
-    bool addFile(File &file);
+    bool addFile(const File &file);
     QSqlDatabase db;
     QSqlQuery *query;
     QList<File> unfinishedFile ;
