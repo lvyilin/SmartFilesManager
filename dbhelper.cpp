@@ -84,7 +84,7 @@ QList<File> &DBHelper::getWorkList(const QString &format, int num)
 {
     unfinishedFile.clear();
     int i = 0;
-    if (!query->exec(QString("select * from files where is_finished = 0 and format = \"%1\" and is_valid = 1").arg(format)))
+    if (!query->exec(QString("select * from files where is_finished = 0 and format = \"%1\" and is_valid = 1 ").arg(format)))
     {
         qDebug() << "【getWorkList】 error: " << query->lastError().text();
         return unfinishedFile;
@@ -127,8 +127,8 @@ void DBHelper::createTable()
                      "unsigned big int NOT NULL,"
                      "create_time DATETIME NOT NULL,"
                      "modify_time DATETIME NOT NULL,"
-                     "is_finished BOOLEAN NOT NULL"
-                     "is_valid BOOLEAN NOT NULL DEFAULT 1)"))
+                     "is_finished BOOLEAN NOT NULL,"
+                     "is_valid BOOLEAN DEFAULT 1 NOT NULL)"))
         qDebug() << "files create false" << query->lastError().text();
     else
         qDebug() << "table create success";
