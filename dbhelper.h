@@ -15,6 +15,7 @@ struct File
     QDateTime createTime;
     QDateTime modifyTime;
     bool isFinished;
+    bool isValid;
 };
 
 class DBHelper : public QObject {
