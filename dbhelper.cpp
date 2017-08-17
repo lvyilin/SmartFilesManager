@@ -52,11 +52,16 @@ void DBHelper::addFiles(QList<File> &filesList)
     {
         if (!addFile(file))
         {
-            query->exec(QString("delete from files where path = \"%1\"").arg(file.path));
-            query->prepare("insert into files (name, format, path, size, create_time, modify_time, is_finished) "
-                           "values(:name, :format, :path, :size, :create_time, :modify_time, :is_finished)");
-            if (!addFile(file))
-                qDebug() << "update false" << query->lastError() ;
+            if (query->exec(QString("update files set name = \"%1\" format = \"%2\" path = \"%3\" size = %4 create_time = %5 modify_time = %6 is_finiehed = %7 where path = \"%8\" ")
+                            .arg(file.name)
+                            .arg(file.format)
+                            .arg(file.path)
+                            .arg(file.size)
+                            .arg(file.createTime.toString(Qt::ISODate))
+                            .arg(file.modifyTime.toString(Qt::ISODate))
+                            .arg(file.isFinished)
+                            .arg(file.path)))
+                qDebug() << "update false" << query->lastError();
         }
     }
 }
@@ -78,7 +83,7 @@ void DBHelper::close()
 QList<File> &DBHelper::getWorkList(QString format, int num)
 {
     int i = 0;
-    if (!query->exec(QString("select * from files where is_finished = 0 and format = \"%1\"").arg(format)))
+    if (!query->exec(QString("select * from files where is_finished = 0 and format = \"%1\" and is_valued = 1").arg(format)))
     {
         qDebug() << "【getWorkList】 error: " << query->lastError().text();
         return unfinishedFile;
@@ -121,7 +126,8 @@ void DBHelper::createTable()
                      "unsigned big int NOT NULL,"
                      "create_time DATETIME NOT NULL,"
                      "modify_time DATETIME NOT NULL,"
-                     "is_finished BOOLEAN NOT NULL)"))
+                     "is_finished BOOLEAN NOT NULL"
+                     "is_valued BOOLEAN NOT NULL DEFAULT 1)"))
         qDebug() << "files create false" << query->lastError().text();
     else
         qDebug() << "table create success";
@@ -138,7 +144,7 @@ void DBHelper::createTable()
     query->exec("PRAGMA foreign_keys = ON"); //打开外键约束
 }
 
-void DBHelper::addlabel()
+void DBHelper::initlabels()
 {
     if (!query->exec("insert into labels(name,level,is_leaf,view_type) values(\"格式\",1,0,\"格式视图\")"))
         qDebug() << query->lastError();
@@ -176,4 +182,9 @@ void DBHelper::addlabel()
     query->exec("insert into labels(name,level,parent,is_leaf,view_type) values(\"RAR文件\",3,7,0,\"格式视图\")");
     query->exec("insert into labels(name,level,parent,is_leaf,view_type) values(\"ZIP文件\",3,7,0,\"格式视图\")");
     query->exec("insert into labels(name,level,parent,is_leaf,view_type) values(\"IMG文件\",3,7,0,\"格式视图\")");
+}
+
+void DBHelper::setFinished(File file)
+{
+    query->exec(QString("update files set is_finished =1 where path = \"%1\"").arg(file.path));
 }
