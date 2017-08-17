@@ -18,8 +18,8 @@ public:
 signals:
 public slots:
 private:
-    const QStringList supportedFormat = {"docx", "txt"};
-    const QStringList supportedFormatFilter = {"*.docx", "*.txt"};
+    static const QStringList supportedFormat = {"docx", "txt"};
+    static const QStringList supportedFormatFilter = {"*.docx", "*.txt"};
     DBHelper *dbHelper;
     QMimeDatabase mimeDb;
     QString docxExtract(const File &file);
