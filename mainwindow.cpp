@@ -9,6 +9,7 @@
 #include "settingsdialog.h"
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "fileupdaterthread.h"
 
 #include <QCloseEvent>
 #include <QMenu>
@@ -17,7 +18,6 @@
 
 #include <qDebug>
 
-const int MAX_FILES_NUMBER = 500;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -76,7 +76,7 @@ void MainWindow::iconActivated(QSystemTrayIcon::ActivationReason reason)
     }
 }
 
-void MainWindow::reallyQuit()
+void MainWindow::readyQuit()
 {
     qDebug() << "Safely exit, Bye!";
     dbHelper->close();
@@ -90,7 +90,7 @@ void MainWindow::createTrayIcon()
     trayIconMenu->addAction(tr("显示主窗口"), this, &QWidget::showNormal);
     trayIconMenu->addAction(tr("打开设置"), this, &MainWindow::openSettings);
     trayIconMenu->addSeparator();
-    trayIconMenu->addAction(tr("退出程序"), this, &MainWindow::reallyQuit);
+    trayIconMenu->addAction(tr("退出程序"), this, &MainWindow::readyQuit);
 
     trayIcon = new QSystemTrayIcon(QIcon(":/images/icons/tray.png"), this);
 
@@ -130,7 +130,7 @@ void MainWindow::setTrigger()
 
 void MainWindow::on_actionExit_triggered()
 {
-    reallyQuit();
+    readyQuit();
 }
 
 void MainWindow::on_actionSettings_triggered()
@@ -201,56 +201,36 @@ void MainWindow::updateFilesList(bool renew)
     ui->statusBar->showMessage(tr("正在更新文件列表..."));
     if (renew == true)
     {
-        filesList.clear();
         dbHelper->cleanFiles();
     }
-    int filesCount = 0;
+    QStringList formatList = analyser->getSupportedFormatsFilter();
+    QStringList pathList;
     for (int i = 0; i < configHelper->pathModel->rowCount(); i++)
     {
-        QDirIterator it(configHelper->pathModel->item(i)->text(),
-                        analyser->getSupportedFormatsFilter(),
-                        QDir::Files,
-                        QDirIterator::Subdirectories);
-        while (it.hasNext() && filesCount < MAX_FILES_NUMBER)
-        {
-            QString thisPath = it.next();
-            QFileInfo thisInfo(thisPath);
-
-            File thisFile;
-            thisFile.path = thisPath;
-            thisFile.name = thisInfo.fileName();
-            thisFile.format = thisInfo.suffix().toLower();
-            thisFile.createTime = thisInfo.created();
-            thisFile.modifyTime = thisInfo.lastModified();
-            thisFile.size = thisInfo.size();
-            thisFile.isFinished = false;
-            thisFile.isValid = true;
-
-            filesList << thisFile;
-            ++filesCount;
-        }
-        if (MAX_FILES_NUMBER == filesCount)
-            break;
+        pathList << configHelper->pathModel->item(i)->text();
     }
-    if (MAX_FILES_NUMBER == filesCount)
-    {
-        QMessageBox::warning(this,
-                             tr("操作中断"),
-                             tr("超过单文件夹文件数限制%1，请前往\"设置\"修改文件夹路径以缩小范围。").arg(MAX_FILES_NUMBER));
-        ui->statusBar->showMessage(tr("添加文件失败"), 5000);
-    }
-    else
-    {
-        dbHelper->addFiles(filesList);
 
-        foreach (auto iter, filesList)
-        {
-            qDebug() << "[updateFilesList] " << iter.path;
-        }
-        qDebug() << "[updateFilesList] files num: " << filesList.count();
+    FileUpdaterThread *updateThread =  new FileUpdaterThread(dbHelper, formatList, pathList, this);
+    connect(updateThread, &FileUpdaterThread::resultReady, this, &MainWindow::showUpdaterResult);
+    connect(updateThread, &FileUpdaterThread::findFilesProgress, this, &MainWindow::showUpdaterProgress);
+    connect(updateThread, &FileUpdaterThread::startDbProgress, this, &MainWindow::showUpdaterDbProgress);
+    connect(updateThread, &FileUpdaterThread::finished, &QObject::deleteLater);
+    updateThread->start();
+}
 
-        ui->statusBar->showMessage(tr("完毕"), 5000);
-    }
+void MainWindow::showUpdaterResult(const QString &res)
+{
+    ui->statusBar->showMessage(res);
+}
+
+void MainWindow::showUpdaterDbProgress()
+{
+    ui->statusBar->showMessage(tr("正在添加文件到数据库..."));
+}
+
+void MainWindow::showUpdaterProgress(int num)
+{
+    ui->statusBar->showMessage(tr("正在添加文件...已找到 %1").arg(num));
 }
 
 void MainWindow::notifyResult(int success, int fail)
@@ -272,3 +252,4 @@ void MainWindow::on_actionAbout_triggered()
 {
     about();
 }
+

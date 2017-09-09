@@ -41,15 +41,16 @@ private slots:
     void processWorkList();
     void showWindowAndDisconnect();
     void on_actionExit_triggered();
-
     void on_actionSettings_triggered();
-
     void on_actionAbout_triggered();
+    void showUpdaterResult(const QString &res);
+    void showUpdaterProgress(int num);
+    void showUpdaterDbProgress();
 
 private:
     Ui::MainWindow *ui;
 
-    void reallyQuit();
+    void readyQuit();
     void createTrayIcon();
     void setTrigger();
     void updateFilesList(bool renew = false);
@@ -59,7 +60,6 @@ private:
     QMenu *trayIconMenu;
     SettingsDialog *settingsDialog;
     DBHelper *dbHelper;
-    QList<File> filesList;
     QList<File> workList;
     QTimer *triggerTimer;
     Analyser *analyser;

@@ -29,14 +29,16 @@ SOURCES += \
     settingsdialog.cpp \
     confighelper.cpp \
     dbhelper.cpp \
-    analyser.cpp
+    analyser.cpp \
+    fileupdaterthread.cpp
 
 HEADERS += \
         mainwindow.h \
     settingsdialog.h \
     confighelper.h \
     dbhelper.h \
-    analyser.h
+    analyser.h \
+    fileupdaterthread.h
 
 FORMS += \
         mainwindow.ui \
