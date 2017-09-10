@@ -12,7 +12,7 @@ FileUpdaterThread::FileUpdaterThread(DBHelper *db, QStringList f, QStringList p,
     pathList(p),
     QThread(parent)
 {
-
+    abortFlag = false;
 }
 
 const int MAX_FILES_NUMBER = 5000;
@@ -25,7 +25,7 @@ void FileUpdaterThread::run()
                         formatList,
                         QDir::Files,
                         QDirIterator::Subdirectories);
-        while (it.hasNext() && filesCount < MAX_FILES_NUMBER)
+        while (!abortFlag && it.hasNext() && filesCount < MAX_FILES_NUMBER)
         {
             emit findFilesProgress(filesCount);
             QString thisPath = it.next();
@@ -44,9 +44,11 @@ void FileUpdaterThread::run()
             filesList << thisFile;
             ++filesCount;
         }
-        if (MAX_FILES_NUMBER == filesCount)
+        if (!abortFlag && MAX_FILES_NUMBER == filesCount)
             break;
     }
+    if (abortFlag)
+        return;
     if (MAX_FILES_NUMBER == filesCount)
     {
         emit resultReady(tr("操作中断! 文件数超过最大限额: %1, 前往\"设置\"更改路径")
@@ -65,4 +67,9 @@ void FileUpdaterThread::run()
 
         emit resultReady(tr("更新文件列表完成! 操作了%1个文件.").arg(filesCount));
     }
+}
+
+void FileUpdaterThread::abortProgress()
+{
+    abortFlag = true;
 }

@@ -82,8 +82,10 @@ void MainWindow::iconActivated(QSystemTrayIcon::ActivationReason reason)
 
 void MainWindow::readyQuit()
 {
-    qDebug() << "Safely exit, Bye!";
+    emit quitFileUpdaterThread();
+    analyser->quitAll();
     dbHelper->close();
+    qDebug() << "Safely exit, Bye!";
     QCoreApplication::quit();
 }
 
@@ -212,6 +214,7 @@ void MainWindow::updateFilesList(bool renew)
     connect(updateThread, &FileUpdaterThread::findFilesProgress, this, &MainWindow::showUpdaterProgress);
     connect(updateThread, &FileUpdaterThread::startDbProgress, this, &MainWindow::showUpdaterDbProgress);
     connect(updateThread, &FileUpdaterThread::finished, &QObject::deleteLater);
+    connect(this, &MainWindow::quitFileUpdaterThread, updateThread, &FileUpdaterThread::abortProgress);
     updateThread->start();
 }
 
@@ -248,6 +251,7 @@ void MainWindow::showWindowAndDisconnect()
 
 void MainWindow::on_actionAbout_triggered()
 {
+    analyser->quitAll();
     about();
 }
 

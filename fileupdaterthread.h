@@ -18,11 +18,15 @@ signals:
     void startDbProgress();
     void resultReady(const QString &s);
 
+public slots:
+    void abortProgress();
+
 private:
     DBHelper *dbHelper;
     QStringList formatList;
     QStringList pathList;
     QList<File> filesList;
+    bool abortFlag;
 };
 
 #endif // FILEUPDATERTHREAD_H

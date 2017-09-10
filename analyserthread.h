@@ -3,13 +3,14 @@
 
 #include <QThread>
 #include "dbhelper.h"
-#include "analyser.h"
+//#include "analyser.h"
 #include "JlCompress.h"
 #include <QFile>
 #include <QDomDocument>
 #include <QString>
 #include <QMimeDatabase>
 #include <QMimeType>
+#include <QMutex>
 
 class AnalyserThread : public QThread {
     Q_OBJECT
@@ -20,11 +21,16 @@ public:
 signals:
     void resultReady(int success, int fail);
 
+public slots:
+    void abortProgress();
+
 private:
     DBHelper *dbHelper;
     QList<File> fileList;
     QStringList supportedFormat;
     QMimeDatabase mimeDb;
+    QMutex mutex;
+    bool abortFlag;
 
     QString docxExtract(const File &file);
     bool processFile(const File &file);

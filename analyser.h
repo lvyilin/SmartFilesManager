@@ -7,7 +7,9 @@
 #include <QFile>
 #include <qDebug>
 #include <QList>
+#include <QMutex>
 
+const int  MAX_THREAD_COUNT = 10;
 class Analyser : public QObject {
     Q_OBJECT
 public:
@@ -17,8 +19,11 @@ public:
     QStringList getSupportedFormatsFilter() const;
     void processFileList(const QList<File> &fileList);
 
+    void quitAll();
 signals:
     void processFinished(int sc, int fc);
+    void threadQuit();
+    void threadWait(unsigned long time);
 
 public slots:
     void handleResult(int success, int fail);
@@ -30,6 +35,7 @@ private:
     int successCount;
     int failCount;
     int threadCount;
+    QMutex mutex;
 
 };
 

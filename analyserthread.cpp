@@ -11,7 +11,7 @@ AnalyserThread::AnalyserThread(DBHelper *db, const QStringList &li, const QList<
     fileList(f),
     QThread(parent)
 {
-
+    abortFlag = false;
 }
 
 void AnalyserThread::run()
@@ -20,18 +20,29 @@ void AnalyserThread::run()
     successCount = failCount = 0;
     foreach (File file, fileList)
     {
+        if (abortFlag)
+            return;
         if (processFile(file))
         {
             ++successCount;
+            mutex.lock();
             dbHelper->setFinish(file, true);
+            mutex.unlock();
         }
         else
         {
             ++failCount;
+            mutex.lock();
             dbHelper->setValid(file, false);
+            mutex.unlock();
         }
     }
     emit resultReady(successCount, failCount);
+}
+
+void AnalyserThread::abortProgress()
+{
+    abortFlag = true;
 }
 
 bool AnalyserThread::processFile(const File &file)
@@ -59,6 +70,8 @@ bool AnalyserThread::processFile(const File &file)
     //纯文本文件
     if (mime.inherits("text/plain"))
     {
+        if (abortFlag)
+            return false;
         QFile f(file.path);
         if (!f.open(QFile::ReadOnly | QFile::Text))
             return false;
@@ -69,11 +82,14 @@ bool AnalyserThread::processFile(const File &file)
             qDebug() << "【Analyser】extract file failed" << file.name;
             return false;
         }
+        f.close();
         qDebug() << "【Analyser】 text file read success! size:" << file.name << file.size;
     }
     //DOCX文件
     else if (file.format == "docx")
     {
+        if (abortFlag)
+            return false;
         textContent = docxExtract(file);
         if (textContent.isNull())
         {
@@ -100,6 +116,8 @@ bool AnalyserThread::isSupportedFormat(QString format) const
 
 QString AnalyserThread::docxExtract(const File &file)
 {
+    if (abortFlag)
+        return QString();
     QuaZip zipper(file.path);
     if (!zipper.open(QuaZip::mdUnzip))
     {

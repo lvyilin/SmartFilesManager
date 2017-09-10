@@ -26,6 +26,8 @@ public:
     ~MainWindow();
 
 signals:
+    void quitFileUpdaterThread();
+
 protected:
     void closeEvent(QCloseEvent *event) override;
 
