@@ -30,6 +30,7 @@ public:
 
 signals:
     void pathChanged();
+    void updateNow(bool renew = false);
 
 private:
     Ui::SettingsDialog *ui;

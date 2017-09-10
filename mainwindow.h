@@ -26,10 +26,6 @@ public:
     ~MainWindow();
 
 signals:
-    /**
-     * @brief onFinishedWorkList 用于提醒上次是否成功运行
-     */
-    void onFinishedWorkList();
 protected:
     void closeEvent(QCloseEvent *event) override;
 
@@ -46,6 +42,8 @@ private slots:
     void showUpdaterResult(const QString &res);
     void showUpdaterProgress(int num);
     void showUpdaterDbProgress();
+    void notifyResult(int success, int fail);
+    void updateFilesList(bool renew = false);
 
 private:
     Ui::MainWindow *ui;
@@ -53,8 +51,6 @@ private:
     void readyQuit();
     void createTrayIcon();
     void setTrigger();
-    void updateFilesList(bool renew = false);
-    void notifyResult(int success, int fail);
     ConfigHelper *configHelper;
     QSystemTrayIcon *trayIcon;
     QMenu *trayIconMenu;

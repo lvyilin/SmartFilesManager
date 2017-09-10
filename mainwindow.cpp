@@ -4,6 +4,7 @@
 
 /*TODO
  * updateIndex() 优化：去除已包含过的子目录
+ * 单次处理文件数目 可设置化
  */
 
 #include "settingsdialog.h"
@@ -36,15 +37,18 @@ MainWindow::MainWindow(QWidget *parent) :
     if (configHelper->isFirstTimeUsing())
         dbHelper->initLabels();
     analyser = new Analyser(dbHelper, this);
+
+    connect(analyser, &Analyser::processFinished, this, &MainWindow::notifyResult);
+
     //tray
     createTrayIcon();
     connect(trayIcon, &QSystemTrayIcon::activated, this, &MainWindow::iconActivated);
     trayIcon->show();
     //less important init
     connect(settingsDialog, &SettingsDialog::pathChanged, this, &MainWindow::rebuildFilesList);
-    //    connect(this, &MainWindow::onFinishedWorkList, this, &MainWindow::setTrigger);若运行过快会导致因在同时刻而多次触发
+    connect(settingsDialog, &SettingsDialog::updateNow, this, &MainWindow::updateFilesList);
     setTrigger();
-    updateFilesList();
+    //updateFilesList();由用户决定
 }
 
 MainWindow::~MainWindow()
@@ -165,34 +169,27 @@ void MainWindow::rebuildFilesList()
 
 void MainWindow::processWorkList()
 {
-    qDebug() << "【Triggered!】 start process work list...";
-    int successCount, failCount;
-    successCount = failCount = 0;
+    qDebug() << "【processWorkList】 start process work list...";
+    ui->statusBar->showMessage(tr("正在处理文件列表..."));
+    //每种格式处理固定个数文件
     foreach (QString format, analyser->getSupportedFormatsList())
     {
-        workList = dbHelper->getWorkList(format, 20);
-        qDebug() << "[processWorkList] work list: ";
-        foreach (auto iter, workList)
+        workList = dbHelper->getWorkList(format, 1000);
+        if (workList.isEmpty())
         {
-            qDebug() << iter.path << iter.isFinished;
+            qDebug() << "[processWorkList] worklist is empty.";
+            notifyResult(0, 0);
+            break;
         }
-
-        foreach (File file, workList)
+        //debug-------------
+        qDebug() << "[processWorkList] work list count: " << workList.count();
+        /*foreach (auto iter, workList)
         {
-            if (analyser->processFile(file))
-            {
-                ++successCount;
-                dbHelper->setFinish(file, true);
-            }
-            else
-            {
-                ++failCount;
-                dbHelper->setValid(file, false);
-            }
-        }
+            qDebug() << iter.path;
+        }*/
+        //------------------
+        analyser->processFileList(workList);
     }
-    notifyResult(successCount, failCount);
-    emit onFinishedWorkList();
 }
 
 
@@ -235,6 +232,7 @@ void MainWindow::showUpdaterProgress(int num)
 
 void MainWindow::notifyResult(int success, int fail)
 {
+    ui->statusBar->showMessage(tr("文件列表处理完成."));
     trayIcon->showMessage(tr("智能文件管家"),
                           tr("索引建立完成, 成功%1个，失败%2个, 打开主页面以查看结果")
                           .arg(success)

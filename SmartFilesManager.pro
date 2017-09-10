@@ -30,7 +30,8 @@ SOURCES += \
     confighelper.cpp \
     dbhelper.cpp \
     analyser.cpp \
-    fileupdaterthread.cpp
+    fileupdaterthread.cpp \
+    analyserthread.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -38,7 +39,8 @@ HEADERS += \
     confighelper.h \
     dbhelper.h \
     analyser.h \
-    fileupdaterthread.h
+    fileupdaterthread.h \
+    analyserthread.h
 
 FORMS += \
         mainwindow.ui \

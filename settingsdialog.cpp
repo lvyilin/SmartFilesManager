@@ -186,5 +186,5 @@ void SettingsDialog::radioBtnTimeToggle()
 
 void SettingsDialog::on_pushButtonScan_clicked()
 {
-
+    emit updateNow(false);
 }
