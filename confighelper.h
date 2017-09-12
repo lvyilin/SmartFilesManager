@@ -15,6 +15,11 @@ public:
         CpuTrigger, TimeTrigger
     };
 
+    enum InterruptionType
+    {
+        NoInterrupt, AnalyserInterrupt, FileUpdaterInterrupt, TerminateInterrupt
+    };
+
     explicit ConfigHelper(QObject *parent = nullptr);
 
     void readSettings();
@@ -29,6 +34,12 @@ public:
 
     void setSettings(bool st, int cpuPct, int intv);
     void setSettings(bool st, const QTime &timeTriPt, int intv);
+
+    bool hasLastInterrupted() const;
+    InterruptionType getInterruptionType() const;
+    void setInterruptionType(InterruptionType it);
+
+    void close();
 
     QStandardItemModel *pathModel;
 
@@ -46,6 +57,10 @@ private:
 
     QSettings *settings;
     static const QString pathProfix;
+
+    InterruptionType interruptionType;
+
+    void saveInterruptionType();
 };
 
 #endif // CONFIGHELPER_H

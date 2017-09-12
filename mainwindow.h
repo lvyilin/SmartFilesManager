@@ -27,6 +27,7 @@ public:
 
 signals:
     void quitFileUpdaterThread();
+    void fileUpdaterWait(unsigned long time);
 
 protected:
     void closeEvent(QCloseEvent *event) override;
@@ -46,6 +47,9 @@ private slots:
     void showUpdaterDbProgress();
     void notifyResult(int success, int fail);
     void updateFilesList(bool renew = false);
+
+    void fileUpdaterInterrupted();
+    void analyserInterrupted();
 
 private:
     Ui::MainWindow *ui;

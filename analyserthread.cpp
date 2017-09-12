@@ -43,6 +43,7 @@ void AnalyserThread::run()
 void AnalyserThread::abortProgress()
 {
     abortFlag = true;
+    emit aborted();
 }
 
 bool AnalyserThread::processFile(const File &file)

@@ -20,6 +20,7 @@ public:
 
 signals:
     void resultReady(int success, int fail);
+    void aborted();
 
 public slots:
     void abortProgress();

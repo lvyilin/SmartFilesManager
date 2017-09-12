@@ -17,6 +17,7 @@ signals:
     void findFilesProgress(int num);
     void startDbProgress();
     void resultReady(const QString &s);
+    void aborted();
 
 public slots:
     void abortProgress();

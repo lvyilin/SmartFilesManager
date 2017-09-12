@@ -20,6 +20,9 @@ void ConfigHelper::readSettings()
     cpuTriggerPercent = settings->value("CpuTriggerPercent", QVariant(10)).toInt();
     timeTriggerPoint = settings->value("TimeTriggerPoint", QVariant(QTime(12, 0))).toTime();
     scanIntervalHours = settings->value("ScanIntervalHours", QVariant(12)).toInt();
+    interruptionType = static_cast<InterruptionType>(settings->value("InterruptionType", QVariant(static_cast<int>(NoInterrupt))).toInt());
+    //detact termination
+    settings->setValue("InterruptionType", QVariant(static_cast<int>(TerminateInterrupt)));
 
     int size = settings->beginReadArray(pathProfix);
     for (int i = 0; i < size; i++)
@@ -101,4 +104,30 @@ void ConfigHelper::setSettings(bool st, const QTime &timeTriPt, int intv)
     scanIntervalHours = intv;
     runningStrategy = TimeTrigger;
 
+}
+
+bool ConfigHelper::hasLastInterrupted() const
+{
+    return !(interruptionType == NoInterrupt);
+}
+
+ConfigHelper::InterruptionType ConfigHelper::getInterruptionType() const
+{
+    return interruptionType;
+}
+
+void ConfigHelper::setInterruptionType(ConfigHelper::InterruptionType it)
+{
+    interruptionType = it;
+}
+
+void ConfigHelper::close()
+{
+    saveInterruptionType();
+    qDebug() << "[ConfigHelper] Interruption type: " << static_cast<int>(interruptionType);
+}
+
+void ConfigHelper::saveInterruptionType()
+{
+    settings->setValue("InterruptionType", QVariant(static_cast<int>(interruptionType)));
 }

@@ -59,12 +59,7 @@ void FileUpdaterThread::run()
         emit startDbProgress();
         dbHelper->addFiles(filesList);
 
-        /* foreach (auto iter, filesList)
-         {
-             qDebug() << "[updateFilesList] " << iter.path;
-         }*/
         qDebug() << "[updateFilesList] files num: " << filesList.count();
-
         emit resultReady(tr("更新文件列表完成! 操作了%1个文件.").arg(filesCount));
     }
 }
@@ -72,4 +67,5 @@ void FileUpdaterThread::run()
 void FileUpdaterThread::abortProgress()
 {
     abortFlag = true;
+    emit aborted();
 }

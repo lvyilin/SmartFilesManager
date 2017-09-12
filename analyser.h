@@ -24,9 +24,11 @@ signals:
     void processFinished(int sc, int fc);
     void threadQuit();
     void threadWait(unsigned long time);
+    void interrupted();
 
 public slots:
     void handleResult(int success, int fail);
+    void analyserInterrupted();
 
 private:
     const QStringList supportedFormat = {"docx", "txt"};

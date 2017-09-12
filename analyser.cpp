@@ -37,6 +37,7 @@ void Analyser::processFileList(const QList<File> &fileList)
     ++threadCount;
     connect(workerThread, &AnalyserThread::resultReady, this, &Analyser::handleResult);
     connect(workerThread, &AnalyserThread::finished, workerThread, &QObject::deleteLater);
+    connect(workerThread, &AnalyserThread::aborted, this, &Analyser::analyserInterrupted);
     connect(this, &Analyser::threadQuit, workerThread, &AnalyserThread::abortProgress);
     connect(this, &Analyser::threadWait, workerThread, &AnalyserThread::wait);
     workerThread->start();
@@ -55,6 +56,11 @@ void Analyser::handleResult(int success, int fail)
     {
         emit processFinished(successCount, failCount);
     }
+}
+
+void Analyser::analyserInterrupted()
+{
+    emit interrupted();
 }
 
 void Analyser::quitAll()

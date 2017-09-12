@@ -37,7 +37,7 @@ MainWindow::MainWindow(QWidget *parent) :
     if (configHelper->isFirstTimeUsing())
         dbHelper->initLabels();
     analyser = new Analyser(dbHelper, this);
-
+    connect(analyser, &Analyser::interrupted, this, &MainWindow::analyserInterrupted);
     connect(analyser, &Analyser::processFinished, this, &MainWindow::notifyResult);
 
     //tray
@@ -49,6 +49,29 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(settingsDialog, &SettingsDialog::updateNow, this, &MainWindow::updateFilesList);
     setTrigger();
     //updateFilesList();由用户决定
+    if (configHelper->hasLastInterrupted() &&
+            configHelper->getInterruptionType() != ConfigHelper::TerminateInterrupt)
+    {
+        QMessageBox infoBox;
+        infoBox.setText(tr("上次有未完成任务, 是否继续?"));
+        infoBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        infoBox.setDefaultButton(QMessageBox::Yes);
+        infoBox.setIcon(QMessageBox::Question);
+        int ret = infoBox.exec();
+        if (ret == QMessageBox::Yes)
+        {
+            switch (configHelper->getInterruptionType())
+            {
+            case ConfigHelper::FileUpdaterInterrupt:
+                updateFilesList();
+                break;
+            case ConfigHelper::AnalyserInterrupt:
+                processWorkList();
+            default:
+                break;
+            }
+        }
+    }
 }
 
 MainWindow::~MainWindow()
@@ -82,9 +105,12 @@ void MainWindow::iconActivated(QSystemTrayIcon::ActivationReason reason)
 
 void MainWindow::readyQuit()
 {
+    configHelper->setInterruptionType(ConfigHelper::NoInterrupt);
     emit quitFileUpdaterThread();
+    emit fileUpdaterWait(1000);
     analyser->quitAll();
     dbHelper->close();
+    configHelper->close();
     qDebug() << "Safely exit, Bye!";
     QCoreApplication::quit();
 }
@@ -214,8 +240,20 @@ void MainWindow::updateFilesList(bool renew)
     connect(updateThread, &FileUpdaterThread::findFilesProgress, this, &MainWindow::showUpdaterProgress);
     connect(updateThread, &FileUpdaterThread::startDbProgress, this, &MainWindow::showUpdaterDbProgress);
     connect(updateThread, &FileUpdaterThread::finished, &QObject::deleteLater);
+    connect(updateThread, &FileUpdaterThread::aborted, this, &MainWindow::fileUpdaterInterrupted);
+    connect(this, &MainWindow::fileUpdaterWait, updateThread, &FileUpdaterThread::wait);
     connect(this, &MainWindow::quitFileUpdaterThread, updateThread, &FileUpdaterThread::abortProgress);
     updateThread->start();
+}
+
+void MainWindow::fileUpdaterInterrupted()
+{
+    configHelper->setInterruptionType(ConfigHelper::FileUpdaterInterrupt);
+}
+
+void MainWindow::analyserInterrupted()
+{
+    configHelper->setInterruptionType(ConfigHelper::AnalyserInterrupt);
 }
 
 void MainWindow::showUpdaterResult(const QString &res)
@@ -251,7 +289,6 @@ void MainWindow::showWindowAndDisconnect()
 
 void MainWindow::on_actionAbout_triggered()
 {
-    analyser->quitAll();
     about();
 }
 
