@@ -49,6 +49,7 @@ private slots:
     void updateFilesList(bool renew = false);
 
     void fileUpdaterInterrupted();
+    void fileUpdaterFinished();
     void analyserInterrupted();
 
 private:

@@ -20,6 +20,7 @@ void ConfigHelper::readSettings()
     cpuTriggerPercent = settings->value("CpuTriggerPercent", QVariant(10)).toInt();
     timeTriggerPoint = settings->value("TimeTriggerPoint", QVariant(QTime(12, 0))).toTime();
     scanIntervalHours = settings->value("ScanIntervalHours", QVariant(12)).toInt();
+    fileIndexFinished = settings->value("FileIndexFinished", QVariant(false)).toBool();
     interruptionType = static_cast<InterruptionType>(settings->value("InterruptionType", QVariant(static_cast<int>(NoInterrupt))).toInt());
     //detact termination
     settings->setValue("InterruptionType", QVariant(static_cast<int>(TerminateInterrupt)));
@@ -123,11 +124,17 @@ void ConfigHelper::setInterruptionType(ConfigHelper::InterruptionType it)
 
 void ConfigHelper::close()
 {
-    saveInterruptionType();
+    settings->setValue("InterruptionType", QVariant(static_cast<int>(interruptionType)));
+    settings->setValue("FileIndexFinished", QVariant(fileIndexFinished));
     qDebug() << "[ConfigHelper] Interruption type: " << static_cast<int>(interruptionType);
 }
 
-void ConfigHelper::saveInterruptionType()
+void ConfigHelper::setFileIndexFinished(bool value)
 {
-    settings->setValue("InterruptionType", QVariant(static_cast<int>(interruptionType)));
+    fileIndexFinished = value;
+}
+
+bool ConfigHelper::isFileIndexFinished() const
+{
+    return fileIndexFinished;
 }

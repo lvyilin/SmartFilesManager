@@ -43,6 +43,9 @@ public:
 
     QStandardItemModel *pathModel;
 
+    void setFileIndexFinished(bool value);
+    bool isFileIndexFinished() const;
+
 signals:
 public slots:
 
@@ -54,13 +57,13 @@ private:
     int cpuTriggerPercent;
     QTime timeTriggerPoint;
     int scanIntervalHours;
+    bool fileIndexFinished;
 
     QSettings *settings;
     static const QString pathProfix;
 
     InterruptionType interruptionType;
 
-    void saveInterruptionType();
 };
 
 #endif // CONFIGHELPER_H

@@ -192,11 +192,17 @@ void MainWindow::about()
 void MainWindow::rebuildFilesList()
 {
     qDebug() << "[rebuildFilesList] start to rebuild files list..";
+    configHelper->setFileIndexFinished(false);
     updateFilesList(true);
 }
 
 void MainWindow::processWorkList()
 {
+    if (!configHelper->isFileIndexFinished())
+    {
+        QMessageBox::information(this, QCoreApplication::applicationName(), tr("文件索引尚未完成."));
+        return;
+    }
     qDebug() << "【processWorkList】 start process work list...";
     ui->statusBar->showMessage(tr("正在处理文件列表..."));
     //每种格式处理固定个数文件
@@ -239,6 +245,7 @@ void MainWindow::updateFilesList(bool renew)
     connect(updateThread, &FileUpdaterThread::resultReady, this, &MainWindow::showUpdaterResult);
     connect(updateThread, &FileUpdaterThread::findFilesProgress, this, &MainWindow::showUpdaterProgress);
     connect(updateThread, &FileUpdaterThread::startDbProgress, this, &MainWindow::showUpdaterDbProgress);
+    connect(updateThread, &FileUpdaterThread::finished, this, &MainWindow::fileUpdaterFinished);
     connect(updateThread, &FileUpdaterThread::finished, &QObject::deleteLater);
     connect(updateThread, &FileUpdaterThread::aborted, this, &MainWindow::fileUpdaterInterrupted);
     connect(this, &MainWindow::fileUpdaterWait, updateThread, &FileUpdaterThread::wait);
@@ -249,6 +256,11 @@ void MainWindow::updateFilesList(bool renew)
 void MainWindow::fileUpdaterInterrupted()
 {
     configHelper->setInterruptionType(ConfigHelper::FileUpdaterInterrupt);
+}
+
+void MainWindow::fileUpdaterFinished()
+{
+    configHelper->setFileIndexFinished(true);
 }
 
 void MainWindow::analyserInterrupted()
