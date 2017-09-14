@@ -18,7 +18,7 @@ public:
     QStringList getSupportedFormatsList() const;
     QStringList getSupportedFormatsFilter() const;
     void processFileList(const QList<File> &fileList);
-
+    int getThreadCount();
     void quitAll();
 signals:
     void processFinished(int sc, int fc);

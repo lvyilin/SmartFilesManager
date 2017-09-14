@@ -2,11 +2,6 @@
 #pragma execution_character_set("utf-8")
 #endif    //解决MSVC编译UTF-8(BOM)导致的中文编码问题
 
-/*TODO
- * updateIndex() 优化：去除已包含过的子目录
- * 单次处理文件数目 可设置化
- */
-
 #include "settingsdialog.h"
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -29,7 +24,7 @@ MainWindow::MainWindow(QWidget *parent) :
     //ui
     ui->setupUi(this);
     setWindowTitle(QCoreApplication::applicationName());
-    connect(ui->processButton, SIGNAL(clicked(bool)), this, SLOT(processWorkList()));
+//    connect(ui->processButton, SIGNAL(clicked(bool)), this, SLOT(processWorkList()));
     //primary init
     configHelper->readSettings();
     settingsDialog = new SettingsDialog(configHelper, this);
@@ -139,7 +134,7 @@ void MainWindow::setTrigger()
             triggerTimer = new QTimer(this);
             triggerTimer->setSingleShot(true);
             triggerTimer->setTimerType(Qt::VeryCoarseTimer);
-            connect(triggerTimer, SIGNAL(timeout()), this, SLOT(processWorkList()));
+            connect(triggerTimer, SIGNAL(timeout()), this, SLOT(onTriggered()));
         }
         else if (triggerTimer->isActive())
             triggerTimer->stop();
@@ -196,8 +191,22 @@ void MainWindow::rebuildFilesList()
     updateFilesList(true);
 }
 
-void MainWindow::processWorkList()
+void MainWindow::onTriggered()
 {
+    processWorkList(true);
+}
+
+void MainWindow::processWorkList(bool triggered)
+{
+    if (triggered)
+    {
+        //判断是否正在工作中，是，忽略当次触发任务
+        if (analyser->getThreadCount() != 0)
+        {
+            qDebug() << "[processWorkList] triggered but already working, ignored!";
+            return;
+        }
+    }
     if (!configHelper->isFileIndexFinished())
     {
         QMessageBox::information(this, QCoreApplication::applicationName(), tr("文件索引尚未完成."));
@@ -304,3 +313,8 @@ void MainWindow::on_actionAbout_triggered()
     about();
 }
 
+
+void MainWindow::on_processButton_clicked()
+{
+    processWorkList();
+}

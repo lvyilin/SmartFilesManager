@@ -44,6 +44,11 @@ void Analyser::processFileList(const QList<File> &fileList)
     qDebug() << "[Analyser] total threads now: " << threadCount;
 }
 
+int Analyser::getThreadCount()
+{
+    return threadCount;
+}
+
 void Analyser::handleResult(int success, int fail)
 {
     mutex.lock();
