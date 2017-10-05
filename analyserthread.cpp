@@ -84,7 +84,7 @@ bool AnalyserThread::processFile(const File &file)
             return false;
         }
         f.close();
-        qDebug() << "【Analyser】 text file read success! size:" << file.name << file.size;
+        qDebug() << "【Analyser】 text file read success! " << file.name;
     }
     //DOCX文件
     else if (file.format == "docx")
