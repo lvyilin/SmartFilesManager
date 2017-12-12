@@ -8,8 +8,6 @@
 #include <QFile>
 #include <QDomDocument>
 #include <QString>
-#include <QMimeDatabase>
-#include <QMimeType>
 #include <QMutex>
 
 class AnalyserThread : public QThread {
@@ -29,13 +27,11 @@ private:
     DBHelper *dbHelper;
     QList<File> fileList;
     QStringList supportedFormat;
-    QMimeDatabase mimeDb;
     QMutex mutex;
     bool abortFlag;
 
     QString docxExtract(const File &file);
-    bool processFile(const File &file);
-    bool isSupportedFormat(QString format) const;
+    ProcessingResult processFile(const File &file);
 };
 
 #endif // ANALYSERTHREAD_H

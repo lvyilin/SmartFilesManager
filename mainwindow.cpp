@@ -217,13 +217,14 @@ void MainWindow::processWorkList(bool triggered)
     //每种格式处理固定个数文件
     foreach (QString format, analyser->getSupportedFormatsList())
     {
-        workList = dbHelper->getWorkList(format, 1000);
+        workList = dbHelper->getWorkList(format, WORKLIST_SIZE);
         if (workList.isEmpty())
         {
             qDebug() << "[processWorkList] worklist is empty.";
             notifyResult(0, 0);
             break;
         }
+        //
         //debug-------------
         qDebug() << "[processWorkList] work list count: " << workList.count();
         /*foreach (auto iter, workList)
@@ -231,6 +232,7 @@ void MainWindow::processWorkList(bool triggered)
             qDebug() << iter.path;
         }*/
         //------------------
+        //
         analyser->processFileList(workList);
     }
 }

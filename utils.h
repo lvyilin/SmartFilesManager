@@ -33,6 +33,22 @@ enum InterruptionType
     NoInterrupt, AnalyserInterrupt, FileUpdaterInterrupt, TerminateInterrupt
 };
 
-const int MAX_THREAD_COUNT = 10;
+enum ProcessingResult
+{
+    NoException,
+    ProcessAborted,
+    FileNotFoundException,
+    FileAccessException,
+    FileReadException,
+    FileFormatNotSupported,
+    DocxExtractException
+};
+
+//MainWindow
+const int WORKLIST_SIZE = 100;
+//Analyser
+const int MAX_THREAD_NUM = 10;
+//FileUpdater
+const int MAX_FILES_NUMBER = 5000;
 
 #endif // UTILS_H

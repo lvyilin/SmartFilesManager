@@ -22,22 +22,32 @@ void AnalyserThread::run()
     {
         if (abortFlag)
             return;
-        if (processFile(file))
+
+        ProcessingResult result = processFile(file);
+        switch (result)
         {
+        case ProcessAborted:
+            return;
+        case NoException:
             ++successCount;
             mutex.lock();
             dbHelper->setFinish(file, true);
             mutex.unlock();
-        }
-        else
-        {
+            break;
+
+        case FileNotFoundException:
+        case FileAccessException:
+
             ++failCount;
             mutex.lock();
             dbHelper->setValid(file, false);
             mutex.unlock();
+        default:
+            break;
         }
+
+        emit resultReady(successCount, failCount);
     }
-    emit resultReady(successCount, failCount);
 }
 
 void AnalyserThread::abortProgress()
@@ -46,42 +56,31 @@ void AnalyserThread::abortProgress()
     emit aborted();
 }
 
-bool AnalyserThread::processFile(const File &file)
+ProcessingResult AnalyserThread::processFile(const File &file)
 {
     QFileInfo checkFile(file.path);
     if (!(checkFile.exists() && checkFile.isReadable()))
     {
         qDebug() << "【AnalyserThread】file not exist or unreadable!";
-        return false;
-    }
-    if (!isSupportedFormat(file.format))
-    {
-        qDebug() << "【AnalyserThread】not supported file format";
-        return false;
-    }
-    QMimeType mime = mimeDb.mimeTypeForFile(file.name);
-    if (!mime.isValid())
-    {
-        qDebug() << "【AnalyserThread】process file is not a valid format: " << file.name;
-        return false;
+        return FileNotFoundException;
     }
 
-    //文本文件提取文本
+    if (abortFlag) return ProcessAborted;
+
     QString textContent;
     //纯文本文件
-    if (mime.inherits("text/plain"))
+    if (file.format == "txt")
     {
-        if (abortFlag)
-            return false;
         QFile f(file.path);
         if (!f.open(QFile::ReadOnly | QFile::Text))
-            return false;
+            return FileAccessException;
+
         QTextStream in(&f);
-        textContent = in.readAll();
+        textContent = in.readAll();//TODO:可优化，如果文件过大
         if (textContent.isNull())
         {
-            qDebug() << "【Analyser】extract file failed" << file.name;
-            return false;
+            qDebug() << "【Analyser】extract txt file failed" << file.name;
+            return FileReadException;
         }
         f.close();
         qDebug() << "【Analyser】 text file read success! " << file.name;
@@ -89,36 +88,29 @@ bool AnalyserThread::processFile(const File &file)
     //DOCX文件
     else if (file.format == "docx")
     {
-        if (abortFlag)
-            return false;
         textContent = docxExtract(file);
         if (textContent.isNull())
         {
             qDebug() << "【Analyser】extract file failed" << file.name;
-            return false;
+            return DocxExtractException;
         }
     }
-    else;
-    /*QFile saveFile(file.name + ".txt");
-    saveFile.open(QIODevice::WriteOnly | QIODevice::Text);
-    QTextStream out(&saveFile);
-    out << textContent;
-    saveFile.close();*/
-    return true;
-}
+    else return FileFormatNotSupported;
 
-bool AnalyserThread::isSupportedFormat(QString format) const
-{
-    //支持所有纯文本文件
-    if (mimeDb.mimeTypeForFile("*." + format).inherits("text/plain"))
-        return true;
-    else return supportedFormat.contains(format);
+    if (abortFlag) return ProcessAborted;
+//
+//开始对文件内容进行处理
+//
+    FileProduct fileProduct;
+    fileProduct.file = file;
+
+
+
+    return NoException;
 }
 
 QString AnalyserThread::docxExtract(const File &file)
 {
-    if (abortFlag)
-        return QString();
     QuaZip zipper(file.path);
     if (!zipper.open(QuaZip::mdUnzip))
     {
@@ -132,6 +124,9 @@ QString AnalyserThread::docxExtract(const File &file)
         zipper.close();
         return QString();
     }
+
+    if (abortFlag) return QString();
+
     QuaZipFile searchFile(&zipper);
     if (!searchFile.open(QIODevice::ReadOnly))
     {
@@ -141,10 +136,15 @@ QString AnalyserThread::docxExtract(const File &file)
         zipper.close();
         return QString();
     }
+
+    if (abortFlag) return QString();
+
     QByteArray content = searchFile.readAll();
     qDebug() << "【Analyser】extract docx file success! size:" << file.name << content.size();
     searchFile.close();
     zipper.close();
+
+    if (abortFlag) return QString();
 
     QString ret;
     QDomDocument xmlReader("mydoc");
@@ -152,6 +152,7 @@ QString AnalyserThread::docxExtract(const File &file)
     QDomNodeList qnl = xmlReader.elementsByTagName("w:t");
     for (int i = 0; i < qnl.count(); i++)
     {
+        if (abortFlag) return QString();
         ret += qnl.item(i).toElement().text();
     }
     return ret;

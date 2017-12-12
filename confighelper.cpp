@@ -1,5 +1,6 @@
 ﻿#include "confighelper.h"
 #include <qDebug>
+
 ConfigHelper::ConfigHelper(QObject *parent) : QObject(parent)
 {
     settings = new QSettings(

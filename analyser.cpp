@@ -26,7 +26,7 @@ QStringList Analyser::getSupportedFormatsFilter() const
 
 void Analyser::processFileList(const QList<File> &fileList)
 {
-    if (MAX_THREAD_COUNT <= threadCount)
+    if (MAX_THREAD_NUM <= threadCount)
     {
         qDebug() << "[processWorkList] thread number exceeds.";
         emit processFinished(0, 0);

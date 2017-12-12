@@ -15,7 +15,6 @@ FileUpdaterThread::FileUpdaterThread(DBHelper *db, QStringList f, QStringList p,
     abortFlag = false;
 }
 
-const int MAX_FILES_NUMBER = 5000;
 void FileUpdaterThread::run()
 {
     int filesCount = 0;
