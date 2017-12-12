@@ -69,7 +69,7 @@ bool ConfigHelper::isStartAtBoot() const
     return startAtBoot;
 }
 
-ConfigHelper::RunningStrategy ConfigHelper::getRunningStrategy() const
+RunningStrategy ConfigHelper::getRunningStrategy() const
 {
     return runningStrategy;
 }
@@ -112,12 +112,12 @@ bool ConfigHelper::hasLastInterrupted() const
     return !(interruptionType == NoInterrupt);
 }
 
-ConfigHelper::InterruptionType ConfigHelper::getInterruptionType() const
+InterruptionType ConfigHelper::getInterruptionType() const
 {
     return interruptionType;
 }
 
-void ConfigHelper::setInterruptionType(ConfigHelper::InterruptionType it)
+void ConfigHelper::setInterruptionType(InterruptionType it)
 {
     interruptionType = it;
 }

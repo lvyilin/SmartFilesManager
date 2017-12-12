@@ -45,7 +45,7 @@ MainWindow::MainWindow(QWidget *parent) :
     setTrigger();
     //updateFilesList();由用户决定
     if (configHelper->hasLastInterrupted() &&
-            configHelper->getInterruptionType() != ConfigHelper::TerminateInterrupt)
+            configHelper->getInterruptionType() != TerminateInterrupt)
     {
         QMessageBox infoBox;
         infoBox.setText(tr("上次有未完成任务, 是否继续?"));
@@ -57,10 +57,10 @@ MainWindow::MainWindow(QWidget *parent) :
         {
             switch (configHelper->getInterruptionType())
             {
-            case ConfigHelper::FileUpdaterInterrupt:
+            case FileUpdaterInterrupt:
                 updateFilesList();
                 break;
-            case ConfigHelper::AnalyserInterrupt:
+            case AnalyserInterrupt:
                 processWorkList();
             default:
                 break;
@@ -100,7 +100,7 @@ void MainWindow::iconActivated(QSystemTrayIcon::ActivationReason reason)
 
 void MainWindow::readyQuit()
 {
-    configHelper->setInterruptionType(ConfigHelper::NoInterrupt);
+    configHelper->setInterruptionType(NoInterrupt);
     emit quitFileUpdaterThread();
     emit fileUpdaterWait(1000);
     analyser->quitAll();
@@ -127,7 +127,7 @@ void MainWindow::createTrayIcon()
 
 void MainWindow::setTrigger()
 {
-    if (configHelper->getRunningStrategy() == ConfigHelper::TimeTrigger)
+    if (configHelper->getRunningStrategy() == TimeTrigger)
     {
         if (!triggerTimer)
         {
@@ -264,7 +264,7 @@ void MainWindow::updateFilesList(bool renew)
 
 void MainWindow::fileUpdaterInterrupted()
 {
-    configHelper->setInterruptionType(ConfigHelper::FileUpdaterInterrupt);
+    configHelper->setInterruptionType(FileUpdaterInterrupt);
 }
 
 void MainWindow::fileUpdaterFinished()
@@ -274,7 +274,7 @@ void MainWindow::fileUpdaterFinished()
 
 void MainWindow::analyserInterrupted()
 {
-    configHelper->setInterruptionType(ConfigHelper::AnalyserInterrupt);
+    configHelper->setInterruptionType(AnalyserInterrupt);
 }
 
 void MainWindow::showUpdaterResult(const QString &res)

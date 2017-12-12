@@ -2,6 +2,7 @@
 #define CONFIGHELPER_H
 
 #include <QObject>
+#include "utils.h"
 #include <QStringList>
 #include <QSettings>
 #include <QTime>
@@ -10,16 +11,6 @@
 class ConfigHelper : public QObject {
     Q_OBJECT
 public:
-    enum RunningStrategy
-    {
-        CpuTrigger, TimeTrigger
-    };
-
-    enum InterruptionType
-    {
-        NoInterrupt, AnalyserInterrupt, FileUpdaterInterrupt, TerminateInterrupt
-    };
-
     explicit ConfigHelper(QObject *parent = nullptr);
 
     void readSettings();

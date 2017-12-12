@@ -5,18 +5,8 @@
 #include <QSqlDatabase>
 #include <QSqlError>
 #include <QSqlQuery>
-#include <QDateTime>
-struct File
-{
-    QString name;
-    QString format;
-    QString path;
-    qint64 size;
-    QDateTime createTime;
-    QDateTime modifyTime;
-    bool isFinished;
-    bool isValid;
-};
+#include "utils.h"
+
 
 class DBHelper : public QObject {
     Q_OBJECT

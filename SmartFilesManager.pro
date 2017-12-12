@@ -40,7 +40,8 @@ HEADERS += \
     dbhelper.h \
     analyser.h \
     fileupdaterthread.h \
-    analyserthread.h
+    analyserthread.h \
+    utils.h
 
 FORMS += \
         mainwindow.ui \

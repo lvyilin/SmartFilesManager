@@ -8,6 +8,7 @@
 #include <QSet>
 #include <QFileInfo>
 #include <QTimer>
+#include "utils.h"
 #include "confighelper.h"
 #include "dbhelper.h"
 #include "analyser.h"

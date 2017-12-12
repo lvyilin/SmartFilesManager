@@ -2,8 +2,8 @@
 #define ANALYSERTHREAD_H
 
 #include <QThread>
+#include "utils.h"
 #include "dbhelper.h"
-//#include "analyser.h"
 #include "JlCompress.h"
 #include <QFile>
 #include <QDomDocument>

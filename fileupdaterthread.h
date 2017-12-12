@@ -3,7 +3,9 @@
 
 #include <QThread>
 #include <QStringList>
+#include "utils.h"
 #include "dbhelper.h"
+
 class FileUpdaterThread : public QThread {
     Q_OBJECT
 public:

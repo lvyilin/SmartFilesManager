@@ -31,7 +31,7 @@ SettingsDialog::SettingsDialog(ConfigHelper *ch, QWidget *parent) :
     connect(ui->spinBoxScanInterval, SIGNAL(valueChanged(int)), this, SLOT(onChanged()));
     connect(ui->pathView, SIGNAL(clicked(QModelIndex)), this, SLOT(checkRemoveButtonStatus(QModelIndex)));
 
-    if (configHelper->getRunningStrategy() == ConfigHelper::CpuTrigger)
+    if (configHelper->getRunningStrategy() == CpuTrigger)
     {
         ui->radioButtonCpu->setChecked(true);
         emit ui->radioButtonCpu->clicked();

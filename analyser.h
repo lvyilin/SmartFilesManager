@@ -2,14 +2,13 @@
 #define ANALYSER_H
 
 #include <QObject>
-#include "dbhelper.h"
 #include "analyserthread.h"
+#include "utils.h"
 #include <QFile>
 #include <qDebug>
 #include <QList>
 #include <QMutex>
 
-const int  MAX_THREAD_COUNT = 10;
 class Analyser : public QObject {
     Q_OBJECT
 public:

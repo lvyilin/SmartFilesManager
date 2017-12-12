@@ -7,7 +7,7 @@
 #include <QStringList>
 #include <QStack>
 #include <QModelIndex>
-#include <confighelper.h>
+#include "confighelper.h"
 
 namespace Ui {
 class SettingsDialog;
