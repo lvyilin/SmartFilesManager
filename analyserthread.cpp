@@ -4,6 +4,7 @@
 
 #include "analyserthread.h"
 #include <qDebug>
+#include "toolkit.h"
 
 AnalyserThread::AnalyserThread(DBHelper *db, const QStringList &li, const QList<File> &f, QObject *parent) :
     dbHelper(db),
@@ -103,7 +104,7 @@ ProcessingResult AnalyserThread::processFile(const File &file)
 //
     FileProduct fileProduct;
     fileProduct.file = file;
-
+//    fileProduct.contents =
 
 
     return NoException;

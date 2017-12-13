@@ -62,6 +62,12 @@ public:
      */
     void setValid(const File &file, bool valid);
 
+    /**
+     * @brief setFileProduct 设置文件提取文本、分词后的结果
+     * @param fp
+     */
+    void setFileProduct(FileProduct fp);
+
 signals:
 public slots:
 private:
