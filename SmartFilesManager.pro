@@ -31,7 +31,9 @@ SOURCES += \
     dbhelper.cpp \
     analyser.cpp \
     fileupdaterthread.cpp \
-    analyserthread.cpp
+    analyserthread.cpp \
+    analyser.cpp \
+    toolkit.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -41,7 +43,43 @@ HEADERS += \
     analyser.h \
     fileupdaterthread.h \
     analyserthread.h \
-    utils.h
+    utils.h \
+    deps/cppjieba/DictTrie.hpp \
+    deps/cppjieba/FullSegment.hpp \
+    deps/cppjieba/HMMModel.hpp \
+    deps/cppjieba/HMMSegment.hpp \
+    deps/cppjieba/Jieba.hpp \
+    deps/cppjieba/KeywordExtractor.hpp \
+    deps/cppjieba/MixSegment.hpp \
+    deps/cppjieba/MPSegment.hpp \
+    deps/cppjieba/PosTagger.hpp \
+    deps/cppjieba/PreFilter.hpp \
+    deps/cppjieba/QuerySegment.hpp \
+    deps/cppjieba/SegmentBase.hpp \
+    deps/cppjieba/SegmentTagged.hpp \
+    deps/cppjieba/TextRankExtractor.hpp \
+    deps/cppjieba/Trie.hpp \
+    deps/cppjieba/Unicode.hpp \
+    deps/cppjieba/limonp/ArgvContext.hpp \
+    deps/cppjieba/limonp/BlockingQueue.hpp \
+    deps/cppjieba/limonp/BoundedBlockingQueue.hpp \
+    deps/cppjieba/limonp/BoundedQueue.hpp \
+    deps/cppjieba/limonp/Closure.hpp \
+    deps/cppjieba/limonp/Colors.hpp \
+    deps/cppjieba/limonp/Condition.hpp \
+    deps/cppjieba/limonp/Config.hpp \
+    deps/cppjieba/limonp/FileLock.hpp \
+    deps/cppjieba/limonp/ForcePublic.hpp \
+    deps/cppjieba/limonp/LocalVector.hpp \
+    deps/cppjieba/limonp/Logging.hpp \
+    deps/cppjieba/limonp/Md5.hpp \
+    deps/cppjieba/limonp/MutexLock.hpp \
+    deps/cppjieba/limonp/NonCopyable.hpp \
+    deps/cppjieba/limonp/StdExtension.hpp \
+    deps/cppjieba/limonp/StringUtil.hpp \
+    deps/cppjieba/limonp/Thread.hpp \
+    deps/cppjieba/limonp/ThreadPool.hpp \
+    toolkit.h
 
 FORMS += \
         mainwindow.ui \
