@@ -104,8 +104,8 @@ ProcessingResult AnalyserThread::processFile(const File &file)
 //
     FileProduct fileProduct;
     fileProduct.file = file;
-//    fileProduct.contents =
-
+//    fileProduct.contents = textContent;
+    QStringList res = Toolkit::getInstance().getSegment(textContent);
 
     return NoException;
 }
