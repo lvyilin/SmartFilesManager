@@ -105,7 +105,7 @@ ProcessingResult AnalyserThread::processFile(const File &file)
     FileProduct fileProduct;
     fileProduct.file = file;
     fileProduct.contents = textContent;
-    fileProduct.keywords = Toolkit::getInstance().getKeywords(fileProduct.contents);
+    generateKeywords(fileProduct);
 
     QMapIterator<QString, double> i(fileProduct.keywords);
     while (i.hasNext())
@@ -113,7 +113,29 @@ ProcessingResult AnalyserThread::processFile(const File &file)
         i.next();
         qDebug() << i.key() << ": " << i.value() << endl;
     }
+
+
     return NoException;
+}
+
+void AnalyserThread::generateKeywords(FileProduct &fpd)
+{
+    fpd.keywords = Toolkit::getInstance().getKeywords(fpd.contents);
+    QMap<QString, double> filenameMap = Toolkit::getInstance().getKeywords(fpd.file.name);
+    QMapIterator<QString, double> itr(filenameMap);
+    while (itr.hasNext())
+    {
+        itr.next();
+        double weight = itr.value() * FILENAME_WEIGHTED_VARIANCE;
+        if (fpd.keywords.contains(itr.key()))
+        {
+            fpd.keywords[itr.key()] += weight;
+        }
+        else
+        {
+            fpd.keywords[itr.key()] = weight;
+        }
+    }
 }
 
 QString AnalyserThread::docxExtract(const File &file)

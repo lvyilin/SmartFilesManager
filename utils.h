@@ -46,6 +46,7 @@ enum ProcessingResult
 
 //Toolkit
 const size_t NEEDED_TOP_KEYWORDS = 20;
+const double FILENAME_WEIGHTED_VARIANCE = 2.0;
 //MainWindow
 const int WORKLIST_SIZE = 100;
 //Analyser

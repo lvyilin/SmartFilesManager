@@ -25,7 +25,7 @@ QStringList Toolkit::getSegment(QString text)
     return ret;
 }
 
-QMap<QString, double> Toolkit::getKeywords(QString text)
+QMap<QString, double> &Toolkit::getKeywords(QString text)
 {
     std::string s = text.toStdString();
     std::vector<cppjieba::KeywordExtractor::Word> keywordres;
