@@ -226,14 +226,7 @@ void MainWindow::processWorkList(bool triggered)
             break;
         }
         //
-        //debug-------------
         qDebug() << "[processWorkList] work list count: " << workList.count();
-        /*foreach (auto iter, workList)
-        {
-            qDebug() << iter.path;
-        }*/
-        //------------------
-        //
         analyser->processFileList(workList);
     }
 }

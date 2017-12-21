@@ -104,9 +104,15 @@ ProcessingResult AnalyserThread::processFile(const File &file)
 //
     FileProduct fileProduct;
     fileProduct.file = file;
-//    fileProduct.contents =
+    fileProduct.contents = textContent;
+    fileProduct.keywords = Toolkit::getInstance().getKeywords(fileProduct.contents);
 
-
+    QMapIterator<QString, double> i(fileProduct.keywords);
+    while (i.hasNext())
+    {
+        i.next();
+        qDebug() << i.key() << ": " << i.value() << endl;
+    }
     return NoException;
 }
 
