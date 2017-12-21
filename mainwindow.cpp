@@ -1,4 +1,5 @@
-﻿#if defined(_MSC_VER) && (_MSC_VER >= 1600)
+﻿
+#if defined(_MSC_VER) && (_MSC_VER >= 1600)
 #pragma execution_character_set("utf-8")
 #endif    //解决MSVC编译UTF-8(BOM)导致的中文编码问题
 
@@ -24,7 +25,7 @@ MainWindow::MainWindow(QWidget *parent) :
     //ui
     ui->setupUi(this);
     setWindowTitle(QCoreApplication::applicationName());
-//    connect(ui->processButton, SIGNAL(clicked(bool)), this, SLOT(processWorkList()));
+    //    connect(ui->processButton, SIGNAL(clicked(bool)), this, SLOT(processWorkList()));
     //primary init
     configHelper->readSettings();
     settingsDialog = new SettingsDialog(configHelper, this);
@@ -315,8 +316,8 @@ void MainWindow::on_actionAbout_triggered()
     about();
 }
 
-
 void MainWindow::on_processButton_clicked()
 {
     processWorkList();
 }
+

@@ -55,6 +55,7 @@ private slots:
 
     void on_processButton_clicked();
 
+
 private:
     Ui::MainWindow *ui;
 

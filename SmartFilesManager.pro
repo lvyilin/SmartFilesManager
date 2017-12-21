@@ -25,7 +25,6 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         main.cpp \
-        mainwindow.cpp \
     settingsdialog.cpp \
     confighelper.cpp \
     dbhelper.cpp \
@@ -33,10 +32,12 @@ SOURCES += \
     fileupdaterthread.cpp \
     analyserthread.cpp \
     analyser.cpp \
-    toolkit.cpp
+    toolkit.cpp \
+    mainwindow.cpp \
+    graphshowwindow.cpp \
+    wordcloudwindow.cpp
 
 HEADERS += \
-        mainwindow.h \
     settingsdialog.h \
     confighelper.h \
     dbhelper.h \
@@ -79,11 +80,16 @@ HEADERS += \
     deps/cppjieba/limonp/StringUtil.hpp \
     deps/cppjieba/limonp/Thread.hpp \
     deps/cppjieba/limonp/ThreadPool.hpp \
-    toolkit.h
+    toolkit.h \
+    mainwindow.h \
+    graphshowwindow.h \
+    wordcloudwindow.h
 
 FORMS += \
-        mainwindow.ui \
-    settingsdialog.ui
+    settingsdialog.ui \
+    mainwindow.ui \
+    graphshowwindow.ui \
+    wordcloudwindow.ui
 
 RESOURCES += \
     images.qrc
@@ -102,3 +108,5 @@ else:unix: LIBS += -L$$PWD/deps/quazip/ -lquazip
 
 INCLUDEPATH += $$PWD/deps/quazip/include
 DEPENDPATH += $$PWD/deps/quazip/include
+
+DISTFILES +=

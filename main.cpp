@@ -13,6 +13,5 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationName("SmartFilesManager");
     MainWindow mainWindow;
     mainWindow.show();
-
     return app.exec();
 }
