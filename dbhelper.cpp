@@ -116,14 +116,14 @@ void DBHelper::createTable()
                      ")"))
         qDebug() << "labels create false" << query->lastError().text();
     else
-        qDebug() << "table create success";
+        qDebug() << "table create success1";
 
     if (!query->exec("create table if not exists files("
                      "id integer primary key autoincrement NOT NULL,"
                      "name varchar(255) NOT NULL,"
                      "format varchar(10) NOT NULL,"
                      "path varchar(255) NOT NULL UNIQUE,"
-                     "size "
+                     "size"
                      "unsigned big int NOT NULL,"
                      "create_time DATETIME NOT NULL,"
                      "modify_time DATETIME NOT NULL,"
@@ -142,7 +142,14 @@ void DBHelper::createTable()
         qDebug() << "file_relations create false" << query->lastError().text();
     else
         qDebug() << "table create success";
-    query->exec("PRAGMA foreign_keys = ON"); //打开外键约束
+    if (!query->exec("create table if not exists file_keyword(file_id integer,keyword varchar(255),Weights DOUBLE NOT NULL,FOREIGN KEY(file_id) REFERENCES files(id) on delete cascade on update cascade ,constraint pk_t2 primary key (file_id,keyword))"))
+        qDebug() << "file_relations create false" << query->lastError().text();
+    else
+        qDebug() << "table create success";
+    if (!query->exec("PRAGMA foreign_keys = ON"))
+        qDebug() << "foreign_keys didn't open" << query->lastError().text();
+    else
+        qDebug() << "foreign_keys have opened"; //打开外键约束
 }
 
 
@@ -196,3 +203,15 @@ void DBHelper::setValid(const File &file, bool valid)
 {
     query->exec(QString("update files set is_valid = %1 where path = \"%2\" ").arg(valid).arg(file.path));
 }
+
+void DBHelper::setFileProduct(FileProduct fp)
+{
+    QMapIterator<QString, int> JavaStyleMap(fp.keywords);
+    while (JavaStyleMap.hasNext())
+    {
+        QString temp_keyword = JavaStyleMap.next().key();
+        double temp_weight = JavaStyleMap.next().value();
+        query->exec(QString("insert into file_keyword(keyword,weight) values(\"%1\", \"%2\")").arg(temp_keyword).arg(temp_weight));
+    }
+}
+
