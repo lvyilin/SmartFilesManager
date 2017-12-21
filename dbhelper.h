@@ -41,7 +41,8 @@ public:
      * @param num 工作列表文件数目，默认500
      * @return 返回一个包含num个文件的列表
      */
-    QList<File> &getWorkList(const QString &format, int num = 50);
+    QList<File> &getWorkList(const QString &format, int num = 50);//deprecated
+    QList<File> &getWorkList(int num);
 
     /**
      * @brief initlabels 初始化labels表格

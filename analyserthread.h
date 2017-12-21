@@ -32,6 +32,7 @@ private:
 
     QString docxExtract(const File &file);
     ProcessingResult processFile(const File &file);
+
 };
 
 #endif // ANALYSERTHREAD_H

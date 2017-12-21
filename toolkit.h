@@ -3,6 +3,7 @@
 
 #include <QStringList>
 #include "deps/cppjieba/Jieba.hpp"
+#include "utils.h"
 
 const char *const DICT_PATH = "C:/Projects/SmartFilesManager/dict/jieba.dict.utf8";
 const char *const HMM_PATH = "C:/Projects/SmartFilesManager/dict/hmm_model.utf8";
@@ -21,6 +22,7 @@ public:
     Toolkit &operator=(Toolkit &&) = delete;      // Move assign
 
     QStringList getSegment(QString text);
+    QMap<QString, double> getKeywords(QString text);
 
 private:
     Toolkit();

@@ -19,8 +19,8 @@ struct File
 struct FileProduct
 {
     File file;
-    QStringList contents;
-    QMap<QString, int> keywords;
+    QString contents;
+    QMap<QString, double> keywords;
 };
 
 enum RunningStrategy
@@ -44,6 +44,8 @@ enum ProcessingResult
     DocxExtractException
 };
 
+//Toolkit
+const size_t NEEDED_TOP_KEYWORDS = 20;
 //MainWindow
 const int WORKLIST_SIZE = 100;
 //Analyser

@@ -25,6 +25,20 @@ QStringList Toolkit::getSegment(QString text)
     return ret;
 }
 
+QMap<QString, double> Toolkit::getKeywords(QString text)
+{
+    std::string s = text.toStdString();
+    std::vector<cppjieba::KeywordExtractor::Word> keywordres;
+    jieba->extractor.Extract(s, keywordres, NEEDED_TOP_KEYWORDS);
+
+    QMap<QString, double> res;
+    foreach (cppjieba::KeywordExtractor::Word kw, keywordres)
+    {
+        res.insert(QString::fromStdString(kw.word), kw.weight);
+    }
+    return res;
+}
+
 Toolkit::Toolkit()
 {
     jieba = new cppjieba::Jieba(DICT_PATH,
