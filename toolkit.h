@@ -22,8 +22,7 @@ public:
     Toolkit &operator=(Toolkit &&) = delete;      // Move assign
 
     QStringList getSegment(QString text);
-    QMap<QString, double> &getKeywords(QString text);
-
+    QMap<QString, double> getKeywords(QString text);
 private:
     Toolkit();
     cppjieba::Jieba *jieba;

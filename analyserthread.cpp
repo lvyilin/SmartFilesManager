@@ -31,24 +31,20 @@ void AnalyserThread::run()
             return;
         case NoException:
             ++successCount;
-            mutex.lock();
             dbHelper->setFinish(file, true);
-            mutex.unlock();
             break;
 
         case FileNotFoundException:
         case FileAccessException:
-
             ++failCount;
-            mutex.lock();
             dbHelper->setValid(file, false);
-            mutex.unlock();
+            break;
         default:
             break;
         }
 
-        emit resultReady(successCount, failCount);
     }
+    emit resultReady(successCount, failCount);
 }
 
 void AnalyserThread::abortProgress()
@@ -84,7 +80,7 @@ ProcessingResult AnalyserThread::processFile(const File &file)
             return FileReadException;
         }
         f.close();
-        qDebug() << "【Analyser】 text file read success! " << file.name;
+        qDebug() << "【Analyser】 extract txt file success! " << file.name;
     }
     //DOCX文件
     else if (file.format == "docx")
@@ -92,7 +88,7 @@ ProcessingResult AnalyserThread::processFile(const File &file)
         textContent = docxExtract(file);
         if (textContent.isNull())
         {
-            qDebug() << "【Analyser】extract file failed" << file.name;
+            qDebug() << "【Analyser】extract docx file failed" << file.name;
             return DocxExtractException;
         }
     }
@@ -107,19 +103,24 @@ ProcessingResult AnalyserThread::processFile(const File &file)
     fileProduct.contents = textContent;
     generateKeywords(fileProduct);
 
-    QMapIterator<QString, double> i(fileProduct.keywords);
+    /*QMapIterator<QString, double> i(fileProduct.keywords);
     while (i.hasNext())
     {
         i.next();
         qDebug() << i.key() << ": " << i.value() << endl;
-    }
+    }*/
 
 
+    //dbHelper->setFileProduct(fileProduct);
     return NoException;
 }
 
 void AnalyserThread::generateKeywords(FileProduct &fpd)
 {
+    //TODO: qmap use pointer
+
+    qDebug() << "start generate keywords, file: "
+             << fpd.file.name;
     fpd.keywords = Toolkit::getInstance().getKeywords(fpd.contents);
     QMap<QString, double> filenameMap = Toolkit::getInstance().getKeywords(fpd.file.name);
     QMapIterator<QString, double> itr(filenameMap);
@@ -136,6 +137,7 @@ void AnalyserThread::generateKeywords(FileProduct &fpd)
             fpd.keywords[itr.key()] = weight;
         }
     }
+    qDebug() << "generate done";
 }
 
 QString AnalyserThread::docxExtract(const File &file)

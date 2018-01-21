@@ -116,7 +116,7 @@ void DBHelper::createTable()
                      ")"))
         qDebug() << "labels create false" << query->lastError().text();
     else
-        qDebug() << "table create success1";
+        qDebug() << "table create success";
 
     if (!query->exec("create table if not exists files("
                      "id integer primary key autoincrement NOT NULL,"
@@ -206,7 +206,7 @@ void DBHelper::setValid(const File &file, bool valid)
 
 void DBHelper::setFileProduct(FileProduct fp)
 {
-    QMapIterator<QString, int> JavaStyleMap(fp.keywords);
+    QMapIterator<QString, double> JavaStyleMap(fp.keywords);
     while (JavaStyleMap.hasNext())
     {
         QString temp_keyword = JavaStyleMap.next().key();

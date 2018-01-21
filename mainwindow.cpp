@@ -1,5 +1,4 @@
-﻿
-#if defined(_MSC_VER) && (_MSC_VER >= 1600)
+﻿#if defined(_MSC_VER) && (_MSC_VER >= 1600)
 #pragma execution_character_set("utf-8")
 #endif    //解决MSVC编译UTF-8(BOM)导致的中文编码问题
 
@@ -215,20 +214,21 @@ void MainWindow::processWorkList(bool triggered)
     }
     qDebug() << "【processWorkList】 start process work list...";
     ui->statusBar->showMessage(tr("正在处理文件列表..."));
-    //每种格式处理固定个数文件
+
+    //每种格式处理固定个数文件，放在同一worklist
+    QList<File> workList;
     foreach (QString format, analyser->getSupportedFormatsList())
     {
-        workList = dbHelper->getWorkList(format, WORKLIST_SIZE);
-        if (workList.isEmpty())
-        {
-            qDebug() << "[processWorkList] worklist is empty.";
-            notifyResult(0, 0);
-            break;
-        }
-        //
-        qDebug() << "[processWorkList] work list count: " << workList.count();
-        analyser->processFileList(workList);
+        workList.append(dbHelper->getWorkList(format, WORKLIST_SIZE));
     }
+    if (workList.isEmpty())
+    {
+        qDebug() << "[processWorkList] worklist is empty.";
+        notifyResult(0, 0);
+        return;
+    }
+    qDebug() << "[processWorkList] work list count: " << workList.count();
+    analyser->processFileList(workList);
 }
 
 
@@ -314,3 +314,7 @@ void MainWindow::on_processButton_clicked()
     processWorkList();
 }
 
+void MainWindow::on_actionStart_triggered()
+{
+    processWorkList();
+}
