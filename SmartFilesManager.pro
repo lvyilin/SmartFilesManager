@@ -33,9 +33,7 @@ SOURCES += \
     analyserthread.cpp \
     analyser.cpp \
     toolkit.cpp \
-    mainwindow.cpp \
-    graphshowwindow.cpp \
-    wordcloudwindow.cpp
+    mainwindow.cpp
 
 HEADERS += \
     settingsdialog.h \
@@ -81,15 +79,11 @@ HEADERS += \
     deps/cppjieba/limonp/Thread.hpp \
     deps/cppjieba/limonp/ThreadPool.hpp \
     toolkit.h \
-    mainwindow.h \
-    graphshowwindow.h \
-    wordcloudwindow.h
+    mainwindow.h
 
 FORMS += \
     settingsdialog.ui \
-    mainwindow.ui \
-    graphshowwindow.ui \
-    wordcloudwindow.ui
+    mainwindow.ui
 
 RESOURCES += \
     images.qrc

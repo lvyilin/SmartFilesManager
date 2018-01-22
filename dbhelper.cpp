@@ -112,7 +112,7 @@ void DBHelper::createTable()
                      "level int NOT NULL,"
                      "parent int,"
                      "is_leaf bool NOT NULL,"
-                     "view_type varchar(255) NOT NULL"
+                     "type varchar(255) NOT NULL"
                      ")"))
         qDebug() << "labels create false" << query->lastError().text();
     else
@@ -155,42 +155,42 @@ void DBHelper::createTable()
 
 void DBHelper::initLabels()
 {
-    if (!query->exec("insert into labels(name,level,is_leaf,view_type) values(\"格式\",1,0,\"格式视图\")"))
+    if (!query->exec("insert into labels(name,level,is_leaf,type) values(\"格式\",1,0,\"格式视图\")"))
         qDebug() << query->lastError();
-    query->exec("insert into labels(name,level,is_leaf,view_type) values(\"知识图谱\",1,0,\"知识图谱视图\")");
-    query->exec("insert into labels(name,level,parent,is_leaf,view_type) values(\"文档\",2,1,0,\"格式视图\")");
-    query->exec("insert into labels(name,level,parent,is_leaf,view_type) values(\"图片\",2,1,0,\"格式视图\")");
-    query->exec("insert into labels(name,level,parent,is_leaf,view_type) values(\"视频\",2,1,0,\"格式视图\")");
-    query->exec("insert into labels(name,level,parent,is_leaf,view_type) values(\"音频\",2,1,0,\"格式视图\")");
-    query->exec("insert into labels(name,level,parent,is_leaf,view_type) values(\"压缩包\",2,1,0,\"格式视图\")");
-    query->exec("insert into labels(name,level,parent,is_leaf,view_type) values(\"其他\",2,1,0,\"格式视图\")");
-    query->exec("insert into labels(name,level,parent,is_leaf,view_type) values(\"TXT文件\",3,3,1,\"格式视图\")");
-    query->exec("insert into labels(name,level,parent,is_leaf,view_type) values(\"HTML文件\",3,3,1,\"格式视图\")");
-    query->exec("insert into labels(name,level,parent,is_leaf,view_type) values(\"WORD文档文件\",3,3,1,\"格式视图\")");
-    query->exec("insert into labels(name,level,parent,is_leaf,view_type) values(\"WPS文件\",3,3,1,\"格式视图\")");
-    query->exec("insert into labels(name,level,parent,is_leaf,view_type) values(\"POWERPOINT文件\",3,3,1,\"格式视图\")");
-    query->exec("insert into labels(name,level,parent,is_leaf,view_type) values(\"PDF文件\",3,3,1,\"格式视图\")");
-    query->exec("insert into labels(name,level,parent,is_leaf,view_type) values(\"INF文件\",3,3,1,\"格式视图\")");
-    query->exec("insert into labels(name,level,parent,is_leaf,view_type) values(\"BMP文件\",3,4,1,\"格式视图\")");
-    query->exec("insert into labels(name,level,parent,is_leaf,view_type) values(\"JPG、JPEG文件\",3,4,1,\"格式视图\")");
-    query->exec("insert into labels(name,level,parent,is_leaf,view_type) values(\"PNG文件\",3,4,1,\"格式视图\")");
-    query->exec("insert into labels(name,level,parent,is_leaf,view_type) values(\"PSD文件\",3,4,1,\"格式视图\")");
-    query->exec("insert into labels(name,level,parent,is_leaf,view_type) values(\"ICO文件\",3,4,1,\"格式视图\")");
-    query->exec("insert into labels(name,level,parent,is_leaf,view_type) values(\"MP3文件\",3,5,1,\"格式视图\")");
-    query->exec("insert into labels(name,level,parent,is_leaf,view_type) values(\"WAV文件\",3,5,1,\"格式视图\")");
-    query->exec("insert into labels(name,level,parent,is_leaf,view_type) values(\"ACC文件\",3,5,1,\"格式视图\")");
-    query->exec("insert into labels(name,level,parent,is_leaf,view_type) values(\"MID文件\",3,5,1,\"格式视图\")");
-    query->exec("insert into labels(name,level,parent,is_leaf,view_type) values(\"VST文件\",3,5,1,\"格式视图\")");
-    query->exec("insert into labels(name,level,parent,is_leaf,view_type) values(\"AVI文件\",3,6,1,\"格式视图\")");
-    query->exec("insert into labels(name,level,parent,is_leaf,view_type) values(\"DAT文件\",3,6,1,\"格式视图\")");
-    query->exec("insert into labels(name,level,parent,is_leaf,view_type) values(\"ANI文件\",3,6,1,\"格式视图\")");
-    query->exec("insert into labels(name,level,parent,is_leaf,view_type) values(\"MOV文件\",3,6,1,\"格式视图\")");
-    query->exec("insert into labels(name,level,parent,is_leaf,view_type) values(\"MNG文件\",3,6,1,\"格式视图\")");
-    query->exec("insert into labels(name,level,parent,is_leaf,view_type) values(\"JAR文件\",3,7,1,\"格式视图\")");
-    query->exec("insert into labels(name,level,parent,is_leaf,view_type) values(\"APK文件\",3,7,1,\"格式视图\")");
-    query->exec("insert into labels(name,level,parent,is_leaf,view_type) values(\"RAR文件\",3,7,1,\"格式视图\")");
-    query->exec("insert into labels(name,level,parent,is_leaf,view_type) values(\"ZIP文件\",3,7,1,\"格式视图\")");
-    query->exec("insert into labels(name,level,parent,is_leaf,view_type) values(\"IMG文件\",3,7,1,\"格式视图\")");
+    query->exec("insert into labels(name,level,is_leaf,type) values(\"知识图谱\",1,0,\"知识图谱视图\")");
+    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"文档\",2,1,0,\"格式视图\")");
+    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"图片\",2,1,0,\"格式视图\")");
+    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"视频\",2,1,0,\"格式视图\")");
+    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"音频\",2,1,0,\"格式视图\")");
+    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"压缩包\",2,1,0,\"格式视图\")");
+    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"其他\",2,1,0,\"格式视图\")");
+    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"TXT文件\",3,3,1,\"格式视图\")");
+    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"HTML文件\",3,3,1,\"格式视图\")");
+    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"WORD文档文件\",3,3,1,\"格式视图\")");
+    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"WPS文件\",3,3,1,\"格式视图\")");
+    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"POWERPOINT文件\",3,3,1,\"格式视图\")");
+    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"PDF文件\",3,3,1,\"格式视图\")");
+    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"INF文件\",3,3,1,\"格式视图\")");
+    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"BMP文件\",3,4,1,\"格式视图\")");
+    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"JPG、JPEG文件\",3,4,1,\"格式视图\")");
+    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"PNG文件\",3,4,1,\"格式视图\")");
+    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"PSD文件\",3,4,1,\"格式视图\")");
+    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"ICO文件\",3,4,1,\"格式视图\")");
+    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"MP3文件\",3,5,1,\"格式视图\")");
+    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"WAV文件\",3,5,1,\"格式视图\")");
+    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"ACC文件\",3,5,1,\"格式视图\")");
+    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"MID文件\",3,5,1,\"格式视图\")");
+    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"VST文件\",3,5,1,\"格式视图\")");
+    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"AVI文件\",3,6,1,\"格式视图\")");
+    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"DAT文件\",3,6,1,\"格式视图\")");
+    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"ANI文件\",3,6,1,\"格式视图\")");
+    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"MOV文件\",3,6,1,\"格式视图\")");
+    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"MNG文件\",3,6,1,\"格式视图\")");
+    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"JAR文件\",3,7,1,\"格式视图\")");
+    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"APK文件\",3,7,1,\"格式视图\")");
+    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"RAR文件\",3,7,1,\"格式视图\")");
+    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"ZIP文件\",3,7,1,\"格式视图\")");
+    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"IMG文件\",3,7,1,\"格式视图\")");
 }
 
 
@@ -211,7 +211,9 @@ void DBHelper::setFileProduct(FileProduct fp)
     {
         QString temp_keyword = JavaStyleMap.next().key();
         double temp_weight = JavaStyleMap.next().value();
-        query->exec(QString("insert into file_keyword(keyword,weight) values(\"%1\", \"%2\")").arg(temp_keyword).arg(temp_weight));
+        if (query->exec(QString("insert into file_keyword(keyword,weight) values(\"%1\", \"%2\")").arg(temp_keyword).arg(temp_weight)) ||
+                query->exec(QString("insert int file_ketword(file_id) values((SELECT id from files WHERE name=\"%1\"))").arg(fp.file.name)))
+            qDebug() << "setFileProduct Woring!";
     }
 }
 
