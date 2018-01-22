@@ -26,6 +26,12 @@ QStringList Analyser::getSupportedFormatsFilter() const
 
 void Analyser::processFileList(const QList<File> &fileList)
 {
+    if (fileList.isEmpty())
+    {
+        qDebug() << "[processWorkList] worklist is empty.";
+        emit processFinished(0, 0);
+        return;
+    }
     if (MAX_THREAD_NUM <= threadCount)
     {
         qDebug() << "[processWorkList] thread number exceeds.";

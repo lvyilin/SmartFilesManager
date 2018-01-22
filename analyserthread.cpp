@@ -36,6 +36,9 @@ void AnalyserThread::run()
 
         case FileNotFoundException:
         case FileAccessException:
+        case FileReadException:
+        case FileFormatNotSupported:
+        case DocxExtractException:
             ++failCount;
             dbHelper->setValid(file, false);
             break;

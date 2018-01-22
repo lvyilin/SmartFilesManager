@@ -80,11 +80,11 @@ void DBHelper::close()
     db.close();
 }
 
-QList<File> &DBHelper::getWorkList(const QString &format, int num)
+QList<File> &DBHelper::getWorkList(int num)
 {
     unfinishedFile.clear();
     int i = 0;
-    if (!query->exec(QString("select * from files where is_finished = 0 and format = \"%1\" and is_valid = 1 ").arg(format)))
+    if (!query->exec(QString("select * from files where is_finished = 0 and is_valid = 1 ")))
     {
         qDebug() << "【getWorkList】 error: " << query->lastError().text();
         return unfinishedFile;
