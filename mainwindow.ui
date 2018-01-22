@@ -60,13 +60,23 @@
         <item row="1" column="0">
          <widget class="QLineEdit" name="lineEdit"/>
         </item>
-        <item row="3" column="0" alignment="Qt::AlignHCenter|Qt::AlignVCenter">
+        <item row="4" column="0" alignment="Qt::AlignHCenter|Qt::AlignVCenter">
          <widget class="QLabel" name="label_2">
           <property name="styleSheet">
            <string notr="true">font: 15pt &quot;华文中宋&quot;;</string>
           </property>
           <property name="text">
            <string>↑请上方输入信息</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0">
+         <widget class="QPushButton" name="pushButton">
+          <property name="styleSheet">
+           <string notr="true">font: 12pt &quot;华文中宋&quot;;</string>
+          </property>
+          <property name="text">
+           <string>检索</string>
           </property>
          </widget>
         </item>
