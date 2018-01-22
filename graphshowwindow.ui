@@ -127,20 +127,20 @@
         <string>检索文件</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_2">
-        <item row="1" column="0">
-         <widget class="QLineEdit" name="lineEdit">
-          <property name="text">
-           <string/>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="0" alignment="Qt::AlignHCenter|Qt::AlignVCenter">
+        <item row="3" column="0" alignment="Qt::AlignHCenter|Qt::AlignVCenter">
          <widget class="QLabel" name="label_2">
           <property name="styleSheet">
            <string notr="true">font: 15pt &quot;华文中宋&quot;;</string>
           </property>
           <property name="text">
            <string>↑请上方输入信息</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLineEdit" name="lineEdit">
+          <property name="text">
+           <string/>
           </property>
          </widget>
         </item>
@@ -163,6 +163,16 @@
           </property>
           <property name="buddy">
            <cstring></cstring>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QPushButton" name="pushButton">
+          <property name="styleSheet">
+           <string notr="true">font: 12pt &quot;华文中宋&quot;;</string>
+          </property>
+          <property name="text">
+           <string>检索</string>
           </property>
          </widget>
         </item>
