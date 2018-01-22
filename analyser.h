@@ -9,6 +9,7 @@
 #include <QList>
 #include <QMutex>
 
+//用于分配AnalyserThread线程
 class Analyser : public QObject {
     Q_OBJECT
 public:
@@ -16,6 +17,11 @@ public:
 
     QStringList getSupportedFormatsList() const;
     QStringList getSupportedFormatsFilter() const;
+
+    /**
+     * @brief processFileList 为param分配工作线程
+     * @param fileList
+     */
     void processFileList(const QList<File> &fileList);
     int getThreadCount();
     void quitAll();

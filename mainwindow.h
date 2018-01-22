@@ -55,6 +55,7 @@ private slots:
 
     void on_processButton_clicked();
 
+    void on_actionStart_triggered();
 
 private:
     Ui::MainWindow *ui;
@@ -69,7 +70,6 @@ private:
     QMenu *trayIconMenu;
     SettingsDialog *settingsDialog;
     DBHelper *dbHelper;
-    QList<File> workList;
     QTimer *triggerTimer;
     Analyser *analyser;
 };

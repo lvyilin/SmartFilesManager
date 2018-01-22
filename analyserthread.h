@@ -27,7 +27,6 @@ private:
     DBHelper *dbHelper;
     QList<File> fileList;
     QStringList supportedFormat;
-    QMutex mutex;
     bool abortFlag;
 
     QString docxExtract(const File &file);

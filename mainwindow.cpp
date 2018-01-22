@@ -1,5 +1,4 @@
-﻿
-#if defined(_MSC_VER) && (_MSC_VER >= 1600)
+﻿#if defined(_MSC_VER) && (_MSC_VER >= 1600)
 #pragma execution_character_set("utf-8")
 #endif    //解决MSVC编译UTF-8(BOM)导致的中文编码问题
 
@@ -215,19 +214,26 @@ void MainWindow::processWorkList(bool triggered)
     }
     qDebug() << "【processWorkList】 start process work list...";
     ui->statusBar->showMessage(tr("正在处理文件列表..."));
-    //每种格式处理固定个数文件
-    foreach (QString format, analyser->getSupportedFormatsList())
+
+    //获取一次任务最大文件数个文件，再分配到多个线程
+    QList<File> workList(dbHelper->getWorkList(WORKLIST_SIZE * MAX_WORKLIST_NUM));
+    for (size_t i = 0; i < MAX_WORKLIST_NUM; ++i)
     {
-        workList = dbHelper->getWorkList(format, WORKLIST_SIZE);
         if (workList.isEmpty())
         {
-            qDebug() << "[processWorkList] worklist is empty.";
-            notifyResult(0, 0);
+            if (i == 0)
+            {
+                notifyResult(0, 0);
+            }
             break;
         }
-        //
-        qDebug() << "[processWorkList] work list count: " << workList.count();
-        analyser->processFileList(workList);
+        QList<File> singleWorkList;
+        for (size_t j = 0; !workList.isEmpty() && j < WORKLIST_SIZE; ++j)
+        {
+            singleWorkList.append(workList.takeLast());
+        }
+        qDebug() << "[processWorkList] single worklist count: " << singleWorkList.count();
+        analyser->processFileList(singleWorkList);
     }
 }
 
@@ -314,3 +320,7 @@ void MainWindow::on_processButton_clicked()
     processWorkList();
 }
 
+void MainWindow::on_actionStart_triggered()
+{
+    processWorkList();
+}

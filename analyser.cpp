@@ -26,13 +26,18 @@ QStringList Analyser::getSupportedFormatsFilter() const
 
 void Analyser::processFileList(const QList<File> &fileList)
 {
+    if (fileList.isEmpty())
+    {
+        qDebug() << "[processWorkList] worklist is empty.";
+        emit processFinished(0, 0);
+        return;
+    }
     if (MAX_THREAD_NUM <= threadCount)
     {
         qDebug() << "[processWorkList] thread number exceeds.";
         emit processFinished(0, 0);
         return;
     }
-    successCount = failCount = 0;
     AnalyserThread *workerThread = new AnalyserThread(dbHelper, getSupportedFormatsList(), fileList, this);
     ++threadCount;
     connect(workerThread, &AnalyserThread::resultReady, this, &Analyser::handleResult);
@@ -56,10 +61,10 @@ void Analyser::handleResult(int success, int fail)
     successCount += success;
     failCount += fail;
     mutex.unlock();
-    //BUG:可能出现提示多次的情况
     if (threadCount == 0)
     {
         emit processFinished(successCount, failCount);
+        successCount = failCount = 0;
     }
 }
 
@@ -73,12 +78,4 @@ void Analyser::quitAll()
     qDebug() << "[analyser] start quiting thread...total:" << threadCount;
     emit threadQuit();
     emit threadWait(2000);
-    /* qDebug() << "【】" << (*threadList[0])->isRunning();
-     for (int i = 0; i < threadCount; i++)
-     {
-         if (threadList[i] && (*threadList[i])->isRunning())
-         {
-             (*threadList[i])->quit();
-         }
-     }*/
 }

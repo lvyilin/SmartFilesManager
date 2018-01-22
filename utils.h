@@ -49,8 +49,9 @@ const size_t NEEDED_TOP_KEYWORDS = 20;
 const double FILENAME_WEIGHTED_VARIANCE = 2.0;
 //MainWindow
 const int WORKLIST_SIZE = 100;
+const int MAX_WORKLIST_NUM = 10;
 //Analyser
-const int MAX_THREAD_NUM = 10;
+const int MAX_THREAD_NUM = MAX_WORKLIST_NUM;
 //FileUpdater
 const int MAX_FILES_NUMBER = 5000;
 
