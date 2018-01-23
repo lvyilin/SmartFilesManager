@@ -195,36 +195,50 @@ void DBHelper::initLabels()
 
 void DBHelper::setFinish(const File &file, bool finish)
 {
+    mutex.lock();
     query->exec(QString("update files set is_finished = %1 where path = \"%2\"").arg(finish).arg(file.path));
+    mutex.unlock();
 }
 
 void DBHelper::setValid(const File &file, bool valid)
 {
+    mutex.lock();
     query->exec(QString("update files set is_valid = %1 where path = \"%2\" ").arg(valid).arg(file.path));
+    mutex.unlock();
 }
 
-void DBHelper::setFileProduct(FileProduct fp)
+void DBHelper::setFileProduct(const FileProduct &fp)
 {
-    QMapIterator<QString, double> JavaStyleMap(fp.keywords);
-    while (JavaStyleMap.hasNext())
+    mutex.lock();
+
+    query->prepare("select id from files where path=:path");
+    query->bindValue(":path", fp.file.path);
+    query->exec();
+
+    QString fileId = "";
+    if (query->next())
     {
-        QString temp_keyword = JavaStyleMap.next().key();
-        double temp_weight = JavaStyleMap.next().value();
-//        qDebug()<<temp_keyword<<" "<<temp_weight;
-//        query->prepare("insert into file_keyword(file_id,keyword,weight)"
-//                       "values((SELECT id from files WHERE path=:path), :kw, :weight)");
-//        query->bindValue(":path", fp.file.path);
-//        query->bindValue(":kw", temp_keyword);
-//        query->bindValue(":weight", temp_weight);
-//        if (!query->exec())
-//        mutex.lock();
+        fileId = query->value(0).toString();
+    }
+    if (fileId == "")
+    {
+        qDebug() << "cannot find file id" << fp.file.name;
+    }
+
+    QMapIterator<QString, double> map(fp.keywords);
+    while (map.hasNext())
+    {
+        map.next();
+        QString temp_keyword = map.key();
+        double temp_weight = map.value();
         if (!query->exec(
-                    QString("insert into file_keyword(file_id,keyword,weight) values((SELECT id from files WHERE path=\"%1\"), \"%2\", \"%3\")")
-                    .arg(fp.file.path).arg(temp_keyword).arg(temp_weight)))
+                    QString("insert into file_keyword(file_id,keyword,weight) values(\"%1\", \"%2\", \"%3\")")
+                    .arg(fileId).arg(temp_keyword).arg(temp_weight)))
         {
             qDebug() << "save file product failed: " << query->lastError().text();
         }
-//        mutex.unlock();
     }
+
+    mutex.unlock();
 }
 

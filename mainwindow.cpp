@@ -332,7 +332,7 @@ void MainWindow::on_actionStart_triggered()
 
 void MainWindow::onStartInitToolkit()
 {
-    ui->statusBar->showMessage(tr("正在初始化词典..."));
+    ui->statusBar->showMessage(tr("正在初始化词典中..."), 0);
 }
 
 void MainWindow::onFinishInitToolkit()

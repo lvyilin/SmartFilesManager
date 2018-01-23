@@ -67,7 +67,7 @@ public:
      * @brief setFileProduct 设置文件提取文本、分词后的结果
      * @param fp
      */
-    void setFileProduct(FileProduct fp);
+    void setFileProduct(const FileProduct &fp);
 
 signals:
 public slots:
