@@ -114,7 +114,7 @@ ProcessingResult AnalyserThread::processFile(const File &file)
     }*/
 
 
-    //dbHelper->setFileProduct(fileProduct);
+    dbHelper->setFileProduct(fileProduct);
     return NoException;
 }
 

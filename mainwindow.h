@@ -12,6 +12,7 @@
 #include "confighelper.h"
 #include "dbhelper.h"
 #include "analyser.h"
+#include "toolkitinitthread.h"
 
 class SettingsDialog;
 
@@ -56,6 +57,9 @@ private slots:
     void on_processButton_clicked();
 
     void on_actionStart_triggered();
+
+    void onStartInitToolkit();
+    void onFinishInitToolkit();
 
 private:
     Ui::MainWindow *ui;

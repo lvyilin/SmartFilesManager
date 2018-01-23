@@ -33,7 +33,8 @@ SOURCES += \
     analyserthread.cpp \
     analyser.cpp \
     toolkit.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    toolkitinitthread.cpp
 
 HEADERS += \
     settingsdialog.h \
@@ -79,7 +80,8 @@ HEADERS += \
     deps/cppjieba/limonp/Thread.hpp \
     deps/cppjieba/limonp/ThreadPool.hpp \
     toolkit.h \
-    mainwindow.h
+    mainwindow.h \
+    toolkitinitthread.h
 
 FORMS += \
     settingsdialog.ui \

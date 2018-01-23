@@ -6,6 +6,7 @@
 #include <QSqlError>
 #include <QSqlQuery>
 #include "utils.h"
+#include <QMutex>
 
 
 class DBHelper : public QObject {
@@ -76,6 +77,7 @@ private:
     QSqlDatabase db;
     QSqlQuery *query;
     QList<File> unfinishedFile ;
+    QMutex mutex;
 };
 
 #endif // DBHELPER_H

@@ -67,6 +67,11 @@ MainWindow::MainWindow(QWidget *parent) :
             }
         }
     }
+    //init dict
+    ToolkitInitThread *toolkitInitThread =  new ToolkitInitThread(this);
+    connect(toolkitInitThread, &ToolkitInitThread::startInit, this, &MainWindow::onStartInitToolkit);
+    connect(toolkitInitThread, &ToolkitInitThread::finishInit, this, &MainWindow::onFinishInitToolkit);
+    toolkitInitThread->start(QThread::LowPriority);
 }
 
 MainWindow::~MainWindow()
@@ -323,4 +328,14 @@ void MainWindow::on_processButton_clicked()
 void MainWindow::on_actionStart_triggered()
 {
     processWorkList();
+}
+
+void MainWindow::onStartInitToolkit()
+{
+    ui->statusBar->showMessage(tr("正在初始化词典..."));
+}
+
+void MainWindow::onFinishInitToolkit()
+{
+    ui->statusBar->showMessage(tr("词典初始化完成."));
 }

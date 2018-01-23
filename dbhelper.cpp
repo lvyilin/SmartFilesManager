@@ -123,8 +123,7 @@ void DBHelper::createTable()
                      "name varchar(255) NOT NULL,"
                      "format varchar(10) NOT NULL,"
                      "path varchar(255) NOT NULL UNIQUE,"
-                     "size"
-                     "unsigned big int NOT NULL,"
+                     "size unsigned big int NOT NULL,"
                      "create_time DATETIME NOT NULL,"
                      "modify_time DATETIME NOT NULL,"
                      "is_finished BOOLEAN NOT NULL,"
@@ -142,7 +141,7 @@ void DBHelper::createTable()
         qDebug() << "file_relations create false" << query->lastError().text();
     else
         qDebug() << "table create success";
-    if (!query->exec("create table if not exists file_keyword(file_id integer,keyword varchar(255),Weights DOUBLE NOT NULL,FOREIGN KEY(file_id) REFERENCES files(id) on delete cascade on update cascade ,constraint pk_t2 primary key (file_id,keyword))"))
+    if (!query->exec("create table if not exists file_keyword(file_id integer,keyword varchar(255),weight double NOT NULL,FOREIGN KEY(file_id) REFERENCES files(id) on delete cascade on update cascade ,constraint pk_t2 primary key (file_id,keyword))"))
         qDebug() << "file_relations create false" << query->lastError().text();
     else
         qDebug() << "table create success";
@@ -211,9 +210,21 @@ void DBHelper::setFileProduct(FileProduct fp)
     {
         QString temp_keyword = JavaStyleMap.next().key();
         double temp_weight = JavaStyleMap.next().value();
-        if (query->exec(QString("insert into file_keyword(keyword,weight) values(\"%1\", \"%2\")").arg(temp_keyword).arg(temp_weight)) ||
-                query->exec(QString("insert int file_ketword(file_id) values((SELECT id from files WHERE name=\"%1\"))").arg(fp.file.name)))
-            qDebug() << "setFileProduct Woring!";
+//        qDebug()<<temp_keyword<<" "<<temp_weight;
+//        query->prepare("insert into file_keyword(file_id,keyword,weight)"
+//                       "values((SELECT id from files WHERE path=:path), :kw, :weight)");
+//        query->bindValue(":path", fp.file.path);
+//        query->bindValue(":kw", temp_keyword);
+//        query->bindValue(":weight", temp_weight);
+//        if (!query->exec())
+//        mutex.lock();
+        if (!query->exec(
+                    QString("insert into file_keyword(file_id,keyword,weight) values((SELECT id from files WHERE path=\"%1\"), \"%2\", \"%3\")")
+                    .arg(fp.file.path).arg(temp_keyword).arg(temp_weight)))
+        {
+            qDebug() << "save file product failed: " << query->lastError().text();
+        }
+//        mutex.unlock();
     }
 }
 
