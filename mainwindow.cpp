@@ -106,8 +106,10 @@ void MainWindow::iconActivated(QSystemTrayIcon::ActivationReason reason)
 void MainWindow::readyQuit()
 {
     configHelper->setInterruptionType(NoInterrupt);
+
     emit quitFileUpdaterThread();
     emit fileUpdaterWait(1000);
+
     analyser->quitAll();
     dbHelper->close();
     configHelper->close();

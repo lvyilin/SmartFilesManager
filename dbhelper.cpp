@@ -112,7 +112,7 @@ void DBHelper::createTable()
                      "level int NOT NULL,"
                      "parent int,"
                      "is_leaf bool NOT NULL,"
-                     "type varchar(255) NOT NULL"
+                     "type varchar(20) NOT NULL"
                      ")"))
         qDebug() << "labels create false" << query->lastError().text();
     else
