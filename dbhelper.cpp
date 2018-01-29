@@ -109,7 +109,7 @@ void DBHelper::createTable()
     if (!query->exec("create table if not exists labels("
                      "id integer primary key autoincrement NOT NULL,"
                      "name varchar(255) NOT NULL,"
-                     "level int NOT NULL,"
+                     "level int, "
                      "parent int,"
                      "is_leaf bool NOT NULL,"
                      "type varchar(20) NOT NULL"

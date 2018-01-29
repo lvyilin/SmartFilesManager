@@ -91,16 +91,45 @@ RESOURCES += \
     images.qrc
 
 
-win32:CONFIG(release, debug|release): LIBS += -L$$PWD/deps/zlib/ -lzlib
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/deps/zlib/ -lzlibd
-else:unix: LIBS += -L$$PWD/deps/zlib/ -lzlib
+#win32:CONFIG(release, debug|release): LIBS += -L$$PWD/deps/zlib/ -lzlib
+#else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/deps/zlib/ -lzlibd
+win32 {
+    contains(DEFINES, WIN64) {
+        CONFIG(release, debug|release){
+            LIBS += -L$$PWD/deps/zlib/x64/ -lzlib
+        } else {
+            LIBS += -L$$PWD/deps/zlib/x64/ -lzlibd
+        }
+    } else {
+        CONFIG(release, debug|release){
+            LIBS += -L$$PWD/deps/zlib/ -lzlib
+        } else {
+            LIBS += -L$$PWD/deps/zlib/ -lzlibd
+        }
+    }
+}
+
 
 INCLUDEPATH += $$PWD/deps/zlib/include
 DEPENDPATH += $$PWD/deps/zlib/include
 
-win32:CONFIG(release, debug|release): LIBS += -L$$PWD/deps/quazip/ -lquazip
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/deps/quazip/ -lquazipd
-else:unix: LIBS += -L$$PWD/deps/quazip/ -lquazip
+#win32:CONFIG(release, debug|release): LIBS += -L$$PWD/deps/quazip/ -lquazip
+#else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/deps/quazip/ -lquazipd
+win32 {
+    contains(DEFINES, WIN64) {
+        CONFIG(release, debug|release){
+            LIBS += -L$$PWD/deps/quazip/x64/ -lquazip
+        } else {
+            LIBS += -L$$PWD/deps/quazip/x64/ -lquazipd
+        }
+    } else {
+        CONFIG(release, debug|release){
+            LIBS += -L$$PWD/deps/quazip/ -lquazip
+        } else {
+            LIBS += -L$$PWD/deps/quazip/ -lquazipd
+        }
+    }
+}
 
 INCLUDEPATH += $$PWD/deps/quazip/include
 DEPENDPATH += $$PWD/deps/quazip/include
