@@ -71,6 +71,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ToolkitInitThread *toolkitInitThread =  new ToolkitInitThread(this);
     connect(toolkitInitThread, &ToolkitInitThread::startInit, this, &MainWindow::onStartInitToolkit);
     connect(toolkitInitThread, &ToolkitInitThread::finishInit, this, &MainWindow::onFinishInitToolkit);
+    connect(this, &MainWindow::quitWorkingThread, toolkitInitThread, &ToolkitInitThread::quit);
     toolkitInitThread->start(QThread::LowPriority);
 }
 
@@ -107,12 +108,13 @@ void MainWindow::readyQuit()
 {
     configHelper->setInterruptionType(NoInterrupt);
 
-    emit quitFileUpdaterThread();
-    emit fileUpdaterWait(1000);
+    emit quitWorkingThread();
+//    emit fileUpdaterWait();
 
     analyser->quitAll();
     dbHelper->close();
     configHelper->close();
+    this->thread()->wait(1000);
     qDebug() << "Safely exit, Bye!";
     QCoreApplication::quit();
 }
@@ -266,8 +268,8 @@ void MainWindow::updateFilesList(bool renew)
     connect(updateThread, &FileUpdaterThread::finished, this, &MainWindow::fileUpdaterFinished);
     connect(updateThread, &FileUpdaterThread::finished, &QObject::deleteLater);
     connect(updateThread, &FileUpdaterThread::aborted, this, &MainWindow::fileUpdaterInterrupted);
-    connect(this, &MainWindow::fileUpdaterWait, updateThread, &FileUpdaterThread::wait);
-    connect(this, &MainWindow::quitFileUpdaterThread, updateThread, &FileUpdaterThread::abortProgress);
+//    connect(this, &MainWindow::fileUpdaterWait, updateThread, &FileUpdaterThread::wait);
+    connect(this, &MainWindow::quitWorkingThread, updateThread, &FileUpdaterThread::abortProgress);
     updateThread->start();
 }
 

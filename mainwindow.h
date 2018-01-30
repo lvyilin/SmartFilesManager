@@ -28,7 +28,7 @@ public:
     ~MainWindow();
 
 signals:
-    void quitFileUpdaterThread();
+    void quitWorkingThread();
     void fileUpdaterWait(unsigned long time);
 
 protected:
