@@ -29,8 +29,8 @@ MainWindow::MainWindow(QWidget *parent) :
     configHelper->readSettings();
     settingsDialog = new SettingsDialog(configHelper, this);
     dbHelper = new DBHelper(QString("SFM"), QString("sfm.db"), this);
-    if (configHelper->isFirstTimeUsing())
-        dbHelper->initLabels();
+//    if (configHelper->isFirstTimeUsing())
+//        dbHelper->initLabels();
     analyser = new Analyser(dbHelper, this);
     connect(analyser, &Analyser::interrupted, this, &MainWindow::analyserInterrupted);
     connect(analyser, &Analyser::processFinished, this, &MainWindow::notifyResult);

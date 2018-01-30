@@ -104,17 +104,13 @@ ProcessingResult AnalyserThread::processFile(const File &file)
     FileProduct fileProduct;
     fileProduct.file = file;
     fileProduct.contents = textContent;
+
     generateKeywords(fileProduct);
-
-    /*QMapIterator<QString, double> i(fileProduct.keywords);
-    while (i.hasNext())
-    {
-        i.next();
-        qDebug() << i.key() << ": " << i.value() << endl;
-    }*/
-
-
+    if (abortFlag) return ProcessAborted;
     dbHelper->setFileProduct(fileProduct);
+    if (abortFlag) return ProcessAborted;
+    generateFileLabels(fileProduct);
+    if (abortFlag) return ProcessAborted;
     return NoException;
 }
 
@@ -125,9 +121,10 @@ void AnalyserThread::generateKeywords(FileProduct &fpd)
     qDebug() << "start generate keywords, file: "
              << fpd.file.name;
     fpd.keywords = Toolkit::getInstance().getKeywords(fpd.contents);
+    if (abortFlag) return;
     QMap<QString, double> filenameMap = Toolkit::getInstance().getKeywords(fpd.file.name);
     QMapIterator<QString, double> itr(filenameMap);
-    while (itr.hasNext())
+    while (!abortFlag && itr.hasNext())
     {
         itr.next();
         double weight = itr.value() * FILENAME_WEIGHTED_VARIANCE;
@@ -141,6 +138,22 @@ void AnalyserThread::generateKeywords(FileProduct &fpd)
         }
     }
     qDebug() << "generate done";
+}
+
+void AnalyserThread::generateFileLabels(FileProduct &fpd)
+{
+    //TODO: 是否需要再切词?
+    qDebug() << "start generate labels, file: "
+             << fpd.file.name;
+    QMapIterator<QString, double> itr(fpd.keywords);
+    QStringList keywords;
+    while (!abortFlag && itr.hasNext())
+    {
+        itr.next();
+        keywords.append(itr.key());
+    }
+    if (abortFlag)return;
+    dbHelper->setFileLabels(fpd, keywords);
 }
 
 QString AnalyserThread::docxExtract(const File &file)

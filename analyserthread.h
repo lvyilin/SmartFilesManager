@@ -32,6 +32,7 @@ private:
     QString docxExtract(const File &file);
     ProcessingResult processFile(const File &file);
     void generateKeywords(FileProduct &fpd);
+    void generateFileLabels(FileProduct &fpd);
 };
 
 #endif // ANALYSERTHREAD_H

@@ -69,6 +69,8 @@ public:
      */
     void setFileProduct(const FileProduct &fp);
 
+    void setFileLabels(const FileProduct &fp, const QStringList &labels);
+
 signals:
 public slots:
 private:

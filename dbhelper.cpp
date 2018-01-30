@@ -4,6 +4,7 @@
 
 #include "dbhelper.h"
 #include <qDebug>
+
 DBHelper::DBHelper(const QString &conName, const QString &dbName, QObject *parent) : QObject(parent)
 {
     db = QSqlDatabase::addDatabase("QSQLITE", conName); //添加数据库驱动 已制定链接名称
@@ -24,7 +25,7 @@ DBHelper::DBHelper(const QString &conName, const QString &dbName, QObject *paren
 
 bool DBHelper::hasIndex() const
 {
-    query->exec("SELECT name FROM files");
+    query->exec("SELECT name FROM files limit 1");
     if (!query->next())
     {
         return false;
@@ -83,13 +84,12 @@ void DBHelper::close()
 QList<File> &DBHelper::getWorkList(int num)
 {
     unfinishedFile.clear();
-    int i = 0;
-    if (!query->exec(QString("select * from files where is_finished = 0 and is_valid = 1 ")))
+    if (!query->exec(QString("select * from files where is_finished = 0 and is_valid = 1 limit %1").arg(num)))
     {
         qDebug() << "【getWorkList】 error: " << query->lastError().text();
         return unfinishedFile;
     }
-    while (query->next() && i++ < num)
+    while (query->next())
     {
         File temp;
         temp.name = query->value(1).toString();
@@ -132,7 +132,7 @@ void DBHelper::createTable()
     else
         qDebug() << "table create success";
 
-    if (!query->exec("create table if not exists file_labels(files_id integer,label_id integer,FOREIGN KEY(files_id) REFERENCES files(id) on delete cascade on update cascade  ,FOREIGN KEY(label_id) REFERENCES labels(id)on delete cascade on update cascade ,constraint pk_t2 primary key (files_id,label_id))"))
+    if (!query->exec("create table if not exists file_labels(file_id integer,label_id integer,FOREIGN KEY(file_id) REFERENCES files(id) on delete cascade on update cascade ,FOREIGN KEY(label_id) REFERENCES labels(id)on delete cascade on update cascade ,constraint pk_t2 primary key (file_id,label_id))"))
         qDebug() << "file_labels create false" << query->lastError().text();
     else
         qDebug() << "table create success";
@@ -154,7 +154,8 @@ void DBHelper::createTable()
 
 void DBHelper::initLabels()
 {
-    if (!query->exec("insert into labels(name,level,is_leaf,type) values(\"格式\",1,0,\"格式视图\")"))
+    //TODO: 需要init吗?
+    /*if (!query->exec("insert into labels(name,level,is_leaf,type) values(\"格式\",1,0,\"格式视图\")"))
         qDebug() << query->lastError();
     query->exec("insert into labels(name,level,is_leaf,type) values(\"知识图谱\",1,0,\"知识图谱视图\")");
     query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"文档\",2,1,0,\"格式视图\")");
@@ -189,7 +190,7 @@ void DBHelper::initLabels()
     query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"APK文件\",3,7,1,\"格式视图\")");
     query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"RAR文件\",3,7,1,\"格式视图\")");
     query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"ZIP文件\",3,7,1,\"格式视图\")");
-    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"IMG文件\",3,7,1,\"格式视图\")");
+    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"IMG文件\",3,7,1,\"格式视图\")");*/
 }
 
 
@@ -211,11 +212,11 @@ void DBHelper::setFileProduct(const FileProduct &fp)
 {
     mutex.lock();
 
+    QString fileId = "";
+
     query->prepare("select id from files where path=:path");
     query->bindValue(":path", fp.file.path);
     query->exec();
-
-    QString fileId = "";
     if (query->next())
     {
         fileId = query->value(0).toString();
@@ -226,6 +227,10 @@ void DBHelper::setFileProduct(const FileProduct &fp)
     }
 
     QMapIterator<QString, double> map(fp.keywords);
+    if (!db.transaction())
+    {
+        qDebug() << "db transaction unsupported?";
+    }
     while (map.hasNext())
     {
         map.next();
@@ -236,6 +241,70 @@ void DBHelper::setFileProduct(const FileProduct &fp)
                     .arg(fileId).arg(temp_keyword).arg(temp_weight)))
         {
             qDebug() << "save file product failed: " << query->lastError().text();
+        }
+    }
+    if (!db.commit())
+    {
+        qDebug() << "db commit error: " << db.lastError();
+        db.rollback();
+    }
+
+    mutex.unlock();
+}
+
+void DBHelper::setFileLabels(const FileProduct &fp, const QStringList &labels)
+{
+    mutex.lock();
+
+    QString fileId = "";
+
+    query->prepare("select id from files where path=:path");
+    query->bindValue(":path", fp.file.path);
+    query->exec();
+    if (query->next())
+    {
+        fileId = query->value(0).toString();
+    }
+    if (fileId == "")
+    {
+        qDebug() << "cannot find file id" << fp.file.name;
+    }
+
+    foreach (QString label, labels)
+    {
+        query->prepare("select * from labels where name=:name");
+        query->bindValue(":name", label);
+        query->exec();
+        QVector<QPair<int, int>> itemGroup; //单个标签在库中可能出现多次，Pair中first=id,second=parent_id
+        while (query->next())
+        {
+            qDebug() << "label: " << query->value(1).toString();
+            int labelId = query->value(0).toInt();
+            int parentId = query->value(3).toInt();
+            QPair<int, int> item(labelId, parentId);
+            itemGroup.append(item);
+        }
+        foreach (auto item, itemGroup)
+        {
+            int id = item.first;
+            int parentId = item.second;
+            while (true)
+            {
+                query->prepare("insert into file_labels(file_id ,label_id) values(:file_id, :label_id)");
+                query->bindValue(":file_id", fileId);
+                query->bindValue(":label_id", id);
+                query->exec();
+                if (parentId == 0)break;
+                query->prepare("select * from labels where id=:id");
+                query->bindValue("id", parentId);
+                query->exec();
+                if (query->next())
+                {
+                    id = query->value(0).toInt();
+                    parentId = query->value(3).toInt();
+                }
+                else break;
+            }
         }
     }
 
