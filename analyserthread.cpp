@@ -6,9 +6,8 @@
 #include <qDebug>
 #include "toolkit.h"
 
-AnalyserThread::AnalyserThread(DBHelper *db, const QStringList &li, const QList<File> &f, QObject *parent) :
+AnalyserThread::AnalyserThread(DBHelper *db, const QList<File> &f, QObject *parent) :
     dbHelper(db),
-    supportedFormat(li),
     fileList(f),
     QThread(parent)
 {

@@ -19,11 +19,6 @@ QStringList Analyser::getSupportedFormatsList() const
     return supportedFormat;
 }
 
-QStringList Analyser::getSupportedFormatsFilter() const
-{
-    return supportedFormatFilter;
-}
-
 void Analyser::processFileList(const QList<File> &fileList)
 {
     if (fileList.isEmpty())
@@ -38,7 +33,7 @@ void Analyser::processFileList(const QList<File> &fileList)
         emit processFinished(0, 0);
         return;
     }
-    AnalyserThread *workerThread = new AnalyserThread(dbHelper, getSupportedFormatsList(), fileList, this);
+    AnalyserThread *workerThread = new AnalyserThread(dbHelper, fileList, this);
     ++threadCount;
     connect(workerThread, &AnalyserThread::resultReady, this, &Analyser::handleResult);
     connect(workerThread, &AnalyserThread::finished, workerThread, &QObject::deleteLater);

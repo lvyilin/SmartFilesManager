@@ -71,6 +71,8 @@ public:
 
     void setFileLabels(const FileProduct &fp, const QStringList &labels);
 
+    void getAllFiles(QList<File> &list);
+
 signals:
 public slots:
 private:

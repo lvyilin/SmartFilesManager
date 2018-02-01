@@ -13,6 +13,7 @@
 #include "dbhelper.h"
 #include "analyser.h"
 #include "toolkitinitthread.h"
+#include "filetreemodel.h"
 
 class SettingsDialog;
 
@@ -61,6 +62,8 @@ private slots:
     void onStartInitToolkit();
     void onFinishInitToolkit();
 
+    void setupFileTreeView();
+
 private:
     Ui::MainWindow *ui;
 
@@ -76,6 +79,8 @@ private:
     DBHelper *dbHelper;
     QTimer *triggerTimer;
     Analyser *analyser;
+
+    FileTreeModel *fileTreeModel = nullptr;
 };
 
 #endif // MAINWINDOW_H

@@ -23,6 +23,14 @@ struct FileProduct
     QMap<QString, double> keywords;
 };
 
+struct FileResult
+{
+    File file;
+    QMap<QString, double> keywords;
+    QStringList labels;
+    QList<QPair<File, double>> relations;
+};
+
 enum RunningStrategy
 {
     CpuTrigger, TimeTrigger
@@ -44,8 +52,33 @@ enum ProcessingResult
     DocxExtractException
 };
 
+//format
+const static QStringList SUPPORTED_FORMATS = {"docx", "txt"};
+const static QStringList SUPPORTED_FORMATS_FILTER = {"*.*"};
+
+const static QStringList DOCUMENT_FORMATS = {"doc", "docx", "xls", "xlsx", "ppt", "pptx", "odt", "rtf",
+                                             "txt", "pdf", "htm", "html", "tex"
+                                            };
+
+const static QStringList AUDIO_FORMATS = {"3gp",  "aa", "aac", "aax", "act", "aiff", "amr", "ape", "au", "awb",
+                                          "dct", "dss", "dvf", "flac", "gsm", "iklax", "ivs", "m4a", "m4b", "m4p",
+                                          "mmf", "mp3", "mpc", "msv", "ogg", "oga", "mogg", "opus", "ra", "raw",
+                                          "tta", "vox", "wav", "wma", "wv", "8svx"
+                                         };
+
+const static QStringList VIDEO_FORMATS = {"mkv", "flv", "vob", "drc", "gifv", "mng", "avi", "mov",
+                                          "wmv", "yuv", "rm", "rmvb", "asf", "amv", "mp4", "m4v", "mpg", "mp2",
+                                          "mpeg", "mpe", "mpv", "m2v", "svi", "mxf", "roq", "nsv"
+                                         };
+
+const static QStringList IMAGE_FORMATS = {"ani", "bmp", "cal", "fax", "gif", "img", "jbg", "jpe", "jpeg", "jpg",
+                                          "mac", "pbm", "pcd", "pcx", "pct", "pgm", "png", "ppm", "psd", "ras",
+                                          "tga", "tiff", "wmf"
+                                         };
+
+//magic value
 //Toolkit
-const size_t NEEDED_TOP_KEYWORDS = 20;
+const int NEEDED_TOP_KEYWORDS = 20;
 const double FILENAME_WEIGHTED_VARIANCE = 2.0;
 //MainWindow
 const int WORKLIST_SIZE = 100;

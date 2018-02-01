@@ -37,7 +37,6 @@ public slots:
 
 private:
     const QStringList supportedFormat = {"docx", "txt"};
-    const QStringList supportedFormatFilter = {"*.docx", "*.txt"};
     DBHelper *dbHelper;
     int successCount;
     int failCount;

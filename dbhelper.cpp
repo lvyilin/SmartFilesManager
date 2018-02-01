@@ -311,3 +311,21 @@ void DBHelper::setFileLabels(const FileProduct &fp, const QStringList &labels)
     mutex.unlock();
 }
 
+void DBHelper::getAllFiles(QList<File> &list)
+{
+    query->exec("select * from files");
+    list.clear();
+    while (query->next())
+    {
+        File temp;
+        temp.name = query->value(1).toString();
+        temp.format = query->value(2).toString();
+        temp.path = query->value(3).toString();
+        temp.size = query->value(4).toLongLong();
+        temp.createTime = query->value(5).toDateTime();
+        temp.modifyTime = query->value(6).toDateTime();
+        temp.isFinished = query->value(7).toBool();
+        list << temp;
+    }
+}
+

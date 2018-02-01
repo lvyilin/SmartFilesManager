@@ -35,6 +35,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(analyser, &Analyser::interrupted, this, &MainWindow::analyserInterrupted);
     connect(analyser, &Analyser::processFinished, this, &MainWindow::notifyResult);
 
+    //model-view
+    setupFileTreeView();
+
     //tray
     createTrayIcon();
     connect(trayIcon, &QSystemTrayIcon::activated, this, &MainWindow::iconActivated);
@@ -246,7 +249,6 @@ void MainWindow::processWorkList(bool triggered)
     }
 }
 
-
 void MainWindow::updateFilesList(bool renew)
 {
     ui->statusBar->showMessage(tr("正在更新文件列表..."));
@@ -254,18 +256,18 @@ void MainWindow::updateFilesList(bool renew)
     {
         dbHelper->cleanFiles();
     }
-    QStringList formatList = analyser->getSupportedFormatsFilter();
     QStringList pathList;
     for (int i = 0; i < configHelper->pathModel->rowCount(); i++)
     {
         pathList << configHelper->pathModel->item(i)->text();
     }
 
-    FileUpdaterThread *updateThread =  new FileUpdaterThread(dbHelper, formatList, pathList, this);
+    FileUpdaterThread *updateThread =  new FileUpdaterThread(dbHelper, SUPPORTED_FORMATS_FILTER, pathList, this);
     connect(updateThread, &FileUpdaterThread::resultReady, this, &MainWindow::showUpdaterResult);
     connect(updateThread, &FileUpdaterThread::findFilesProgress, this, &MainWindow::showUpdaterProgress);
     connect(updateThread, &FileUpdaterThread::startDbProgress, this, &MainWindow::showUpdaterDbProgress);
     connect(updateThread, &FileUpdaterThread::finished, this, &MainWindow::fileUpdaterFinished);
+    connect(updateThread, &FileUpdaterThread::finished, this, &MainWindow::setupFileTreeView);
     connect(updateThread, &FileUpdaterThread::finished, &QObject::deleteLater);
     connect(updateThread, &FileUpdaterThread::aborted, this, &MainWindow::fileUpdaterInterrupted);
 //    connect(this, &MainWindow::fileUpdaterWait, updateThread, &FileUpdaterThread::wait);
@@ -342,4 +344,25 @@ void MainWindow::onStartInitToolkit()
 void MainWindow::onFinishInitToolkit()
 {
     ui->statusBar->showMessage(tr("词典初始化完成."));
+}
+
+void MainWindow::setupFileTreeView()
+{
+    QList<File> fileList;
+    dbHelper->getAllFiles(fileList);
+    ui->treeView->hide();
+    if (fileTreeModel == nullptr)
+    {
+        fileTreeModel = new FileTreeModel(fileList, this);
+        ui->treeView->setModel(fileTreeModel);
+    }
+    else
+    {
+        FileTreeModel *anotherModel = new FileTreeModel(fileList, this);
+        ui->treeView->setModel(anotherModel);
+        delete fileTreeModel;
+        fileTreeModel = anotherModel;
+    }
+    ui->treeView->header()->hide();
+    ui->treeView->show();
 }

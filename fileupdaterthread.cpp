@@ -50,7 +50,7 @@ void FileUpdaterThread::run()
         return;
     if (MAX_FILES_NUMBER == filesCount)
     {
-        emit resultReady(tr("操作中断! 文件数超过最大限额: %1, 前往\"设置\"更改路径")
+        emit resultReady(tr("操作中断! 文件数超过最大限额: %1.")
                          .arg(MAX_FILES_NUMBER));
     }
     else

@@ -13,7 +13,7 @@
 class AnalyserThread : public QThread {
     Q_OBJECT
 public:
-    explicit AnalyserThread(DBHelper *db, const QStringList &li, const QList<File> &f, QObject *parent = nullptr);
+    explicit AnalyserThread(DBHelper *db, const QList<File> &f, QObject *parent = nullptr);
     void run() override;
 
 signals:
@@ -26,7 +26,6 @@ public slots:
 private:
     DBHelper *dbHelper;
     QList<File> fileList;
-    QStringList supportedFormat;
     bool abortFlag;
 
     QString docxExtract(const File &file);
