@@ -364,6 +364,6 @@ void MainWindow::setupFileTreeView()
         delete fileTreeModel;
         fileTreeModel = anotherModel;
     }
-    ui->treeView->header()->hide();
+//    ui->treeView->header()->hide();
     ui->treeView->show();
 }
