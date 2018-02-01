@@ -228,7 +228,8 @@ void MainWindow::processWorkList(bool triggered)
     ui->statusBar->showMessage(tr("正在处理文件列表..."));
 
     //获取一次任务最大文件数个文件，再分配到多个线程
-    QList<File> workList(dbHelper->getWorkList(WORKLIST_SIZE * MAX_WORKLIST_NUM));
+    QVector<File> workList;
+    dbHelper->getWorkList(workList, WORKLIST_SIZE * MAX_WORKLIST_NUM);
     for (size_t i = 0; i < MAX_WORKLIST_NUM; ++i)
     {
         if (workList.isEmpty())

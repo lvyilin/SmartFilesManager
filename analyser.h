@@ -36,7 +36,6 @@ public slots:
     void analyserInterrupted();
 
 private:
-    const QStringList supportedFormat = {"docx", "txt"};
     DBHelper *dbHelper;
     int successCount;
     int failCount;

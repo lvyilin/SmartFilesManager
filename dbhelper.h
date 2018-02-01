@@ -38,11 +38,11 @@ public:
     void close();
 
     /**
-     * @brief getWorkList 获得工作列表
-     * @param num 工作列表文件数目，默认500
-     * @return 返回一个包含num个文件的列表
+     * @brief getWorkList
+     * @param li
+     * @param maxNum
      */
-    QList<File> &getWorkList(int num = 50);
+    void getWorkList(QVector<File> &li, int maxNum);
 
     /**
      * @brief initlabels 初始化labels表格
@@ -80,7 +80,6 @@ private:
     bool addFile(const File &file);
     QSqlDatabase db;
     QSqlQuery *query;
-    QList<File> unfinishedFile ;
     QMutex mutex;
 };
 

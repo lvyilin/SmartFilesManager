@@ -12,13 +12,6 @@ Analyser::Analyser(DBHelper *dh, QObject *parent) :
     threadCount = 0;
 }
 
-
-
-QStringList Analyser::getSupportedFormatsList() const
-{
-    return supportedFormat;
-}
-
 void Analyser::processFileList(const QList<File> &fileList)
 {
     if (fileList.isEmpty())

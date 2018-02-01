@@ -81,27 +81,28 @@ void DBHelper::close()
     db.close();
 }
 
-QList<File> &DBHelper::getWorkList(int num)
+void DBHelper::getWorkList(QVector<File> &li, int maxNum)
 {
-    unfinishedFile.clear();
-    if (!query->exec(QString("select * from files where is_finished = 0 and is_valid = 1 limit %1").arg(num)))
+    //仅返回可以处理的格式的文件
+    for (QString fmt : SUPPORTED_FORMATS)
     {
-        qDebug() << "【getWorkList】 error: " << query->lastError().text();
-        return unfinishedFile;
+        if (!query->exec(QString("select * from files where format = %1 and is_finished = 0 and is_valid = 1 limit %2").arg(fmt).arg(maxNum)))
+        {
+            qDebug() << "【getWorkList】 error: " << query->lastError().text();
+        }
+        while (query->next())
+        {
+            File temp;
+            temp.name = query->value(1).toString();
+            temp.format = query->value(2).toString();
+            temp.path = query->value(3).toString();
+            temp.size = query->value(4).toLongLong();
+            temp.createTime = query->value(5).toDateTime();
+            temp.modifyTime = query->value(6).toDateTime();
+            temp.isFinished = query->value(7).toBool();
+            li.append(temp);
+        }
     }
-    while (query->next())
-    {
-        File temp;
-        temp.name = query->value(1).toString();
-        temp.format = query->value(2).toString();
-        temp.path = query->value(3).toString();
-        temp.size = query->value(4).toLongLong();
-        temp.createTime = query->value(5).toDateTime();
-        temp.modifyTime = query->value(6).toDateTime();
-        temp.isFinished = query->value(7).toBool();
-        unfinishedFile.append(temp);
-    }
-    return unfinishedFile;
 }
 
 void DBHelper::createTable()
