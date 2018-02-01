@@ -55,8 +55,6 @@ private slots:
     void fileUpdaterFinished();
     void analyserInterrupted();
 
-    void on_processButton_clicked();
-
     void on_actionStart_triggered();
 
     void onStartInitToolkit();

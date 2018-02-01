@@ -1,6 +1,8 @@
 ﻿#include "toolkit.h"
 #include <vector>
 #include <string>
+#include <QFileInfo>
+#include <QDir>
 #include <QDebug>
 
 Toolkit &Toolkit::getInstance()
@@ -41,9 +43,30 @@ QMap<QString, double> Toolkit::getKeywords(QString text)
 
 Toolkit::Toolkit()
 {
-    jieba = new cppjieba::Jieba(DICT_PATH,
-                                HMM_PATH,
-                                USER_DICT_PATH,
-                                IDF_PATH,
-                                STOP_WORD_PATH);
+    const QString DICT_PATH = "/dict/jieba.dict.utf8";
+    const QString HMM_PATH = "/dict/hmm_model.utf8";
+    const QString USER_DICT_PATH = "/dict/user.dict.utf8";
+    const QString IDF_PATH = "/dict/idf.utf8";
+    const QString STOP_WORD_PATH = "/dict/stop_words.utf8";
+
+    QString curPath = QDir::currentPath();
+    QString dictPath = curPath + DICT_PATH;
+    QString prefix;
+    if (QFileInfo(dictPath).exists())
+        prefix = curPath;
+    else
+    {
+        QDir dir = curPath;
+        dir.cd("../SmartFilesManager/");
+        if (dir.exists() && QFileInfo(dir.absolutePath() + DICT_PATH).exists())
+            prefix = dir.absolutePath();
+        else
+            qDebug() << "cannot find toolkit dict!";
+    }
+    jieba = new cppjieba::Jieba(QString(prefix + DICT_PATH).toStdString(),
+                                QString(prefix + HMM_PATH).toStdString(),
+                                QString(prefix + USER_DICT_PATH).toStdString(),
+                                QString(prefix + IDF_PATH).toStdString(),
+                                QString(prefix + STOP_WORD_PATH).toStdString()
+                               );
 }

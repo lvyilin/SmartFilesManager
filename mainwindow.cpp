@@ -327,11 +327,6 @@ void MainWindow::on_actionAbout_triggered()
     about();
 }
 
-void MainWindow::on_processButton_clicked()
-{
-    processWorkList();
-}
-
 void MainWindow::on_actionStart_triggered()
 {
     processWorkList();

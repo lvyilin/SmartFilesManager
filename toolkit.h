@@ -5,12 +5,6 @@
 #include "deps/cppjieba/Jieba.hpp"
 #include "utils.h"
 
-const char *const DICT_PATH = "C:/Projects/SmartFilesManager/dict/jieba.dict.utf8";
-const char *const HMM_PATH = "C:/Projects/SmartFilesManager/dict/hmm_model.utf8";
-const char *const USER_DICT_PATH = "C:/Projects/SmartFilesManager/dict/user.dict.utf8";
-const char *const IDF_PATH = "C:/Projects/SmartFilesManager/dict/idf.utf8";
-const char *const STOP_WORD_PATH = "C:/Projects/SmartFilesManager/dict/stop_words.utf8";
-
 //Singleton class
 class Toolkit {
 
