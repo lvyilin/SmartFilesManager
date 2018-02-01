@@ -98,17 +98,17 @@ RESOURCES += \
 #win32:CONFIG(release, debug|release): LIBS += -L$$PWD/deps/zlib/ -lzlib
 #else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/deps/zlib/ -lzlibd
 win32 {
-    contains(DEFINES, WIN64) {
-        CONFIG(release, debug|release){
-            LIBS += -L$$PWD/deps/zlib/x64/ -lzlib
-        } else {
-            LIBS += -L$$PWD/deps/zlib/x64/ -lzlibd
-        }
-    } else {
+    contains(QT_ARCH, i386) {
         CONFIG(release, debug|release){
             LIBS += -L$$PWD/deps/zlib/ -lzlib
         } else {
             LIBS += -L$$PWD/deps/zlib/ -lzlibd
+        }
+    } else {
+        CONFIG(release, debug|release){
+            LIBS += -L$$PWD/deps/zlib/x64/ -lzlib
+        } else {
+            LIBS += -L$$PWD/deps/zlib/x64/ -lzlibd
         }
     }
 }
@@ -120,17 +120,17 @@ DEPENDPATH += $$PWD/deps/zlib/include
 #win32:CONFIG(release, debug|release): LIBS += -L$$PWD/deps/quazip/ -lquazip
 #else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/deps/quazip/ -lquazipd
 win32 {
-    contains(DEFINES, WIN64) {
-        CONFIG(release, debug|release){
-            LIBS += -L$$PWD/deps/quazip/x64/ -lquazip
-        } else {
-            LIBS += -L$$PWD/deps/quazip/x64/ -lquazipd
-        }
-    } else {
+    contains(QT_ARCH,i386) {
         CONFIG(release, debug|release){
             LIBS += -L$$PWD/deps/quazip/ -lquazip
         } else {
             LIBS += -L$$PWD/deps/quazip/ -lquazipd
+        }
+    } else {
+        CONFIG(release, debug|release){
+            LIBS += -L$$PWD/deps/quazip/x64/ -lquazip
+        } else {
+            LIBS += -L$$PWD/deps/quazip/x64/ -lquazipd
         }
     }
 }
