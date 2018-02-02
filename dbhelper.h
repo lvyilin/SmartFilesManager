@@ -73,6 +73,8 @@ public:
 
     void getAllFiles(QList<File> &list);
 
+    FileResult getFileResult(const File &file);
+
 signals:
 public slots:
 private:

@@ -120,7 +120,7 @@ DEPENDPATH += $$PWD/deps/zlib/include
 #win32:CONFIG(release, debug|release): LIBS += -L$$PWD/deps/quazip/ -lquazip
 #else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/deps/quazip/ -lquazipd
 win32 {
-    contains(QT_ARCH,i386) {
+    contains(QT_ARCH, i386) {
         CONFIG(release, debug|release){
             LIBS += -L$$PWD/deps/quazip/ -lquazip
         } else {
