@@ -62,6 +62,8 @@ private slots:
 
     void setupFileTreeView();
 
+    void on_treeView_clicked(const QModelIndex &index);
+
 private:
     Ui::MainWindow *ui;
 
@@ -69,6 +71,8 @@ private:
     void createTrayIcon();
     void setTrigger();
     void processWorkList(bool triggered = false);
+
+    QString fileSizeHumanReadable(qint64 num);
 
     ConfigHelper *configHelper;
     QSystemTrayIcon *trayIcon;

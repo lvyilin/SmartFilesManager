@@ -33,18 +33,6 @@ bool DBHelper::hasIndex() const
     return true;
 }
 
-bool DBHelper::addFile(const File &file)
-{
-    query->addBindValue(file.name);
-    query->addBindValue(file.format);
-    query->addBindValue(file.path);
-    query->addBindValue(file.size);
-    query->addBindValue(file.createTime.toString(Qt::ISODate));
-    query->addBindValue(file.modifyTime.toString(Qt::ISODate));
-    query->addBindValue(file.isFinished);
-    return query->exec();
-}
-
 void DBHelper::addFiles(const QList<File> &filesList)
 {
     if (!db.transaction())
@@ -297,11 +285,29 @@ void DBHelper::getAllFiles(QList<File> &list)
     }
 }
 
-FileResult DBHelper::getFileResult(const File &file)
+void DBHelper::getFileResult(const QString &path, FileResult &fr)
 {
-    QString fileId = "";
-    FileResult fr;
+    query->prepare("select * from files where path=:path");
+    query->addBindValue(path);
+    query->exec();
+    if (!query->next())
+        return;
+
+    File file;
+    file.name = query->value(1).toString();
+    file.format = query->value(2).toString();
+    file.path = query->value(3).toString();
+    file.size = query->value(4).toLongLong();
+    file.createTime = query->value(5).toDateTime();
+    file.modifyTime = query->value(6).toDateTime();
+    file.isFinished = query->value(7).toBool();
+    file.isValid = query->value(8).toBool();
+
     fr.file = file;
+    QString fileId = query->value(0).toString();
+
+    if (!file.isValid)
+        return;
 
     //get id
     query->prepare("select id from files where path=:path");
@@ -311,10 +317,10 @@ FileResult DBHelper::getFileResult(const File &file)
     {
         fileId = query->value(0).toString();
     }
-    if (fileId == "")
+    if (fileId.isEmpty())
     {
         qDebug() << "cannot find file id" << file.name;
-        return fr;
+        return;
     }
 
     //get keywords

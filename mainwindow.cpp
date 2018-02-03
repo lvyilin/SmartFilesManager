@@ -250,6 +250,22 @@ void MainWindow::processWorkList(bool triggered)
     }
 }
 
+QString MainWindow::fileSizeHumanReadable(qint64 num)
+{
+    QStringList list;
+    list << "KB" << "MB" << "GB" << "TB";
+
+    QStringListIterator i(list);
+    QString unit("bytes");
+
+    while (num >= 1024.0 && i.hasNext())
+    {
+        unit = i.next();
+        num /= 1024.0;
+    }
+    return QString().setNum((float)num, 'f', 2) + " " + unit;
+}
+
 void MainWindow::updateFilesList(bool renew)
 {
     ui->statusBar->showMessage(tr("正在更新文件列表..."));
@@ -359,6 +375,64 @@ void MainWindow::setupFileTreeView()
         delete fileTreeModel;
         fileTreeModel = anotherModel;
     }
-//    ui->treeView->header()->hide();
     ui->treeView->show();
+}
+
+void MainWindow::on_treeView_clicked(const QModelIndex &index)
+{
+    ui->tableWidgetAttr->clear();
+    ui->listWidgetField->clear();
+    ui->listWidgetKw->clear();
+    ui->tableWidgetLabel->clear();
+    ui->tableWidgetRelation->clear();
+
+    FileItem *item = static_cast<FileItem *>(index.internalPointer());
+    QString path = item->data(1).toString();
+    if (path.isEmpty())
+        return;
+    FileResult fr;
+    dbHelper->getFileResult(path, fr);
+
+    ui->tableWidgetAttr->setColumnCount(2);
+    ui->tableWidgetAttr->setRowCount(6);
+
+    int fontHeight = ui->tableWidgetAttr->fontMetrics().height();
+    int fontWidth = ui->tableWidgetAttr->fontMetrics().width("修改日期--");
+    ui->tableWidgetAttr->horizontalHeader()->setStretchLastSection(true);//header宽度自适应
+    for (int i = 0; i < 6; ++i)
+        ui->tableWidgetAttr->setRowHeight(i, fontHeight * 1.2);
+    ui->tableWidgetAttr->setColumnWidth(0, fontWidth);
+
+    QTableWidgetItem *witem;
+    ui->tableWidgetAttr->setItem(0, 0, new QTableWidgetItem(QString("名称")));
+    witem = new QTableWidgetItem(fr.file.name);
+    witem->setToolTip(fr.file.name);
+    ui->tableWidgetAttr->setItem(0, 1, witem);
+
+    ui->tableWidgetAttr->setItem(1, 0, new QTableWidgetItem(QString("类型")));
+    witem = new QTableWidgetItem(fr.file.format);
+    ui->tableWidgetAttr->setItem(1, 1, witem);
+
+    ui->tableWidgetAttr->setItem(2, 0, new QTableWidgetItem(QString("路径")));
+    witem = new QTableWidgetItem(fr.file.path);
+    witem->setToolTip(fr.file.path);
+    ui->tableWidgetAttr->setItem(2, 1, witem);
+
+    ui->tableWidgetAttr->setItem(3, 0, new QTableWidgetItem(QString("大小")));
+    witem = new QTableWidgetItem(fileSizeHumanReadable(fr.file.size));
+    ui->tableWidgetAttr->setItem(3, 1, witem);
+
+    ui->tableWidgetAttr->setItem(4, 0, new QTableWidgetItem(QString("创建日期")));
+    witem = new QTableWidgetItem(
+        fr.file.createTime.toString(Qt::SystemLocaleLongDate));
+    witem->setToolTip(fr.file.createTime.toString(Qt::SystemLocaleLongDate));
+    ui->tableWidgetAttr->setItem(4, 1, witem);
+
+    ui->tableWidgetAttr->setItem(5, 0, new QTableWidgetItem(QString("修改日期")));
+    witem = new QTableWidgetItem(
+        fr.file.modifyTime.toString(Qt::SystemLocaleLongDate));
+    witem->setToolTip(fr.file.modifyTime.toString(Qt::SystemLocaleLongDate));
+    ui->tableWidgetAttr->setItem(5, 1, witem);
+
+    //TODO: other view goes here
 }

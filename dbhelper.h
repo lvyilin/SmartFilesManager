@@ -73,13 +73,12 @@ public:
 
     void getAllFiles(QList<File> &list);
 
-    FileResult getFileResult(const File &file);
+    void getFileResult(const QString &path, FileResult &fr);
 
 signals:
 public slots:
 private:
     void createTable();
-    bool addFile(const File &file);
     QSqlDatabase db;
     QSqlQuery *query;
     QMutex mutex;

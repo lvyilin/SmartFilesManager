@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>678</width>
-    <height>484</height>
+    <width>692</width>
+    <height>550</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -44,18 +44,12 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="0">
-           <widget class="QListView" name="listView"/>
-          </item>
           <item row="2" column="0">
            <widget class="QLabel" name="label_4">
             <property name="text">
              <string>领域信息</string>
             </property>
            </widget>
-          </item>
-          <item row="3" column="0">
-           <widget class="QListView" name="listView_2"/>
           </item>
           <item row="4" column="0">
            <widget class="QLabel" name="label_5">
@@ -64,8 +58,48 @@
             </property>
            </widget>
           </item>
+          <item row="3" column="0">
+           <widget class="QListWidget" name="listWidgetField"/>
+          </item>
           <item row="5" column="0">
-           <widget class="QListView" name="listView_3"/>
+           <widget class="QListWidget" name="listWidgetKw"/>
+          </item>
+          <item row="1" column="0">
+           <widget class="QTableWidget" name="tableWidgetAttr">
+            <property name="sizeAdjustPolicy">
+             <enum>QAbstractScrollArea::AdjustIgnored</enum>
+            </property>
+            <property name="editTriggers">
+             <set>QAbstractItemView::NoEditTriggers</set>
+            </property>
+            <property name="selectionMode">
+             <enum>QAbstractItemView::SingleSelection</enum>
+            </property>
+            <property name="selectionBehavior">
+             <enum>QAbstractItemView::SelectRows</enum>
+            </property>
+            <property name="showGrid">
+             <bool>false</bool>
+            </property>
+            <property name="rowCount">
+             <number>0</number>
+            </property>
+            <property name="columnCount">
+             <number>0</number>
+            </property>
+            <attribute name="horizontalHeaderVisible">
+             <bool>false</bool>
+            </attribute>
+            <attribute name="horizontalHeaderHighlightSections">
+             <bool>false</bool>
+            </attribute>
+            <attribute name="verticalHeaderVisible">
+             <bool>false</bool>
+            </attribute>
+            <attribute name="verticalHeaderHighlightSections">
+             <bool>false</bool>
+            </attribute>
+           </widget>
           </item>
          </layout>
         </item>
@@ -107,9 +141,6 @@
             </item>
            </layout>
           </item>
-          <item row="1" column="0">
-           <widget class="QTableView" name="tableView"/>
-          </item>
           <item row="2" column="0">
            <widget class="QLabel" name="label_8">
             <property name="text">
@@ -118,7 +149,10 @@
            </widget>
           </item>
           <item row="3" column="0">
-           <widget class="QTableView" name="tableView_2"/>
+           <widget class="QTableWidget" name="tableWidgetLabel"/>
+          </item>
+          <item row="1" column="0">
+           <widget class="QTableWidget" name="tableWidgetRelation"/>
           </item>
          </layout>
         </item>
@@ -199,7 +233,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>678</width>
+     <width>692</width>
      <height>23</height>
     </rect>
    </property>
