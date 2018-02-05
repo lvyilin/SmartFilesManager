@@ -29,8 +29,8 @@ MainWindow::MainWindow(QWidget *parent) :
     configHelper->readSettings();
     settingsDialog = new SettingsDialog(configHelper, this);
     dbHelper = new DBHelper(QString("SFM"), QString("sfm.db"), this);
-//    if (configHelper->isFirstTimeUsing())
-//        dbHelper->initLabels();
+    //    if (configHelper->isFirstTimeUsing())
+    //        dbHelper->initLabels();
     analyser = new Analyser(dbHelper, this);
     connect(analyser, &Analyser::interrupted, this, &MainWindow::analyserInterrupted);
     connect(analyser, &Analyser::processFinished, this, &MainWindow::notifyResult);
@@ -112,7 +112,7 @@ void MainWindow::readyQuit()
     configHelper->setInterruptionType(NoInterrupt);
 
     emit quitWorkingThread();
-//    emit fileUpdaterWait();
+    //    emit fileUpdaterWait();
 
     analyser->quitAll();
     dbHelper->close();
@@ -287,7 +287,7 @@ void MainWindow::updateFilesList(bool renew)
     connect(updateThread, &FileUpdaterThread::finished, this, &MainWindow::setupFileTreeView);
     connect(updateThread, &FileUpdaterThread::finished, &QObject::deleteLater);
     connect(updateThread, &FileUpdaterThread::aborted, this, &MainWindow::fileUpdaterInterrupted);
-//    connect(this, &MainWindow::fileUpdaterWait, updateThread, &FileUpdaterThread::wait);
+    //    connect(this, &MainWindow::fileUpdaterWait, updateThread, &FileUpdaterThread::wait);
     connect(this, &MainWindow::quitWorkingThread, updateThread, &FileUpdaterThread::abortProgress);
     updateThread->start();
 }
@@ -383,7 +383,7 @@ void MainWindow::on_treeView_clicked(const QModelIndex &index)
     ui->tableWidgetAttr->clear();
     ui->listWidgetField->clear();
     ui->listWidgetKw->clear();
-    ui->tableWidgetLabel->clear();
+    ui->listWidgetLabel->clear();
     ui->tableWidgetRelation->clear();
 
     FileItem *item = static_cast<FileItem *>(index.internalPointer());
@@ -393,6 +393,7 @@ void MainWindow::on_treeView_clicked(const QModelIndex &index)
     FileResult fr;
     dbHelper->getFileResult(path, fr);
 
+    //attribute view
     ui->tableWidgetAttr->setColumnCount(2);
     ui->tableWidgetAttr->setRowCount(6);
 
@@ -434,5 +435,28 @@ void MainWindow::on_treeView_clicked(const QModelIndex &index)
     witem->setToolTip(fr.file.modifyTime.toString(Qt::SystemLocaleLongDate));
     ui->tableWidgetAttr->setItem(5, 1, witem);
 
+    //field view
+    for (QPair<QString, QString> label : fr.labels)
+    {
+        if (label.second == "field")
+        {
+            ui->listWidgetField->addItem(new QListWidgetItem(label.first));
+        }
+    }
+
+    //keyword view
+    for (QPair<QString, QString> label : fr.labels)
+    {
+        if (label.second == "keyword")
+        {
+            ui->listWidgetKw->addItem(new QListWidgetItem(label.first));
+        }
+    }
+
+    //label view
+    for (QPair<QString, QString> label : fr.labels)
+    {
+        ui->listWidgetLabel->addItem(new QListWidgetItem(label.first));
+    }
     //TODO: other view goes here
 }

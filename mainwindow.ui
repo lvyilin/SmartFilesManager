@@ -59,7 +59,11 @@
            </widget>
           </item>
           <item row="3" column="0">
-           <widget class="QListWidget" name="listWidgetField"/>
+           <widget class="QListWidget" name="listWidgetField">
+            <property name="editTriggers">
+             <set>QAbstractItemView::NoEditTriggers</set>
+            </property>
+           </widget>
           </item>
           <item row="5" column="0">
            <widget class="QListWidget" name="listWidgetKw"/>
@@ -148,11 +152,11 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="0">
-           <widget class="QTableWidget" name="tableWidgetLabel"/>
-          </item>
           <item row="1" column="0">
            <widget class="QTableWidget" name="tableWidgetRelation"/>
+          </item>
+          <item row="3" column="0">
+           <widget class="QListWidget" name="listWidgetLabel"/>
           </item>
          </layout>
         </item>
@@ -234,7 +238,7 @@
      <x>0</x>
      <y>0</y>
      <width>692</width>
-     <height>23</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu">

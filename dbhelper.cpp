@@ -125,7 +125,7 @@ void DBHelper::createTable()
     else
         qDebug() << "table create success";
 
-    if (!query->exec("create table if not exists file_labels(file_id integer,label_id integer,FOREIGN KEY(file_id) REFERENCES files(id) on delete cascade on update cascade ,FOREIGN KEY(label_id) REFERENCES labels(id)on delete cascade on update cascade ,constraint pk_t2 primary key (file_id,label_id))"))
+    if (!query->exec("create table if not exists file_labels(file_id integer,label_id integer,FOREIGN KEY(file_id) REFERENCES files(id) on delete cascade on update cascade ,FOREIGN KEY(label_id) REFERENCES labels(id), constraint pk_t2 primary key (file_id,label_id))"))
         qDebug() << "file_labels create false" << query->lastError().text();
     else
         qDebug() << "table create success";
@@ -240,7 +240,7 @@ void DBHelper::setFileLabels(const FileProduct &fp, const QStringList &labels)
             QPair<int, int> item(labelId, parentId);
             itemGroup.append(item);
         }
-        foreach (auto item, itemGroup)
+        for (QPair<int, int> item : itemGroup)
         {
             int id = item.first;
             int parentId = item.second;
@@ -252,7 +252,7 @@ void DBHelper::setFileLabels(const FileProduct &fp, const QStringList &labels)
                 query->exec();
                 if (parentId == 0)break;
                 query->prepare("select * from labels where id=:id");
-                query->bindValue("id", parentId);
+                query->bindValue(":id", parentId);
                 query->exec();
                 if (query->next())
                 {
@@ -333,12 +333,12 @@ void DBHelper::getFileResult(const QString &path, FileResult &fr)
     }
 
     //get labels
-    query->prepare("select name from labels where id in(select label_id from file_labels where file_id=:id)");
+    query->prepare("select name, type from labels where id in(select label_id from file_labels where file_id=:id)");
     query->bindValue(":id", fileId);
     query->exec();
     while (query->next())
     {
-        fr.labels << query->value(0).toString();
+        fr.labels << QPair<QString, QString>(query->value(0).toString(), query->value(1).toString());
     }
 
     //get relations
