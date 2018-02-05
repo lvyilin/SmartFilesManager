@@ -361,7 +361,7 @@ void MainWindow::onFinishInitToolkit()
 void MainWindow::setupFileTreeView()
 {
     QList<File> fileList;
-    dbHelper->getAllFiles(fileList);
+    dbHelper->getAllFiles(fileList, QList<int>());
     ui->treeView->hide();
     if (fileTreeModel == nullptr)
     {
@@ -391,7 +391,7 @@ void MainWindow::on_treeView_clicked(const QModelIndex &index)
     if (path.isEmpty())
         return;
     FileResult fr;
-    dbHelper->getFileResult(path, fr);
+    dbHelper->getFileResultByPath(path, fr);
 
     //attribute view
     ui->tableWidgetAttr->setColumnCount(2);

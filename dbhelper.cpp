@@ -144,13 +144,21 @@ void DBHelper::createTable()
         qDebug() << "foreign_keys have opened"; //打开外键约束
 }
 
-
-void DBHelper::initLabels()
+int DBHelper::getFileId(const QString &path)
 {
+    query->prepare("select id from files where path=:path");
+    query->bindValue(":path", path);
+    query->exec();
+    if (query->next())
+    {
+        return query->value(0).toInt();
+    }
+
+    qDebug() << "cannot find file id" << path;
+    return 0;
 }
 
-
-void DBHelper::setFinish(const File &file, bool finish)
+void DBHelper::setFinished(const File &file, bool finish)
 {
     mutex.lock();
     query->exec(QString("update files set is_finished = %1 where path = \"%2\"").arg(finish).arg(file.path));
@@ -168,19 +176,7 @@ void DBHelper::setFileProduct(const FileProduct &fp)
 {
     mutex.lock();
 
-    QString fileId = "";
-
-    query->prepare("select id from files where path=:path");
-    query->bindValue(":path", fp.file.path);
-    query->exec();
-    if (query->next())
-    {
-        fileId = query->value(0).toString();
-    }
-    if (fileId == "")
-    {
-        qDebug() << "cannot find file id" << fp.file.name;
-    }
+    int fileId = getFileId(fp.file.path);
 
     QMapIterator<QString, double> map(fp.keywords);
     if (!db.transaction())
@@ -193,7 +189,7 @@ void DBHelper::setFileProduct(const FileProduct &fp)
         QString temp_keyword = map.key();
         double temp_weight = map.value();
         if (!query->exec(
-                    QString("insert into file_keywords(file_id,keyword,weight) values(\"%1\", \"%2\", \"%3\")")
+                    QString("insert into file_keywords(file_id,keyword,weight) values(%1, \"%2\", \"%3\")")
                     .arg(fileId).arg(temp_keyword).arg(temp_weight)))
         {
             qDebug() << "save file product failed: " << query->lastError().text();
@@ -211,20 +207,7 @@ void DBHelper::setFileProduct(const FileProduct &fp)
 void DBHelper::setFileLabels(const FileProduct &fp, const QStringList &labels)
 {
     mutex.lock();
-
-    QString fileId = "";
-
-    query->prepare("select id from files where path=:path");
-    query->bindValue(":path", fp.file.path);
-    query->exec();
-    if (query->next())
-    {
-        fileId = query->value(0).toString();
-    }
-    if (fileId == "")
-    {
-        qDebug() << "cannot find file id" << fp.file.name;
-    }
+    int fileId = getFileId(fp.file.path);
 
     foreach (QString label, labels)
     {
@@ -234,7 +217,6 @@ void DBHelper::setFileLabels(const FileProduct &fp, const QStringList &labels)
         QVector<QPair<int, int>> itemGroup; //单个标签在库中可能出现多次，Pair中first=id,second=parent_id
         while (query->next())
         {
-            qDebug() << "label: " << query->value(1).toString();
             int labelId = query->value(0).toInt();
             int parentId = query->value(3).toInt();
             QPair<int, int> item(labelId, parentId);
@@ -267,10 +249,30 @@ void DBHelper::setFileLabels(const FileProduct &fp, const QStringList &labels)
     mutex.unlock();
 }
 
-void DBHelper::getAllFiles(QList<File> &list)
+void DBHelper::getFileAndIdByPath(const QString &path, File &file, int &id)
+{
+    query->prepare("select * from files where path=:path");
+    query->addBindValue(path);
+    query->exec();
+    if (!query->next())
+        return;
+
+    id = query->value(0).toInt();
+    file.name = query->value(1).toString();
+    file.format = query->value(2).toString();
+    file.path = query->value(3).toString();
+    file.size = query->value(4).toLongLong();
+    file.createTime = query->value(5).toDateTime();
+    file.modifyTime = query->value(6).toDateTime();
+    file.isFinished = query->value(7).toBool();
+    file.isValid = query->value(8).toBool();
+}
+
+void DBHelper::getAllFiles(QList<File> &list, QList<int> &idList)
 {
     query->exec("select * from files");
     list.clear();
+    idList.clear();
     while (query->next())
     {
         File temp;
@@ -281,48 +283,27 @@ void DBHelper::getAllFiles(QList<File> &list)
         temp.createTime = query->value(5).toDateTime();
         temp.modifyTime = query->value(6).toDateTime();
         temp.isFinished = query->value(7).toBool();
+        idList << query->value(0).toInt();
         list << temp;
     }
 }
 
-void DBHelper::getFileResult(const QString &path, FileResult &fr)
+void DBHelper::getFileResultByPath(const QString &path, FileResult &fr)
 {
-    query->prepare("select * from files where path=:path");
-    query->addBindValue(path);
-    query->exec();
-    if (!query->next())
-        return;
 
     File file;
-    file.name = query->value(1).toString();
-    file.format = query->value(2).toString();
-    file.path = query->value(3).toString();
-    file.size = query->value(4).toLongLong();
-    file.createTime = query->value(5).toDateTime();
-    file.modifyTime = query->value(6).toDateTime();
-    file.isFinished = query->value(7).toBool();
-    file.isValid = query->value(8).toBool();
-
-    fr.file = file;
-    QString fileId = query->value(0).toString();
+    int fileId;
+    getFileAndIdByPath(path, file, fileId);
 
     if (!file.isValid)
         return;
 
-    //get id
-    query->prepare("select id from files where path=:path");
-    query->bindValue(":path", file.path);
-    query->exec();
-    if (query->next())
-    {
-        fileId = query->value(0).toString();
-    }
-    if (fileId.isEmpty())
-    {
-        qDebug() << "cannot find file id" << file.name;
-        return;
-    }
+    fr.file = file;
+    getFileResultById(fr, fileId);
+}
 
+void DBHelper::getFileResultById(FileResult &fr, int fileId)
+{
     //get keywords
     query->prepare("select * from file_keywords where file_id=:id");
     query->bindValue(":id", fileId);
@@ -344,4 +325,19 @@ void DBHelper::getFileResult(const QString &path, FileResult &fr)
     //get relations
     //TODO
 }
+
+void DBHelper::getFinishedFileResults(QList<FileResult> &frs)
+{
+    QList<File> list;
+    QList<int> idList;
+    getAllFiles(list, idList);
+    for (int i = 0; i < list.count(); ++i)
+    {
+        FileResult fr;
+        fr.file = list[i];
+        getFileResultById(fr, idList[i]);
+        frs << fr;
+    }
+}
+
 
