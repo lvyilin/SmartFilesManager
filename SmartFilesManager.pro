@@ -36,7 +36,11 @@ SOURCES += \
     mainwindow.cpp \
     toolkitinitthread.cpp \
     filetreemodel.cpp \
-    fileitem.cpp
+    fileitem.cpp \
+    graph.cpp \
+    node.cpp \
+    edge.cpp \
+    wordcloud.cpp
 
 HEADERS += \
     settingsdialog.h \
@@ -85,7 +89,11 @@ HEADERS += \
     mainwindow.h \
     toolkitinitthread.h \
     filetreemodel.h \
-    fileitem.h
+    fileitem.h \
+    graph.h \
+    edge.h \
+    node.h \
+    wordcloud.h
 
 FORMS += \
     settingsdialog.ui \

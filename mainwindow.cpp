@@ -29,8 +29,8 @@ MainWindow::MainWindow(QWidget *parent) :
     configHelper->readSettings();
     settingsDialog = new SettingsDialog(configHelper, this);
     dbHelper = new DBHelper(QString("SFM"), QString("sfm.db"), this);
-//    if (configHelper->isFirstTimeUsing())
-//        dbHelper->initLabels();
+    //    if (configHelper->isFirstTimeUsing())
+    //        dbHelper->initLabels();
     analyser = new Analyser(dbHelper, this);
     connect(analyser, &Analyser::interrupted, this, &MainWindow::analyserInterrupted);
     connect(analyser, &Analyser::processFinished, this, &MainWindow::notifyResult);
@@ -112,7 +112,7 @@ void MainWindow::readyQuit()
     configHelper->setInterruptionType(NoInterrupt);
 
     emit quitWorkingThread();
-//    emit fileUpdaterWait();
+    //    emit fileUpdaterWait();
 
     analyser->quitAll();
     dbHelper->close();
@@ -271,7 +271,7 @@ void MainWindow::updateFilesList(bool renew)
     connect(updateThread, &FileUpdaterThread::finished, this, &MainWindow::setupFileTreeView);
     connect(updateThread, &FileUpdaterThread::finished, &QObject::deleteLater);
     connect(updateThread, &FileUpdaterThread::aborted, this, &MainWindow::fileUpdaterInterrupted);
-//    connect(this, &MainWindow::fileUpdaterWait, updateThread, &FileUpdaterThread::wait);
+    //    connect(this, &MainWindow::fileUpdaterWait, updateThread, &FileUpdaterThread::wait);
     connect(this, &MainWindow::quitWorkingThread, updateThread, &FileUpdaterThread::abortProgress);
     updateThread->start();
 }
@@ -359,6 +359,6 @@ void MainWindow::setupFileTreeView()
         delete fileTreeModel;
         fileTreeModel = anotherModel;
     }
-//    ui->treeView->header()->hide();
+    //    ui->treeView->header()->hide();
     ui->treeView->show();
 }
