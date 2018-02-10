@@ -33,7 +33,7 @@ MainWindow::MainWindow(QWidget *parent) :
     //        dbHelper->initLabels();
     analyser = new Analyser(dbHelper, this);
     connect(analyser, &Analyser::interrupted, this, &MainWindow::analyserInterrupted);
-    connect(analyser, &Analyser::processFinished, this, &MainWindow::notifyResult);
+    connect(analyser, &Analyser::processFinished, this, &MainWindow::notifyIndexResult);
 
     //model-view
     setupFileTreeView();
@@ -236,7 +236,7 @@ void MainWindow::processWorkList(bool triggered)
         {
             if (i == 0)
             {
-                notifyResult(0, 0);
+                notifyIndexResult(0, 0);
             }
             break;
         }
@@ -279,7 +279,7 @@ void MainWindow::updateFilesList(bool renew)
         pathList << configHelper->pathModel->item(i)->text();
     }
 
-    FileUpdaterThread *updateThread =  new FileUpdaterThread(dbHelper, SUPPORTED_FORMATS_FILTER, pathList, this);
+    FileUpdaterThread *updateThread =  new FileUpdaterThread(dbHelper, FORMATS_FILTER, pathList, this);
     connect(updateThread, &FileUpdaterThread::resultReady, this, &MainWindow::showUpdaterResult);
     connect(updateThread, &FileUpdaterThread::findFilesProgress, this, &MainWindow::showUpdaterProgress);
     connect(updateThread, &FileUpdaterThread::startDbProgress, this, &MainWindow::showUpdaterDbProgress);
@@ -322,9 +322,9 @@ void MainWindow::showUpdaterProgress(int num)
     ui->statusBar->showMessage(tr("正在添加文件...已找到 %1").arg(num));
 }
 
-void MainWindow::notifyResult(int success, int fail)
+void MainWindow::notifyIndexResult(int success, int fail)
 {
-    ui->statusBar->showMessage(tr("文件列表处理完成."));
+    ui->statusBar->showMessage(tr("文件索引建立完成."));
     trayIcon->showMessage(tr("智能文件管家"),
                           tr("索引建立完成, 成功%1个，失败%2个, 打开主页面以查看结果")
                           .arg(success)
@@ -436,27 +436,70 @@ void MainWindow::on_treeView_clicked(const QModelIndex &index)
     ui->tableWidgetAttr->setItem(5, 1, witem);
 
     //field view
-    for (QPair<QString, QString> label : fr.labels)
+    for (Label &label : fr.labels)
     {
-        if (label.second == "field")
+        if (label.type == "field")
         {
-            ui->listWidgetField->addItem(new QListWidgetItem(label.first));
+            ui->listWidgetField->addItem(new QListWidgetItem(label.name));
         }
     }
 
     //keyword view
-    for (QPair<QString, QString> label : fr.labels)
+    for (Label &label : fr.labels)
     {
-        if (label.second == "keyword")
+        if (label.type == "keyword")
         {
-            ui->listWidgetKw->addItem(new QListWidgetItem(label.first));
+            ui->listWidgetKw->addItem(new QListWidgetItem(label.name));
         }
     }
 
     //label view
-    for (QPair<QString, QString> label : fr.labels)
+    for (Label &label : fr.labels)
     {
-        ui->listWidgetLabel->addItem(new QListWidgetItem(label.first));
+        ui->listWidgetLabel->addItem(new QListWidgetItem(label.name));
     }
-    //TODO: other view goes here
+    //relation view
+    ui->tableWidgetRelation->setColumnCount(2);
+    ui->tableWidgetRelation->setRowCount(fr.relations.size());
+    ui->tableWidgetRelation->setHorizontalHeaderItem(0, new QTableWidgetItem("关联文件"));
+    ui->tableWidgetRelation->setHorizontalHeaderItem(1, new QTableWidgetItem("关系度"));
+//    ui->tableWidgetRelation->horizontalHeader()->setStretchLastSection(true);
+    for (int i = 0; i < fr.relations.size(); ++i)
+    {
+        QTableWidgetItem *rlItem = new QTableWidgetItem(fr.relations[i].file.name);
+        rlItem->setToolTip(fr.relations[i].file.name);
+        ui->tableWidgetRelation->setItem(i, 0, rlItem);
+        double totalRelation = fr.relations[i].keywordDegree * KEYWORD_RELATION_WEIGHT
+                               + fr.relations[i].labelDegree * LABEL_RELATION_WEIGHT
+                               + fr.relations[i].attributeDegree * ATTRIBUTE_RELATION_WEIGHT;
+        ui->tableWidgetRelation->setItem(i, 1, new QTableWidgetItem(QString("%1%").arg(totalRelation * 100, 0, 'f', 1)));
+
+    }
+}
+
+void MainWindow::startCalculateRelation()
+{
+    if (!relationCalculator)
+    {
+        relationCalculator = new RelationCalculator(dbHelper, this);
+        connect(relationCalculator, &RelationCalculator::allTasksFinished, this, &MainWindow::notifyRelationFinished);
+        relationCalculator->start();
+    }
+    else if (relationCalculator->isFinished())
+    {
+        relationCalculator->start();
+    }
+
+}
+
+void MainWindow::on_actionRelation_triggered()
+{
+    startCalculateRelation();
+}
+
+void MainWindow::notifyRelationFinished()
+{
+    ui->statusBar->showMessage(tr("文件关系计算完成."));
+    trayIcon->showMessage(tr("智能文件管家"),
+                          tr("文件关系建立完成。"));
 }

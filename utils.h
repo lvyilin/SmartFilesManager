@@ -16,6 +16,21 @@ struct File
     bool isValid;
 };
 
+struct Label
+{
+    QString name;
+    int level;
+    QString type;
+};
+
+struct Relation
+{
+    File file;
+    double keywordDegree;
+    double labelDegree;
+    double attributeDegree;
+};
+
 struct FileProduct
 {
     File file;
@@ -27,8 +42,8 @@ struct FileResult
 {
     File file;
     QMap<QString, double> keywords;
-    QList<QPair<QString, QString>> labels; //first: name  second: type
-    QList<QPair<File, double>> relations;
+    QList<Label> labels;
+    QList<Relation> relations;
 };
 
 enum RunningStrategy
@@ -54,7 +69,7 @@ enum ProcessingResult
 
 //format
 const static QStringList SUPPORTED_FORMATS = {"docx", "txt"};
-const static QStringList SUPPORTED_FORMATS_FILTER = {"*.*"};
+const static QStringList FORMATS_FILTER = {"*.*"};
 
 const static QStringList DOCUMENT_FORMATS = {"doc", "docx", "xls", "xlsx", "ppt", "pptx", "odt", "rtf",
                                              "txt", "pdf", "htm", "html", "tex"
@@ -87,5 +102,10 @@ const int MAX_WORKLIST_NUM = 10;
 const int MAX_THREAD_NUM = MAX_WORKLIST_NUM;
 //FileUpdater
 const int MAX_FILES_NUMBER = 5000;
+
+//relation calculate
+const double KEYWORD_RELATION_WEIGHT = 0.35;
+const double LABEL_RELATION_WEIGHT = 0.45;
+const double ATTRIBUTE_RELATION_WEIGHT = 0.2;
 
 #endif // UTILS_H

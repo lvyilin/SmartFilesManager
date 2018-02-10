@@ -121,7 +121,8 @@ void AnalyserThread::generateKeywords(FileProduct &fpd)
              << fpd.file.name;
     fpd.keywords = Toolkit::getInstance().getKeywords(fpd.contents);
     if (abortFlag) return;
-    QMap<QString, double> filenameMap = Toolkit::getInstance().getKeywords(fpd.file.name);
+    QMap<QString, double> filenameMap =
+        Toolkit::getInstance().getKeywords(fpd.file.name.split(".", QString::SkipEmptyParts).at(0));
     QMapIterator<QString, double> itr(filenameMap);
     while (!abortFlag && itr.hasNext())
     {

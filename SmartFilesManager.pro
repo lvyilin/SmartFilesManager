@@ -36,7 +36,9 @@ SOURCES += \
     mainwindow.cpp \
     toolkitinitthread.cpp \
     filetreemodel.cpp \
-    fileitem.cpp
+    fileitem.cpp \
+    relationcalculatetask.cpp \
+    relationcalculator.cpp
 
 HEADERS += \
     settingsdialog.h \
@@ -85,7 +87,9 @@ HEADERS += \
     mainwindow.h \
     toolkitinitthread.h \
     filetreemodel.h \
-    fileitem.h
+    fileitem.h \
+    relationcalculatetask.h \
+    relationcalculator.h
 
 FORMS += \
     settingsdialog.ui \

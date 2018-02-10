@@ -14,6 +14,7 @@
 #include "analyser.h"
 #include "toolkitinitthread.h"
 #include "filetreemodel.h"
+#include "relationcalculator.h"
 
 class SettingsDialog;
 
@@ -48,7 +49,7 @@ private slots:
     void showUpdaterResult(const QString &res);
     void showUpdaterProgress(int num);
     void showUpdaterDbProgress();
-    void notifyResult(int success, int fail);
+    void notifyIndexResult(int success, int fail);
     void updateFilesList(bool renew = false);
 
     void fileUpdaterInterrupted();
@@ -64,6 +65,10 @@ private slots:
 
     void on_treeView_clicked(const QModelIndex &index);
 
+    void on_actionRelation_triggered();
+
+    void notifyRelationFinished();
+
 private:
     Ui::MainWindow *ui;
 
@@ -71,6 +76,7 @@ private:
     void createTrayIcon();
     void setTrigger();
     void processWorkList(bool triggered = false);
+    void startCalculateRelation();
 
     QString fileSizeHumanReadable(qint64 num);
 
@@ -83,6 +89,8 @@ private:
     Analyser *analyser;
 
     FileTreeModel *fileTreeModel = nullptr;
+
+    RelationCalculator *relationCalculator = nullptr;
 };
 
 #endif // MAINWINDOW_H

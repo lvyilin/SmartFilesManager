@@ -81,6 +81,8 @@ public:
      */
     void getFinishedFileResults(QList<FileResult> &frs);
 
+    void saveFileResults(QList<FileResult> &frs);
+
 signals:
 public slots:
 private:
@@ -88,6 +90,7 @@ private:
     int getFileId(const QString &path);
     void getFileAndIdByPath(const QString &path, File &file, int &id);
     void getFileResultById(FileResult &fr, int fileId);
+    void getFileById(File &f, int fileId);
     QSqlDatabase db;
     QSqlQuery *query;
     QMutex mutex;

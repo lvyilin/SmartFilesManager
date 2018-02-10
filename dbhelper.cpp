@@ -130,7 +130,7 @@ void DBHelper::createTable()
     else
         qDebug() << "table create success";
 
-    if (!query->exec("create table if not exists file_relations(file_a_id int, file_b_id int, degree double NOT NULL, type int NOT NULL, FOREIGN KEY(file_a_id) REFERENCES files(id) on delete cascade on update cascade ,FOREIGN KEY(file_b_id) REFERENCES files(id) on delete cascade on update cascade  ,constraint pk_t2 primary key (file_a_id,file_b_id))"))
+    if (!query->exec("create table if not exists file_relations(file_a_id int, file_b_id int, keyword_degree double NOT NULL, label_degree double NOT NULL, attribute_degree double NOT NULL, FOREIGN KEY(file_a_id) REFERENCES files(id) on delete cascade on update cascade ,FOREIGN KEY(file_b_id) REFERENCES files(id) on delete cascade on update cascade  ,constraint pk_t2 primary key (file_a_id,file_b_id))"))
         qDebug() << "file_relations create false" << query->lastError().text();
     else
         qDebug() << "table create success";
@@ -310,20 +310,58 @@ void DBHelper::getFileResultById(FileResult &fr, int fileId)
     query->exec();
     while (query->next())
     {
-        fr.keywords.insert(query->value(1).toString(), query->value(1).toDouble());
+        fr.keywords.insert(query->value(1).toString(), query->value(2).toDouble());
     }
 
     //get labels
-    query->prepare("select name, type from labels where id in(select label_id from file_labels where file_id=:id)");
+    query->prepare("select name, level, type from labels where id in(select label_id from file_labels where file_id=:id)");
     query->bindValue(":id", fileId);
     query->exec();
     while (query->next())
     {
-        fr.labels << QPair<QString, QString>(query->value(0).toString(), query->value(1).toString());
+        Label lb;
+        lb.name = query->value(0).toString();
+        lb.level = query->value(1).toInt();
+        lb.type = query->value(2).toString();
+        fr.labels << lb;
     }
 
     //get relations
-    //TODO
+    query->prepare("select * from file_relations where file_a_id=:id");
+    query->bindValue(":id", fileId);
+    query->exec();
+    QList<int> relationIdList;
+    while (query->next())
+    {
+        relationIdList << query->value(1).toInt();
+        Relation rl;
+        rl.keywordDegree = query->value(2).toDouble();
+        rl.labelDegree = query->value(3).toDouble();
+        rl.attributeDegree = query->value(4).toDouble();
+        fr.relations << rl;
+    }
+    for (int i = 0; i < fr.relations.size(); ++i)
+    {
+        getFileById(fr.relations[i].file, relationIdList[i]);
+    }
+
+}
+
+void DBHelper::getFileById(File &f, int fileId)
+{
+    query->prepare("select * from files where id=:id");
+    query->bindValue(":id", fileId);
+    query->exec();
+    if (query->next())
+    {
+        f.name = query->value(1).toString();
+        f.format = query->value(2).toString();
+        f.path = query->value(3).toString();
+        f.size = query->value(4).toLongLong();
+        f.createTime = query->value(5).toDateTime();
+        f.modifyTime = query->value(6).toDateTime();
+        f.isFinished = query->value(7).toBool();
+    }
 }
 
 void DBHelper::getFinishedFileResults(QList<FileResult> &frs)
@@ -337,6 +375,43 @@ void DBHelper::getFinishedFileResults(QList<FileResult> &frs)
         fr.file = list[i];
         getFileResultById(fr, idList[i]);
         frs << fr;
+    }
+}
+
+void DBHelper::saveFileResults(QList<FileResult> &frs)
+{
+    for (int i = 0; i < frs.size(); ++i)
+    {
+        int id = getFileId(frs[i].file.path);
+        for (int j = 0; j < frs[i].relations.size(); ++j)
+        {
+            int idB = getFileId(frs[i].relations[j].file.path);
+            db.transaction();
+
+            query->prepare("insert into file_relations(file_a_id, file_b_id, keyword_degree, label_degree, attribute_degree) "
+                           "values(:id, :id_b, :kw, :lb, :attr)");
+            query->bindValue(":id", id);
+            query->bindValue(":id_b", idB);
+            query->bindValue(":kw", frs[i].relations[j].keywordDegree);
+            query->bindValue(":lb", frs[i].relations[j].labelDegree);
+            query->bindValue(":attr", frs[i].relations[j].attributeDegree);
+            query->exec();
+
+            query->prepare("insert into file_relations(file_a_id, file_b_id, keyword_degree, label_degree, attribute_degree) "
+                           "values(:id, :id_b, :kw, :lb, :attr)");
+            query->bindValue(":id", idB);
+            query->bindValue(":id_b", id);
+            query->bindValue(":kw", frs[i].relations[j].keywordDegree);
+            query->bindValue(":lb", frs[i].relations[j].labelDegree);
+            query->bindValue(":attr", frs[i].relations[j].attributeDegree);
+            query->exec();
+
+            if (!db.commit())
+            {
+                qDebug() << "db commit error: " << db.lastError();
+                db.rollback();
+            }
+        }
     }
 }
 
