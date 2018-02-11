@@ -361,8 +361,6 @@ void MainWindow::onFinishInitToolkit()
 void MainWindow::setupView()
 {
     ui->tableWidgetAttr->setColumnCount(2);
-    ui->tableWidgetAttr->setRowCount(1);
-//    ui->tableWidgetAttr->horizontalHeader()->setStretchLastSection(true);//header宽度自适应
     ui->tableWidgetAttr->setHorizontalHeaderLabels(QStringList() << "文件属性" << "值");
     ui->tableWidgetAttr->horizontalHeader()->setVisible(true);
 
@@ -370,10 +368,11 @@ void MainWindow::setupView()
     ui->tableWidgetAttr->setColumnWidth(0, fontWidth);
 
     ui->tableWidgetRelation->setColumnCount(2);
-    ui->tableWidgetRelation->setRowCount(1);
     ui->tableWidgetRelation->setHorizontalHeaderLabels(QStringList() << "关联文件" << "关系度");
-//    ui->tableWidgetRelation->horizontalHeader()->setStretchLastSection(true);
     ui->tableWidgetRelation->horizontalHeader()->setVisible(true);
+
+    ui->tableWidgetRelation->setColumnWidth(0, ui->tableWidgetRelation->width() - fontWidth);
+    ui->tableWidgetRelation->setColumnWidth(1, fontWidth);
 
     QList<File> fileList;
     dbHelper->getAllFiles(fileList, QList<int>());
