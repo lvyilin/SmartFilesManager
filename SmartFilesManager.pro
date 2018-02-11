@@ -38,7 +38,8 @@ SOURCES += \
     filetreemodel.cpp \
     fileitem.cpp \
     relationcalculatetask.cpp \
-    relationcalculator.cpp
+    relationcalculator.cpp \
+    numerictablewidgetitem.cpp
 
 HEADERS += \
     settingsdialog.h \
@@ -89,7 +90,8 @@ HEADERS += \
     filetreemodel.h \
     fileitem.h \
     relationcalculatetask.h \
-    relationcalculator.h
+    relationcalculator.h \
+    numerictablewidgetitem.h
 
 FORMS += \
     settingsdialog.ui \

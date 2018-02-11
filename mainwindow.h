@@ -61,7 +61,7 @@ private slots:
     void onStartInitToolkit();
     void onFinishInitToolkit();
 
-    void setupFileTreeView();
+    void setupView();
 
     void on_treeView_clicked(const QModelIndex &index);
 

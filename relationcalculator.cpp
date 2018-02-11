@@ -48,10 +48,10 @@ void RelationCalculator::singleTaskFinished(FileResult *fr)
 {
     --threadCount;
     qDebug() << "finish one task, task count: " << threadCount;
-    dbHelper->saveSingleFileResult(*fr);
+//    dbHelper->saveSingleFileResult(*fr);
     if (threadCount == 0)
     {
-//        saveResult();
+        dbHelper->saveFileResults(fileResultList);
         emit allTasksFinished();
     }
 }
@@ -62,9 +62,4 @@ bool RelationCalculator::isSupportedFormat(const QString &format)
            (IMAGE_FORMATS.contains(format, Qt::CaseInsensitive)) ||
            (AUDIO_FORMATS.contains(format, Qt::CaseInsensitive)) ||
            (VIDEO_FORMATS.contains(format, Qt::CaseInsensitive));
-}
-
-void RelationCalculator::saveResult()
-{
-    dbHelper->saveFileResults(fileResultList);
 }

@@ -70,25 +70,19 @@ double RelationCalculateTask::getKeywordNorm(FileResult *fr)
 
 double RelationCalculateTask::getLabelNumerator(FileResult *frA, FileResult *frB)
 {
-    double sum = 0.0;
+    int sum = 0.0;
+    QMap<QString, int> mapA, mapB;
     for (Label la : frA->labels)
+        mapA.insert(la.name, la.type == "field" ? la.level : 1);
+    for (Label lb : frB->labels)
+        mapB.insert(lb.name, lb.type == "field" ? lb.level : 1);
+    QMapIterator<QString, int> itr(mapA);
+    while (itr.hasNext())
     {
-        for (Label lb : frB->labels)
-        {
-            if (la.name == lb.name)
-            {
-                if (la.type == "field")
-                {
-                    sum += 1.0 * la.level * lb.level;
-                }
-                else
-                {
-                    sum += 1.0;
-                }
-            }
-        }
+        itr.next();
+        sum += itr.value() * mapB.value(itr.key(), 0.0);
     }
-    return sum;
+    return (double)sum;
 }
 
 double RelationCalculateTask::getLabelNorm(FileResult *fr)

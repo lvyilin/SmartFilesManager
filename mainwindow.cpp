@@ -6,6 +6,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "fileupdaterthread.h"
+#include "numerictablewidgetitem.h"
 
 #include <QCloseEvent>
 #include <QMenu>
@@ -29,14 +30,13 @@ MainWindow::MainWindow(QWidget *parent) :
     configHelper->readSettings();
     settingsDialog = new SettingsDialog(configHelper, this);
     dbHelper = new DBHelper(QString("SFM"), QString("sfm.db"), this);
-    //    if (configHelper->isFirstTimeUsing())
-    //        dbHelper->initLabels();
+
     analyser = new Analyser(dbHelper, this);
     connect(analyser, &Analyser::interrupted, this, &MainWindow::analyserInterrupted);
     connect(analyser, &Analyser::processFinished, this, &MainWindow::notifyIndexResult);
 
-    //model-view
-    setupFileTreeView();
+    //view
+    setupView();
 
     //tray
     createTrayIcon();
@@ -71,11 +71,11 @@ MainWindow::MainWindow(QWidget *parent) :
         }
     }
     //init dict
-    ToolkitInitThread *toolkitInitThread =  new ToolkitInitThread(this);
+    /*ToolkitInitThread *toolkitInitThread =  new ToolkitInitThread(this);
     connect(toolkitInitThread, &ToolkitInitThread::startInit, this, &MainWindow::onStartInitToolkit);
     connect(toolkitInitThread, &ToolkitInitThread::finishInit, this, &MainWindow::onFinishInitToolkit);
     connect(this, &MainWindow::quitWorkingThread, toolkitInitThread, &ToolkitInitThread::quit);
-    toolkitInitThread->start(QThread::LowPriority);
+    toolkitInitThread->start(QThread::LowPriority);*/
 }
 
 MainWindow::~MainWindow()
@@ -284,7 +284,7 @@ void MainWindow::updateFilesList(bool renew)
     connect(updateThread, &FileUpdaterThread::findFilesProgress, this, &MainWindow::showUpdaterProgress);
     connect(updateThread, &FileUpdaterThread::startDbProgress, this, &MainWindow::showUpdaterDbProgress);
     connect(updateThread, &FileUpdaterThread::finished, this, &MainWindow::fileUpdaterFinished);
-    connect(updateThread, &FileUpdaterThread::finished, this, &MainWindow::setupFileTreeView);
+    connect(updateThread, &FileUpdaterThread::finished, this, &MainWindow::setupView);
     connect(updateThread, &FileUpdaterThread::finished, &QObject::deleteLater);
     connect(updateThread, &FileUpdaterThread::aborted, this, &MainWindow::fileUpdaterInterrupted);
     //    connect(this, &MainWindow::fileUpdaterWait, updateThread, &FileUpdaterThread::wait);
@@ -358,11 +358,26 @@ void MainWindow::onFinishInitToolkit()
     ui->statusBar->showMessage(tr("词典初始化完成."));
 }
 
-void MainWindow::setupFileTreeView()
+void MainWindow::setupView()
 {
+    ui->tableWidgetAttr->setColumnCount(2);
+    ui->tableWidgetAttr->setRowCount(1);
+//    ui->tableWidgetAttr->horizontalHeader()->setStretchLastSection(true);//header宽度自适应
+    ui->tableWidgetAttr->setHorizontalHeaderLabels(QStringList() << "文件属性" << "值");
+    ui->tableWidgetAttr->horizontalHeader()->setVisible(true);
+
+    int fontWidth = ui->tableWidgetAttr->fontMetrics().width("修改日期--");
+    ui->tableWidgetAttr->setColumnWidth(0, fontWidth);
+
+    ui->tableWidgetRelation->setColumnCount(2);
+    ui->tableWidgetRelation->setRowCount(1);
+    ui->tableWidgetRelation->setHorizontalHeaderLabels(QStringList() << "关联文件" << "关系度");
+//    ui->tableWidgetRelation->horizontalHeader()->setStretchLastSection(true);
+    ui->tableWidgetRelation->horizontalHeader()->setVisible(true);
+
     QList<File> fileList;
     dbHelper->getAllFiles(fileList, QList<int>());
-    ui->treeView->hide();
+//    ui->treeView->hide();
     if (fileTreeModel == nullptr)
     {
         fileTreeModel = new FileTreeModel(fileList, this);
@@ -380,11 +395,11 @@ void MainWindow::setupFileTreeView()
 
 void MainWindow::on_treeView_clicked(const QModelIndex &index)
 {
-    ui->tableWidgetAttr->clear();
     ui->listWidgetField->clear();
     ui->listWidgetKw->clear();
     ui->listWidgetLabel->clear();
-    ui->tableWidgetRelation->clear();
+    ui->tableWidgetAttr->setRowCount(0);
+    ui->tableWidgetRelation->setRowCount(0);
 
     FileItem *item = static_cast<FileItem *>(index.internalPointer());
     QString path = item->data(1).toString();
@@ -394,15 +409,10 @@ void MainWindow::on_treeView_clicked(const QModelIndex &index)
     dbHelper->getFileResultByPath(path, fr);
 
     //attribute view
-    ui->tableWidgetAttr->setColumnCount(2);
     ui->tableWidgetAttr->setRowCount(6);
-
     int fontHeight = ui->tableWidgetAttr->fontMetrics().height();
-    int fontWidth = ui->tableWidgetAttr->fontMetrics().width("修改日期--");
-    ui->tableWidgetAttr->horizontalHeader()->setStretchLastSection(true);//header宽度自适应
     for (int i = 0; i < 6; ++i)
         ui->tableWidgetAttr->setRowHeight(i, fontHeight * 1.2);
-    ui->tableWidgetAttr->setColumnWidth(0, fontWidth);
 
     QTableWidgetItem *witem;
     ui->tableWidgetAttr->setItem(0, 0, new QTableWidgetItem(QString("名称")));
@@ -459,11 +469,10 @@ void MainWindow::on_treeView_clicked(const QModelIndex &index)
         ui->listWidgetLabel->addItem(new QListWidgetItem(label.name));
     }
     //relation view
-    ui->tableWidgetRelation->setColumnCount(2);
     ui->tableWidgetRelation->setRowCount(fr.relations.size());
-    ui->tableWidgetRelation->setHorizontalHeaderItem(0, new QTableWidgetItem("关联文件"));
-    ui->tableWidgetRelation->setHorizontalHeaderItem(1, new QTableWidgetItem("关系度"));
-//    ui->tableWidgetRelation->horizontalHeader()->setStretchLastSection(true);
+    for (int i = 0; i < fr.relations.size(); ++i)
+        ui->tableWidgetRelation->setRowHeight(i, fontHeight * 1.2);
+
     for (int i = 0; i < fr.relations.size(); ++i)
     {
         QTableWidgetItem *rlItem = new QTableWidgetItem(fr.relations[i].file.name);
@@ -472,9 +481,9 @@ void MainWindow::on_treeView_clicked(const QModelIndex &index)
         double totalRelation = fr.relations[i].keywordDegree * KEYWORD_RELATION_WEIGHT
                                + fr.relations[i].labelDegree * LABEL_RELATION_WEIGHT
                                + fr.relations[i].attributeDegree * ATTRIBUTE_RELATION_WEIGHT;
-        ui->tableWidgetRelation->setItem(i, 1, new QTableWidgetItem(QString("%1%").arg(totalRelation * 100, 0, 'f', 1)));
-
+        ui->tableWidgetRelation->setItem(i, 1, new NumericTableWidgetItem(QString("%1%").arg(totalRelation * 100, 0, 'f', 1)));
     }
+    ui->tableWidgetRelation->sortItems(1, Qt::DescendingOrder);
 }
 
 void MainWindow::startCalculateRelation()

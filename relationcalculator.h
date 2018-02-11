@@ -23,7 +23,6 @@ private:
 
     int threadCount = 0;
     bool isSupportedFormat(const QString &format);
-    void saveResult();
 };
 
 #endif // RELATIONCALCULATOR_H

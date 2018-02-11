@@ -391,7 +391,7 @@ void DBHelper::saveFileResults(QList<FileResult> &frs)
             int idB = getFileId(frs[i].relations[j].file.path);
             db.transaction();
 
-            query->prepare("insert into file_relations(file_a_id, file_b_id, keyword_degree, label_degree, attribute_degree) "
+            query->prepare("insert or replace into file_relations(file_a_id, file_b_id, keyword_degree, label_degree, attribute_degree) "
                            "values(:id, :id_b, :kw, :lb, :attr)");
             query->bindValue(":id", id);
             query->bindValue(":id_b", idB);
@@ -400,7 +400,7 @@ void DBHelper::saveFileResults(QList<FileResult> &frs)
             query->bindValue(":attr", frs[i].relations[j].attributeDegree);
             query->exec();
 
-            query->prepare("insert into file_relations(file_a_id, file_b_id, keyword_degree, label_degree, attribute_degree) "
+            query->prepare("insert or replace into file_relations(file_a_id, file_b_id, keyword_degree, label_degree, attribute_degree) "
                            "values(:id, :id_b, :kw, :lb, :attr)");
             query->bindValue(":id", idB);
             query->bindValue(":id_b", id);
@@ -427,7 +427,7 @@ void DBHelper::saveSingleFileResult(const FileResult &fr)
         int idB = getFileId(fr.relations[j].file.path);
         db.transaction();
 
-        query->prepare("insert into file_relations(file_a_id, file_b_id, keyword_degree, label_degree, attribute_degree) "
+        query->prepare("insert or replace into file_relations(file_a_id, file_b_id, keyword_degree, label_degree, attribute_degree) "
                        "values(:id, :id_b, :kw, :lb, :attr)");
         query->bindValue(":id", id);
         query->bindValue(":id_b", idB);
@@ -436,7 +436,7 @@ void DBHelper::saveSingleFileResult(const FileResult &fr)
         query->bindValue(":attr", fr.relations[j].attributeDegree);
         query->exec();
 
-        query->prepare("insert into file_relations(file_a_id, file_b_id, keyword_degree, label_degree, attribute_degree) "
+        query->prepare("insert or replace into file_relations(file_a_id, file_b_id, keyword_degree, label_degree, attribute_degree) "
                        "values(:id, :id_b, :kw, :lb, :attr)");
         query->bindValue(":id", idB);
         query->bindValue(":id_b", id);
