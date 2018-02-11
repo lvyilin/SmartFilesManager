@@ -41,7 +41,7 @@ void RelationCalculateTask::run()
         fileResult->relations << r;
     }
 
-    emit finished();
+    emit finished(fileResult);
 }
 
 double RelationCalculateTask::getKeywordNumerator(FileResult *frA, FileResult *frB)
@@ -128,7 +128,7 @@ double RelationCalculateTask::getAttrDegree(FileResult *frA, FileResult *frB)
     QString dirBStr = dirB.absolutePath();
     if (dirAStr == dirBStr)
         sum += 0.3;
-    else if (dirAParent == dirBParent || dirAParent == dirB || dirA == dirBParent)
+    else if (dirAParentStr == dirBParentStr || dirAParentStr == dirBStr || dirAStr == dirBParentStr)
         sum += 0.2;
     else;
 

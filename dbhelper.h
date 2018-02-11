@@ -66,7 +66,7 @@ public:
 
     void setFileLabels(const FileProduct &fp, const QStringList &labels);
 
-    void getAllFiles(QList<File> &list, QList<int> &idList);
+    void getAllFiles(QList<File> &list, QList<int> &idList, bool finished = false);
 
     /**
      * @brief getFileResultByPath 通过路径path获得FileResult
@@ -82,6 +82,7 @@ public:
     void getFinishedFileResults(QList<FileResult> &frs);
 
     void saveFileResults(QList<FileResult> &frs);
+    void saveSingleFileResult(const FileResult &fr);
 
 signals:
 public slots:

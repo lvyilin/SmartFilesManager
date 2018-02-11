@@ -14,7 +14,7 @@ public:
     void run() override;
 
 signals:
-    void finished();
+    void finished(FileResult *fr);
 
 
 private:

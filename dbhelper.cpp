@@ -268,9 +268,12 @@ void DBHelper::getFileAndIdByPath(const QString &path, File &file, int &id)
     file.isValid = query->value(8).toBool();
 }
 
-void DBHelper::getAllFiles(QList<File> &list, QList<int> &idList)
+void DBHelper::getAllFiles(QList<File> &list, QList<int> &idList, bool finished)
 {
-    query->exec("select * from files");
+    if (!finished)
+        query->exec("select * from files");
+    else
+        query->exec("select * from files where is_finished=1");
     list.clear();
     idList.clear();
     while (query->next())
@@ -368,7 +371,7 @@ void DBHelper::getFinishedFileResults(QList<FileResult> &frs)
 {
     QList<File> list;
     QList<int> idList;
-    getAllFiles(list, idList);
+    getAllFiles(list, idList, true);
     for (int i = 0; i < list.count(); ++i)
     {
         FileResult fr;
@@ -413,6 +416,42 @@ void DBHelper::saveFileResults(QList<FileResult> &frs)
             }
         }
     }
+}
+
+void DBHelper::saveSingleFileResult(const FileResult &fr)
+{
+    mutex.lock();
+    int id = getFileId(fr.file.path);
+    for (int j = 0; j < fr.relations.size(); ++j)
+    {
+        int idB = getFileId(fr.relations[j].file.path);
+        db.transaction();
+
+        query->prepare("insert into file_relations(file_a_id, file_b_id, keyword_degree, label_degree, attribute_degree) "
+                       "values(:id, :id_b, :kw, :lb, :attr)");
+        query->bindValue(":id", id);
+        query->bindValue(":id_b", idB);
+        query->bindValue(":kw", fr.relations[j].keywordDegree);
+        query->bindValue(":lb", fr.relations[j].labelDegree);
+        query->bindValue(":attr", fr.relations[j].attributeDegree);
+        query->exec();
+
+        query->prepare("insert into file_relations(file_a_id, file_b_id, keyword_degree, label_degree, attribute_degree) "
+                       "values(:id, :id_b, :kw, :lb, :attr)");
+        query->bindValue(":id", idB);
+        query->bindValue(":id_b", id);
+        query->bindValue(":kw", fr.relations[j].keywordDegree);
+        query->bindValue(":lb", fr.relations[j].labelDegree);
+        query->bindValue(":attr", fr.relations[j].attributeDegree);
+        query->exec();
+
+        if (!db.commit())
+        {
+            qDebug() << "db commit error: " << db.lastError();
+            db.rollback();
+        }
+    }
+    mutex.unlock();
 }
 
 

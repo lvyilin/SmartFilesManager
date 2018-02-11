@@ -14,7 +14,7 @@ public:
 signals:
     void allTasksFinished();
 public slots:
-    void singleTaskFinished();
+    void singleTaskFinished(FileResult *fr);
 
 private:
     QThreadPool *pool;
@@ -22,7 +22,7 @@ private:
     QList<FileResult> fileResultList;
 
     int threadCount = 0;
-
+    bool isSupportedFormat(const QString &format);
     void saveResult();
 };
 
