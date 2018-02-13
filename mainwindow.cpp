@@ -375,8 +375,10 @@ void MainWindow::setupView()
     ui->tableWidgetRelation->setColumnWidth(1, fontWidth);
 
     QList<File> fileList;
-    dbHelper->getAllFiles(fileList, QList<int>());
-//    ui->treeView->hide();
+    QList<int> idList;
+
+    dbHelper->getAllFiles(fileList, idList);
+    //    ui->treeView->hide();
     if (fileTreeModel == nullptr)
     {
         fileTreeModel = new FileTreeModel(fileList, this);
