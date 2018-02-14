@@ -30,11 +30,12 @@ void RelationCalculateTask::run()
         double keywordNumerator = getKeywordNumerator(fileResult, anotherFileResult);
         double keywordNormAnother = getKeywordNorm(anotherFileResult);
         double denominator = keywordNorm * keywordNormAnother;
-        r.keywordDegree = keywordNumerator / denominator;
+        r.keywordDegree = denominator != 0 ? keywordNumerator / denominator : 0;
         //label relation
         double labelNumerator = getLabelNumerator(fileResult, anotherFileResult);
         double labelNormAnother = getLabelNorm(anotherFileResult);
-        r.labelDegree = labelNumerator / (labelNorm * labelNormAnother);
+        double denominatorLabel = labelNorm * labelNormAnother;
+        r.labelDegree = denominatorLabel != 0 ? labelNumerator / denominatorLabel : 0;
         //attribute relation
         r.attributeDegree = getAttrDegree(fileResult, anotherFileResult);
 
