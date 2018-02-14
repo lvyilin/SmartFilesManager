@@ -186,11 +186,11 @@ void DBHelper::setFileProduct(const FileProduct &fp)
     while (map.hasNext())
     {
         map.next();
-        QString temp_keyword = map.key();
-        double temp_weight = map.value();
+        QString tempKeyword = map.key();
+        double tempWeight = map.value();
         if (!query->exec(
                     QString("insert into file_keywords(file_id,keyword,weight) values(%1, \"%2\", \"%3\")")
-                    .arg(fileId).arg(temp_keyword).arg(temp_weight)))
+                    .arg(fileId).arg(tempKeyword).arg(tempWeight)))
         {
             qDebug() << "save file product failed: " << query->lastError().text();
         }
@@ -209,23 +209,41 @@ void DBHelper::setFileLabels(const FileProduct &fp, const QStringList &labels)
     mutex.lock();
     int fileId = getFileId(fp.file.path);
 
-    foreach (QString label, labels)
+    QMap<int, QVector<int> > countMap; //计数每个关键词的标签所在领域
+    for (int i = 0; i < labels.count(); ++i)
     {
-        query->prepare("select * from labels where name=:name");
-        query->bindValue(":name", label);
+        query->prepare("select id, parent from labels where name=:name");
+        query->bindValue(":name", labels[i]);
         query->exec();
-        QVector<QPair<int, int>> itemGroup; //单个标签在库中可能出现多次，Pair中first=id,second=parent_id
-        while (query->next())
+        if (query->next())
         {
-            int labelId = query->value(0).toInt();
-            int parentId = query->value(3).toInt();
-            QPair<int, int> item(labelId, parentId);
-            itemGroup.append(item);
+            int id = query->value(0).toInt();
+            int parentId = query->value(1).toInt();
+            countMap[parentId].append(id);
         }
-        for (QPair<int, int> item : itemGroup)
+    }
+    QMapIterator<int, QVector<int> > iter(countMap);
+    int maxSize = 0;
+    QVector<int> maxKeys;
+    while (iter.hasNext())
+    {
+        iter.next();
+        if (iter.value().count() > maxSize)
         {
-            int id = item.first;
-            int parentId = item.second;
+            maxSize = iter.value().count();
+            maxKeys.clear();
+            maxKeys << iter.key();
+        }
+        else if (iter.value().count() == maxSize)
+            maxKeys << iter.key();
+    }
+    if (maxSize >= LABEL_JUDGEMENT_NEEDED_KEYWORD_NUMBER)
+    {
+        for (int key : maxKeys)
+        {
+            int parentId = key;
+            int id = countMap[key].at(0);
+            //仅第一个标签需要向上打父标签
             while (true)
             {
                 query->prepare("insert into file_labels(file_id ,label_id) values(:file_id, :label_id)");
@@ -233,15 +251,22 @@ void DBHelper::setFileLabels(const FileProduct &fp, const QStringList &labels)
                 query->bindValue(":label_id", id);
                 query->exec();
                 if (parentId == 0)break;
-                query->prepare("select * from labels where id=:id");
+                query->prepare("select id, parent from labels where id=:id");
                 query->bindValue(":id", parentId);
                 query->exec();
                 if (query->next())
                 {
                     id = query->value(0).toInt();
-                    parentId = query->value(3).toInt();
+                    parentId = query->value(1).toInt();
                 }
                 else break;
+            }
+            for (int i = 1; i < countMap[key].count(); ++i)
+            {
+                query->prepare("insert into file_labels(file_id ,label_id) values(:file_id, :label_id)");
+                query->bindValue(":file_id", fileId);
+                query->bindValue(":label_id", countMap[key][i]);
+                query->exec();
             }
         }
     }

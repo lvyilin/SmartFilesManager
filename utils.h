@@ -93,19 +93,21 @@ const static QStringList IMAGE_FORMATS = {"ani", "bmp", "cal", "fax", "gif", "im
 
 //magic value
 //Toolkit
-const int NEEDED_TOP_KEYWORDS = 20;
-const double FILENAME_WEIGHTED_VARIANCE = 2.0;
+const static int NEEDED_TOP_KEYWORDS = 20;
+const static double FILENAME_WEIGHTED_VARIANCE = 2.0;
 //MainWindow
-const int WORKLIST_SIZE = 100;
-const int MAX_WORKLIST_NUM = 10;
+const static int WORKLIST_SIZE = 100;
+const static int MAX_WORKLIST_NUM = 10;
 //Analyser
-const int MAX_THREAD_NUM = MAX_WORKLIST_NUM;
+const static int MAX_THREAD_NUM = MAX_WORKLIST_NUM;
 //FileUpdater
-const int MAX_FILES_NUMBER = 5000;
+const static int MAX_FILES_NUMBER = 5000;
 
+//label judge
+const static int LABEL_JUDGEMENT_NEEDED_KEYWORD_NUMBER = 2;
 //relation calculate
-const double KEYWORD_RELATION_WEIGHT = 0.35;
-const double LABEL_RELATION_WEIGHT = 0.45;
-const double ATTRIBUTE_RELATION_WEIGHT = 0.2;
+const static double KEYWORD_RELATION_WEIGHT = 0.35;
+const static double LABEL_RELATION_WEIGHT = 0.45;
+const static double ATTRIBUTE_RELATION_WEIGHT = 0.2;
 
 #endif // UTILS_H

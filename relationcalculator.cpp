@@ -48,7 +48,7 @@ void RelationCalculator::singleTaskFinished(FileResult *fr)
 {
     --threadCount;
     qDebug() << "finish one task, task count: " << threadCount;
-//    dbHelper->saveSingleFileResult(*fr);
+    //    dbHelper->saveSingleFileResult(*fr);
     if (threadCount == 0)
     {
         dbHelper->saveFileResults(fileResultList);

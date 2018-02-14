@@ -456,12 +456,12 @@ void MainWindow::on_treeView_clicked(const QModelIndex &index)
     }
 
     //keyword view
-    for (Label &label : fr.labels)
+
+    QMapIterator<QString, double> iter(fr.keywords);
+    while (iter.hasNext())
     {
-        if (label.type == "keyword")
-        {
-            ui->listWidgetKw->addItem(new QListWidgetItem(label.name));
-        }
+        iter.next();
+        ui->listWidgetKw->addItem(new QListWidgetItem(iter.key()));
     }
 
     //label view
