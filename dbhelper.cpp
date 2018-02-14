@@ -212,14 +212,18 @@ void DBHelper::setFileLabels(const FileProduct &fp, const QStringList &labels)
     QMap<int, QVector<int> > countMap; //计数每个关键词的标签所在领域
     for (int i = 0; i < labels.count(); ++i)
     {
-        query->prepare("select id, parent from labels where name=:name");
+        query->prepare("select id, parent,is_leaf from labels where name=:name");
         query->bindValue(":name", labels[i]);
         query->exec();
         if (query->next())
         {
             int id = query->value(0).toInt();
             int parentId = query->value(1).toInt();
-            countMap[parentId].append(id);
+            bool isLeaf = query->value(2).toBool();
+            if (isLeaf)
+                countMap[parentId].append(id);
+            else
+                countMap[id].append(id);
         }
     }
     QMapIterator<int, QVector<int> > iter(countMap);
