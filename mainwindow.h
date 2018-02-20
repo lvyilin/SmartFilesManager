@@ -80,6 +80,7 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
+    bool calculateRelationSeparately = true;
 
     void readyQuit();
     void createTrayIcon();

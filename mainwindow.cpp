@@ -341,6 +341,7 @@ void MainWindow::notifyIndexResult(int success, int fail)
     ui->statusBar->showMessage(tr("文件索引建立完成."));
     if (configHelper->isAutoCalRelation())
     {
+        calculateRelationSeparately = false;
         startCalculateRelation();
     }
     else
@@ -522,7 +523,7 @@ void MainWindow::notifyRelationFinished()
 {
     ui->statusBar->showMessage(tr("文件关系计算完成."));
     QString finishMsg;
-    if (configHelper->isAutoCalRelation())
+    if (!calculateRelationSeparately)
     {
         finishMsg = "本次任务完成，打开界面以查看结果";
     }
