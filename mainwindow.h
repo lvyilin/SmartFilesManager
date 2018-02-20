@@ -17,6 +17,7 @@
 #include "toolkitinitthread.h"
 #include "filetreemodel.h"
 #include "relationcalculator.h"
+#include "searchdialog.h"
 
 class SettingsDialog;
 
@@ -71,6 +72,12 @@ private slots:
 
     void on_actionBuildRelation_triggered();
 
+    void on_actionQuickSearch_triggered();
+
+    void on_actionAdvancedSearch_triggered();
+
+    void on_actionRefrashFiles_triggered();
+
 private:
     Ui::MainWindow *ui;
 
@@ -86,11 +93,14 @@ private:
     QSystemTrayIcon *trayIcon;
     QMenu *trayIconMenu;
     SettingsDialog *settingsDialog;
+    SearchDialog *searchDialog;
     DBHelper *dbHelper;
     QTimer *triggerTimer;
     Analyser *analyser;
     FileTreeModel *fileTreeModel = nullptr;
     RelationCalculator *relationCalculator = nullptr;
+
+    QLineEdit *searchLineEdit;
 
 };
 

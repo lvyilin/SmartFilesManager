@@ -39,7 +39,8 @@ SOURCES += \
     fileitem.cpp \
     relationcalculatetask.cpp \
     relationcalculator.cpp \
-    numerictablewidgetitem.cpp
+    numerictablewidgetitem.cpp \
+    searchdialog.cpp
 
 HEADERS += \
     settingsdialog.h \
@@ -91,11 +92,13 @@ HEADERS += \
     fileitem.h \
     relationcalculatetask.h \
     relationcalculator.h \
-    numerictablewidgetitem.h
+    numerictablewidgetitem.h \
+    searchdialog.h
 
 FORMS += \
     settingsdialog.ui \
-    mainwindow.ui
+    mainwindow.ui \
+    searchdialog.ui
 
 RESOURCES += \
     images.qrc

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>692</width>
-    <height>550</height>
+    <width>808</width>
+    <height>637</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -187,7 +187,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>692</width>
+     <width>808</width>
      <height>26</height>
     </rect>
    </property>
@@ -208,7 +208,15 @@
     <addaction name="actionAbout"/>
     <addaction name="separator"/>
    </widget>
+   <widget class="QMenu" name="menu_S">
+    <property name="title">
+     <string>搜索(&amp;S)</string>
+    </property>
+    <addaction name="actionQuickSearch"/>
+    <addaction name="actionAdvancedSearch"/>
+   </widget>
    <addaction name="menu"/>
+   <addaction name="menu_S"/>
    <addaction name="menu_2"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
@@ -234,6 +242,7 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="actionRefrashFiles"/>
    <addaction name="actionIndex"/>
    <addaction name="actionBuildRelation"/>
   </widget>
@@ -294,6 +303,28 @@
    </property>
    <property name="toolTip">
     <string>关系重建</string>
+   </property>
+  </action>
+  <action name="actionAdvancedSearch">
+   <property name="text">
+    <string>高级搜索(&amp;A)</string>
+   </property>
+  </action>
+  <action name="actionQuickSearch">
+   <property name="text">
+    <string>快速搜索(&amp;Q)</string>
+   </property>
+  </action>
+  <action name="actionRefrashFiles">
+   <property name="icon">
+    <iconset resource="images.qrc">
+     <normaloff>:/images/icons/refresh.png</normaloff>:/images/icons/refresh.png</iconset>
+   </property>
+   <property name="text">
+    <string>更新文件库</string>
+   </property>
+   <property name="toolTip">
+    <string>更新文件库</string>
    </property>
   </action>
  </widget>

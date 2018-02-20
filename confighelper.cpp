@@ -23,6 +23,7 @@ void ConfigHelper::readSettings()
     scanIntervalHours = settings->value("ScanIntervalHours", QVariant(12)).toInt();
     fileIndexFinished = settings->value("FileIndexFinished", QVariant(false)).toBool();
     interruptionType = static_cast<InterruptionType>(settings->value("InterruptionType", QVariant(static_cast<int>(NoInterrupt))).toInt());
+    autoCalculateRelation = settings->value("AutoCalRelation", QVariant(true)).toBool();
     //detact termination
     settings->setValue("InterruptionType", QVariant(static_cast<int>(TerminateInterrupt)));
 
@@ -47,6 +48,7 @@ void ConfigHelper::saveSettings()
     settings->setValue("CpuTriggerPercent", QVariant(static_cast<int>(cpuTriggerPercent)));
     settings->setValue("TimeTriggerPoint", QVariant(timeTriggerPoint));
     settings->setValue("ScanIntervalHours", QVariant(scanIntervalHours));
+    settings->setValue("AutoCalRelation", QVariant(autoCalculateRelation));
 
     int pathSize = pathModel->rowCount();
     qDebug() << "[saveSettings] path size: " << pathSize;
@@ -90,22 +92,22 @@ int ConfigHelper::getScanInterval() const
     return scanIntervalHours;
 }
 
-void ConfigHelper::setSettings(bool st, int cpuPct, int intv)
+void ConfigHelper::setSettings(bool st, int cpuPct, int intv, bool autoCal)
 {
     startAtBoot = st;
     cpuTriggerPercent = cpuPct;
     scanIntervalHours = intv;
     runningStrategy = CpuTrigger;
-
+    autoCalculateRelation = autoCal;
 }
 
-void ConfigHelper::setSettings(bool st, const QTime &timeTriPt, int intv)
+void ConfigHelper::setSettings(bool st, const QTime &timeTriPt, int intv, bool autoCal)
 {
     startAtBoot = st;
     timeTriggerPoint = timeTriPt;
     scanIntervalHours = intv;
     runningStrategy = TimeTrigger;
-
+    autoCalculateRelation = autoCal;
 }
 
 bool ConfigHelper::hasLastInterrupted() const
@@ -138,4 +140,9 @@ void ConfigHelper::setFileIndexFinished(bool value)
 bool ConfigHelper::isFileIndexFinished() const
 {
     return fileIndexFinished;
+}
+
+bool ConfigHelper::isAutoCalRelation() const
+{
+    return autoCalculateRelation;
 }

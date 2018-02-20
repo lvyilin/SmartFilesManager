@@ -26,10 +26,10 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 
     setWindowTitle(QCoreApplication::applicationName());
-    QLineEdit *searchLineEdit = new QLineEdit(this);
+    searchLineEdit = new QLineEdit(this);
     QPushButton *searchButton = new QPushButton(QIcon(":/images/icons/search.png"), QString(), this);
     connect(searchButton, &QPushButton::clicked, searchLineEdit, &QLineEdit::returnPressed);
-    searchLineEdit->setPlaceholderText("搜索文件");
+    searchLineEdit->setPlaceholderText("快速搜索");
     searchLineEdit->setFixedHeight(searchButton->height() * 0.9);
     searchLineEdit->setMaximumWidth(this->width() / 2);
     QWidget *spacer = new QWidget(this);
@@ -42,6 +42,7 @@ MainWindow::MainWindow(QWidget *parent) :
     //primary init
     configHelper->readSettings();
     settingsDialog = new SettingsDialog(configHelper, this);
+    searchDialog = new SearchDialog(this);
     dbHelper = new DBHelper(QString("SFM"), QString("sfm.db"), this);
 
     analyser = new Analyser(dbHelper, this);
@@ -102,7 +103,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
     {
         hide();
         if (configHelper->isFirstTimeUsing())
-            trayIcon->showMessage(tr("智能文件管家"), tr("后台运行中"));
+            trayIcon->showMessage(QCoreApplication::applicationName(), tr("后台运行中"));
         event->ignore();
     }
 }
@@ -147,7 +148,7 @@ void MainWindow::createTrayIcon()
     trayIcon = new QSystemTrayIcon(QIcon(":/images/icons/tray.png"), this);
 
     trayIcon->setContextMenu(trayIconMenu);
-    trayIcon->setToolTip(tr("打开智能文件管家"));
+    trayIcon->setToolTip("打开" + QCoreApplication::applicationName());
 }
 
 void MainWindow::setTrigger()
@@ -338,11 +339,18 @@ void MainWindow::showUpdaterProgress(int num)
 void MainWindow::notifyIndexResult(int success, int fail)
 {
     ui->statusBar->showMessage(tr("文件索引建立完成."));
-    trayIcon->showMessage(tr("智能文件管家"),
-                          tr("索引建立完成, 成功%1个，失败%2个, 打开主页面以查看结果")
-                          .arg(success)
-                          .arg(fail));
-    connect(trayIcon, SIGNAL(messageClicked()), this, SLOT(showWindowAndDisconnect()));
+    if (configHelper->isAutoCalRelation())
+    {
+        startCalculateRelation();
+    }
+    else
+    {
+        trayIcon->showMessage(QCoreApplication::applicationName(),
+                              tr("索引建立完成, 成功%1个，失败%2个, 打开主页面以查看结果")
+                              .arg(success)
+                              .arg(fail));
+        connect(trayIcon, SIGNAL(messageClicked()), this, SLOT(showWindowAndDisconnect()));
+    }
 }
 
 void MainWindow::showWindowAndDisconnect()
@@ -513,8 +521,16 @@ void MainWindow::startCalculateRelation()
 void MainWindow::notifyRelationFinished()
 {
     ui->statusBar->showMessage(tr("文件关系计算完成."));
-    trayIcon->showMessage(tr("智能文件管家"),
-                          tr("文件关系建立完成。"));
+    QString finishMsg;
+    if (configHelper->isAutoCalRelation())
+    {
+        finishMsg = "本次任务完成，打开界面以查看结果";
+    }
+    else
+    {
+        finishMsg = "文件关系建立完成";
+    }
+    trayIcon->showMessage(QCoreApplication::applicationName(), finishMsg);
 }
 
 void MainWindow::on_actionIndex_triggered()
@@ -525,4 +541,19 @@ void MainWindow::on_actionIndex_triggered()
 void MainWindow::on_actionBuildRelation_triggered()
 {
     startCalculateRelation();
+}
+
+void MainWindow::on_actionQuickSearch_triggered()
+{
+    searchLineEdit->setFocus();
+}
+
+void MainWindow::on_actionAdvancedSearch_triggered()
+{
+    searchDialog->show();
+}
+
+void MainWindow::on_actionRefrashFiles_triggered()
+{
+    rebuildFilesList();
 }
