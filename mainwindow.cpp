@@ -24,7 +24,20 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     //ui
     ui->setupUi(this);
+
     setWindowTitle(QCoreApplication::applicationName());
+    QLineEdit *searchLineEdit = new QLineEdit(this);
+    QPushButton *searchButton = new QPushButton(QIcon(":/images/icons/search.png"), QString(), this);
+    connect(searchButton, &QPushButton::clicked, searchLineEdit, &QLineEdit::returnPressed);
+    searchLineEdit->setPlaceholderText("搜索文件");
+    searchLineEdit->setFixedHeight(searchButton->height() * 0.9);
+    searchLineEdit->setMaximumWidth(this->width() / 2);
+    QWidget *spacer = new QWidget(this);
+    spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    ui->toolBar->addWidget(spacer);
+    ui->toolBar->addWidget(searchLineEdit);
+    ui->toolBar->addWidget(searchButton);
+
     //    connect(ui->processButton, SIGNAL(clicked(bool)), this, SLOT(processWorkList()));
     //primary init
     configHelper->readSettings();
@@ -343,11 +356,6 @@ void MainWindow::on_actionAbout_triggered()
     about();
 }
 
-void MainWindow::on_actionStart_triggered()
-{
-    processWorkList();
-}
-
 void MainWindow::onStartInitToolkit()
 {
     ui->statusBar->showMessage(tr("正在初始化词典中..."), 0);
@@ -502,14 +510,19 @@ void MainWindow::startCalculateRelation()
 
 }
 
-void MainWindow::on_actionRelation_triggered()
-{
-    startCalculateRelation();
-}
-
 void MainWindow::notifyRelationFinished()
 {
     ui->statusBar->showMessage(tr("文件关系计算完成."));
     trayIcon->showMessage(tr("智能文件管家"),
                           tr("文件关系建立完成。"));
+}
+
+void MainWindow::on_actionIndex_triggered()
+{
+    processWorkList();
+}
+
+void MainWindow::on_actionBuildRelation_triggered()
+{
+    startCalculateRelation();
 }

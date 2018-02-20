@@ -8,6 +8,8 @@
 #include <QSet>
 #include <QFileInfo>
 #include <QTimer>
+#include <QLineEdit>
+#include <QPushButton>
 #include "utils.h"
 #include "confighelper.h"
 #include "dbhelper.h"
@@ -56,8 +58,6 @@ private slots:
     void fileUpdaterFinished();
     void analyserInterrupted();
 
-    void on_actionStart_triggered();
-
     void onStartInitToolkit();
     void onFinishInitToolkit();
 
@@ -65,9 +65,11 @@ private slots:
 
     void on_treeView_clicked(const QModelIndex &index);
 
-    void on_actionRelation_triggered();
-
     void notifyRelationFinished();
+
+    void on_actionIndex_triggered();
+
+    void on_actionBuildRelation_triggered();
 
 private:
     Ui::MainWindow *ui;
@@ -87,10 +89,9 @@ private:
     DBHelper *dbHelper;
     QTimer *triggerTimer;
     Analyser *analyser;
-
     FileTreeModel *fileTreeModel = nullptr;
-
     RelationCalculator *relationCalculator = nullptr;
+
 };
 
 #endif // MAINWINDOW_H
