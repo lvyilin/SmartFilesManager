@@ -53,7 +53,7 @@ enum RunningStrategy
 
 enum InterruptionType
 {
-    NoInterrupt, AnalyserInterrupt, FileUpdaterInterrupt, TerminateInterrupt
+    NoInterrupt, AnalyserInterrupt, FileUpdaterInterrupt, DBInterrupt, TerminateInterrupt
 };
 
 enum ProcessingResult

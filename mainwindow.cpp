@@ -44,10 +44,14 @@ MainWindow::MainWindow(QWidget *parent) :
     settingsDialog = new SettingsDialog(configHelper, this);
     searchDialog = new SearchDialog(this);
     dbHelper = new DBHelper(QString("SFM"), QString("sfm.db"), this);
+    connect(this, &MainWindow::quitTask, dbHelper, &DBHelper::abortProgress);
+    connect(dbHelper, &DBHelper::dbInterrupted, this, &MainWindow::dbHelperInterrupted);
+    connect(dbHelper, &DBHelper::calRelationProgress, this, &MainWindow::showCalRelationProgress);
 
     analyser = new Analyser(dbHelper, this);
     connect(analyser, &Analyser::interrupted, this, &MainWindow::analyserInterrupted);
     connect(analyser, &Analyser::processFinished, this, &MainWindow::notifyIndexResult);
+    connect(analyser, &Analyser::analyseProgress, this, &MainWindow::showAnalyserProgress);
 
     //view
     setupView();
@@ -79,6 +83,10 @@ MainWindow::MainWindow(QWidget *parent) :
                 break;
             case AnalyserInterrupt:
                 processWorkList();
+                break;
+            case DBInterrupt:
+                startCalculateRelation();
+                break;
             default:
                 break;
             }
@@ -125,13 +133,12 @@ void MainWindow::readyQuit()
 {
     configHelper->setInterruptionType(NoInterrupt);
 
-    emit quitWorkingThread();
-    //    emit fileUpdaterWait();
+    emit quitTask();
 
     analyser->quitAll();
-    dbHelper->close();
     configHelper->close();
     this->thread()->wait(1000);
+    dbHelper->close();
     qDebug() << "Safely exit, Bye!";
     QCoreApplication::quit();
 }
@@ -239,7 +246,7 @@ void MainWindow::processWorkList(bool triggered)
         return;
     }
     qDebug() << "【processWorkList】 start process work list...";
-    ui->statusBar->showMessage(tr("正在处理文件列表..."));
+    //    ui->statusBar->showMessage(tr("正在处理文件列表..."));
 
     //获取一次任务最大文件数个文件，再分配到多个线程
     QVector<File> workList;
@@ -302,7 +309,7 @@ void MainWindow::updateFilesList(bool renew)
     connect(updateThread, &FileUpdaterThread::finished, &QObject::deleteLater);
     connect(updateThread, &FileUpdaterThread::aborted, this, &MainWindow::fileUpdaterInterrupted);
     //    connect(this, &MainWindow::fileUpdaterWait, updateThread, &FileUpdaterThread::wait);
-    connect(this, &MainWindow::quitWorkingThread, updateThread, &FileUpdaterThread::abortProgress);
+    connect(this, &MainWindow::quitTask, updateThread, &FileUpdaterThread::abortProgress);
     updateThread->start();
 }
 
@@ -321,6 +328,11 @@ void MainWindow::analyserInterrupted()
     configHelper->setInterruptionType(AnalyserInterrupt);
 }
 
+void MainWindow::dbHelperInterrupted()
+{
+    configHelper->setInterruptionType(DBInterrupt);
+}
+
 void MainWindow::showUpdaterResult(const QString &res)
 {
     ui->statusBar->showMessage(res);
@@ -334,6 +346,16 @@ void MainWindow::showUpdaterDbProgress()
 void MainWindow::showUpdaterProgress(int num)
 {
     ui->statusBar->showMessage(tr("正在添加文件...已找到 %1").arg(num));
+}
+
+void MainWindow::showAnalyserProgress(int num)
+{
+    ui->statusBar->showMessage(tr("正在分析文件...已完成 %1").arg(num));
+}
+
+void MainWindow::showCalRelationProgress(int num, int total)
+{
+    ui->statusBar->showMessage(tr("正在保存文件关系计算结果...(%1/%2)").arg(num).arg(total));
 }
 
 void MainWindow::notifyIndexResult(int success, int fail)

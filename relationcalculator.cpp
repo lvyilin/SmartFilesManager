@@ -1,6 +1,7 @@
 ﻿#include "relationcalculator.h"
 #include "relationcalculatetask.h"
 #include <QDebug>
+#include <QCoreApplication>
 
 RelationCalculator::RelationCalculator(DBHelper *db, QObject *parent):
     dbHelper(db),

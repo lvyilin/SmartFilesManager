@@ -4,6 +4,7 @@
 
 #include "dbhelper.h"
 #include <qDebug>
+#include <QCoreApplication>
 
 DBHelper::DBHelper(const QString &conName, const QString &dbName, QObject *parent) : QObject(parent)
 {
@@ -70,6 +71,7 @@ void DBHelper::cleanFiles()
 
 void DBHelper::close()
 {
+    query->finish();
     db.close();
 }
 
@@ -403,6 +405,7 @@ void DBHelper::getFinishedFileResults(QList<FileResult> &frs)
     getAllFiles(list, idList, true);
     for (int i = 0; i < list.count(); ++i)
     {
+        //        QCoreApplication::processEvents();
         FileResult fr;
         fr.file = list[i];
         getFileResultById(fr, idList[i]);
@@ -412,11 +415,17 @@ void DBHelper::getFinishedFileResults(QList<FileResult> &frs)
 
 void DBHelper::saveFileResults(QList<FileResult> &frs)
 {
-    for (int i = 0; i < frs.size(); ++i)
+    const int size = frs.size();
+    for (int i = 0; i < size; ++i)
     {
+        emit calRelationProgress(i + 1, size);
         int id = getFileId(frs[i].file.path);
         for (int j = 0; j < frs[i].relations.size(); ++j)
         {
+            if (abortFlag)
+                return;
+            QCoreApplication::processEvents();
+            //            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
             int idB = getFileId(frs[i].relations[j].file.path);
             db.transaction();
 
@@ -481,6 +490,12 @@ void DBHelper::saveSingleFileResult(const FileResult &fr)
         }
     }
     mutex.unlock();
+}
+
+void DBHelper::abortProgress()
+{
+    abortFlag = true;
+    emit dbInterrupted();
 }
 
 

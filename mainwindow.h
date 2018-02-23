@@ -33,7 +33,7 @@ public:
     ~MainWindow();
 
 signals:
-    void quitWorkingThread();
+    void quitTask();
     void fileUpdaterWait(unsigned long time);
 
 protected:
@@ -51,6 +51,8 @@ private slots:
     void on_actionAbout_triggered();
     void showUpdaterResult(const QString &res);
     void showUpdaterProgress(int num);
+    void showAnalyserProgress(int num);
+    void showCalRelationProgress(int num, int total);
     void showUpdaterDbProgress();
     void notifyIndexResult(int success, int fail);
     void updateFilesList(bool renew = false);
@@ -58,6 +60,7 @@ private slots:
     void fileUpdaterInterrupted();
     void fileUpdaterFinished();
     void analyserInterrupted();
+    void dbHelperInterrupted();
 
     void onStartInitToolkit();
     void onFinishInitToolkit();

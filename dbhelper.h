@@ -85,7 +85,10 @@ public:
     void saveSingleFileResult(const FileResult &fr);
 
 signals:
+    void calRelationProgress(int num, int total);
+    void dbInterrupted();
 public slots:
+    void abortProgress();
 private:
     void createTable();
     int getFileId(const QString &path);
@@ -95,6 +98,7 @@ private:
     QSqlDatabase db;
     QSqlQuery *query;
     QMutex mutex;
+    bool abortFlag = false;
 };
 
 #endif // DBHELPER_H

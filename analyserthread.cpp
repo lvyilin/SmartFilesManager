@@ -44,7 +44,7 @@ void AnalyserThread::run()
         default:
             break;
         }
-
+        finishOne();
     }
     emit resultReady(successCount, failCount);
 }
@@ -97,9 +97,9 @@ ProcessingResult AnalyserThread::processFile(const File &file)
     else return FileFormatNotSupported;
 
     if (abortFlag) return ProcessAborted;
-//
-//开始对文件内容进行处理
-//
+    //
+    //开始对文件内容进行处理
+    //
     FileProduct fileProduct;
     fileProduct.file = file;
     fileProduct.contents = textContent;

@@ -8,7 +8,7 @@ Analyser::Analyser(DBHelper *dh, QObject *parent) :
     QObject(parent),
     dbHelper(dh)
 {
-    successCount = failCount = 0;
+    successCount = failCount = finishCount = 0;
     threadCount = 0;
 }
 
@@ -33,6 +33,7 @@ void Analyser::processFileList(const QList<File> &fileList)
     connect(workerThread, &AnalyserThread::aborted, this, &Analyser::analyserInterrupted);
     connect(this, &Analyser::threadQuit, workerThread, &AnalyserThread::abortProgress);
     connect(this, &Analyser::threadWait, workerThread, &AnalyserThread::wait);
+    connect(workerThread, &AnalyserThread::finishOne, this, &Analyser::threadProgressAdded);
     workerThread->start();
     qDebug() << "[Analyser] total threads now: " << threadCount;
 }
@@ -49,6 +50,7 @@ void Analyser::handleResult(int success, int fail)
     successCount += success;
     failCount += fail;
     mutex.unlock();
+    emit analyseProgress(successCount + failCount);
     if (threadCount == 0)
     {
         emit processFinished(successCount, failCount);
@@ -59,6 +61,11 @@ void Analyser::handleResult(int success, int fail)
 void Analyser::analyserInterrupted()
 {
     emit interrupted();
+}
+
+void Analyser::threadProgressAdded()
+{
+    emit analyseProgress(++finishCount);
 }
 
 void Analyser::quitAll()
