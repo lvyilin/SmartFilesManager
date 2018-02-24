@@ -18,6 +18,7 @@
 #include "filetreemodel.h"
 #include "relationcalculator.h"
 #include "searchdialog.h"
+#include "searchbox.h"
 
 class SettingsDialog;
 
@@ -35,6 +36,10 @@ public:
 signals:
     void quitTask();
     void fileUpdaterWait(unsigned long time);
+
+public slots:
+    void treeViewFocus(const QString &str);
+    void fileNotFoundMsgBox();
 
 protected:
     void closeEvent(QCloseEvent *event) override;
@@ -104,7 +109,8 @@ private:
     FileTreeModel *fileTreeModel = nullptr;
     RelationCalculator *relationCalculator = nullptr;
 
-    QLineEdit *searchLineEdit;
+    SearchBox *searchBox;
+    QList<File> fileList;
 
 };
 

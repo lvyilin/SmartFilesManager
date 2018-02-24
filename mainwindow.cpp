@@ -26,16 +26,19 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 
     setWindowTitle(QCoreApplication::applicationName());
-    searchLineEdit = new QLineEdit(this);
+    searchBox = new SearchBox(&fileList, this);
     QPushButton *searchButton = new QPushButton(QIcon(":/images/icons/search.png"), QString(), this);
-    connect(searchButton, &QPushButton::clicked, searchLineEdit, &QLineEdit::returnPressed);
-    searchLineEdit->setPlaceholderText("快速搜索");
-    searchLineEdit->setFixedHeight(searchButton->height() * 0.9);
-    searchLineEdit->setMaximumWidth(this->width() / 2);
+    searchButton->setToolTip("搜索/下一个");
+    connect(searchButton, &QPushButton::clicked, searchBox, &QLineEdit::returnPressed);
+    searchBox->setPlaceholderText("快速搜索");
+    searchBox->setFixedHeight(searchButton->height() * 0.9);
+    searchBox->setMaximumWidth(this->width() / 2);
+    connect(searchBox, &SearchBox::findFile, this, &MainWindow::treeViewFocus);
+    connect(searchBox, &SearchBox::fileNotFound, this, &MainWindow::fileNotFoundMsgBox);
     QWidget *spacer = new QWidget(this);
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     ui->toolBar->addWidget(spacer);
-    ui->toolBar->addWidget(searchLineEdit);
+    ui->toolBar->addWidget(searchBox);
     ui->toolBar->addWidget(searchButton);
 
     //    connect(ui->processButton, SIGNAL(clicked(bool)), this, SLOT(processWorkList()));
@@ -413,7 +416,6 @@ void MainWindow::setupView()
     ui->tableWidgetRelation->setColumnWidth(0, ui->tableWidgetRelation->width() - fontWidth);
     ui->tableWidgetRelation->setColumnWidth(1, fontWidth);
 
-    QList<File> fileList;
     QList<int> idList;
 
     dbHelper->getAllFiles(fileList, idList);
@@ -431,6 +433,29 @@ void MainWindow::setupView()
         fileTreeModel = anotherModel;
     }
     ui->treeView->show();
+}
+
+void MainWindow::treeViewFocus(const QString &str)
+{
+
+    QModelIndexList idxs = fileTreeModel->match(
+                               fileTreeModel->index(0, 0),
+                               Qt::ToolTipRole,
+                               QVariant(str),
+                               1,
+                               Qt::MatchRecursive);
+    if (idxs.isEmpty())
+    {
+        fileNotFoundMsgBox();
+        return;
+    }
+    ui->treeView->setCurrentIndex(idxs[0]);
+    on_treeView_clicked(idxs[0]);
+}
+
+void MainWindow::fileNotFoundMsgBox()
+{
+    QMessageBox::information(this, QCoreApplication::applicationName(), "找不到文件");
 }
 
 void MainWindow::on_treeView_clicked(const QModelIndex &index)
@@ -568,7 +593,7 @@ void MainWindow::on_actionBuildRelation_triggered()
 
 void MainWindow::on_actionQuickSearch_triggered()
 {
-    searchLineEdit->setFocus();
+    searchBox->setFocus();
 }
 
 void MainWindow::on_actionAdvancedSearch_triggered()

@@ -36,6 +36,7 @@ bool DBHelper::hasIndex() const
 
 void DBHelper::addFiles(const QList<File> &filesList)
 {
+    working = true;
     if (!db.transaction())
     {
         qDebug() << "db transaction unsupported?";
@@ -58,6 +59,7 @@ void DBHelper::addFiles(const QList<File> &filesList)
         qDebug() << "db commit error: " << db.lastError();
         db.rollback();
     }
+    working = false;
 }
 
 void DBHelper::cleanFiles()
@@ -77,6 +79,7 @@ void DBHelper::close()
 
 void DBHelper::getWorkList(QVector<File> &li, int maxNum)
 {
+    working = true;
     //仅返回可以处理的格式的文件
     for (QString fmt : SUPPORTED_FORMATS)
     {
@@ -97,6 +100,7 @@ void DBHelper::getWorkList(QVector<File> &li, int maxNum)
             li.append(temp);
         }
     }
+    working = false;
 }
 
 void DBHelper::createTable()
@@ -415,6 +419,7 @@ void DBHelper::getFinishedFileResults(QList<FileResult> &frs)
 
 void DBHelper::saveFileResults(QList<FileResult> &frs)
 {
+    working = true;
     const int size = frs.size();
     for (int i = 0; i < size; ++i)
     {
@@ -454,6 +459,7 @@ void DBHelper::saveFileResults(QList<FileResult> &frs)
             }
         }
     }
+    working = false;
 }
 
 void DBHelper::saveSingleFileResult(const FileResult &fr)
@@ -494,8 +500,11 @@ void DBHelper::saveSingleFileResult(const FileResult &fr)
 
 void DBHelper::abortProgress()
 {
-    abortFlag = true;
-    emit dbInterrupted();
+    if (working)
+    {
+        abortFlag = true;
+        emit dbInterrupted();
+    }
 }
 
 

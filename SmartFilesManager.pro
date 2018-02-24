@@ -40,7 +40,9 @@ SOURCES += \
     relationcalculatetask.cpp \
     relationcalculator.cpp \
     numerictablewidgetitem.cpp \
-    searchdialog.cpp
+    searchdialog.cpp \
+    searchbox.cpp \
+    searchpopup.cpp
 
 HEADERS += \
     settingsdialog.h \
@@ -93,7 +95,9 @@ HEADERS += \
     relationcalculatetask.h \
     relationcalculator.h \
     numerictablewidgetitem.h \
-    searchdialog.h
+    searchdialog.h \
+    searchbox.h \
+    searchpopup.h
 
 FORMS += \
     settingsdialog.ui \

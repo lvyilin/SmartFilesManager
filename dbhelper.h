@@ -99,6 +99,7 @@ private:
     QSqlQuery *query;
     QMutex mutex;
     bool abortFlag = false;
+    bool working = false;
 };
 
 #endif // DBHELPER_H
