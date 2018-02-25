@@ -14,7 +14,7 @@
 #include "confighelper.h"
 #include "dbhelper.h"
 #include "analyser.h"
-#include "toolkitinitthread.h"
+//#include "toolkitinitthread.h"
 #include "filetreemodel.h"
 #include "relationcalculator.h"
 #include "searchdialog.h"

@@ -16,6 +16,7 @@
 #include <qDebug>
 
 
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
@@ -134,6 +135,7 @@ void MainWindow::iconActivated(QSystemTrayIcon::ActivationReason reason)
 
 void MainWindow::readyQuit()
 {
+    disconnect(relationCalculator, &RelationCalculator::allTasksFinished, this, &MainWindow::notifyRelationFinished);
     configHelper->setInterruptionType(NoInterrupt);
 
     emit quitTask();
@@ -392,7 +394,7 @@ void MainWindow::on_actionAbout_triggered()
 
 void MainWindow::onStartInitToolkit()
 {
-    ui->statusBar->showMessage(tr("正在初始化词典中..."), 0);
+    ui->statusBar->showMessage(tr("正在初始化词典..."));
 }
 
 void MainWindow::onFinishInitToolkit()
@@ -608,6 +610,7 @@ void MainWindow::notifyRelationFinished()
 
 void MainWindow::on_actionIndex_triggered()
 {
+    onStartInitToolkit();
     processWorkList();
 }
 
