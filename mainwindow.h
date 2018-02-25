@@ -86,6 +86,10 @@ private slots:
 
     void on_actionRefrashFiles_triggered();
 
+    void on_actionOpenFile_triggered();
+    void on_actionOpenFolder_triggered();
+    void showContextMenu(const QPoint &pos);
+
 private:
     Ui::MainWindow *ui;
     bool calculateRelationSeparately = true;
@@ -111,6 +115,8 @@ private:
 
     SearchBox *searchBox;
     QList<File> fileList;
+
+    QMenu *fileTreeMenu = nullptr;
 
 };
 

@@ -142,7 +142,7 @@ void SearchPopup::autoSuggest()
     for (int i = 0; i < fileList->size(); ++i)
     {
         if (fileList->at(i).name.contains(str, Qt::CaseInsensitive))
-            choices << fileList->value(i);
+            choices << fileList->at(i);
     }
     showSearchResult(choices);
 }

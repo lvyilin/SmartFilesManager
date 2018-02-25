@@ -12,7 +12,8 @@
 #include <QMenu>
 #include <QMessageBox>
 #include <QTime>
-
+#include <QDesktopServices>
+#include <QProcess>
 #include <qDebug>
 
 
@@ -420,6 +421,8 @@ void MainWindow::setupView()
 
     QList<int> idList;
 
+    connect(ui->treeView, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(showContextMenu(QPoint)));
+
     dbHelper->getAllFiles(fileList, idList);
     //    ui->treeView->hide();
     if (fileTreeModel == nullptr)
@@ -632,4 +635,54 @@ void MainWindow::on_actionAdvancedSearch_triggered()
 void MainWindow::on_actionRefrashFiles_triggered()
 {
     rebuildFilesList();
+}
+
+void MainWindow::on_actionOpenFile_triggered()
+{
+    QString path = ui->treeView->currentIndex().data(Qt::ToolTipRole).toString();
+    if (!path.isEmpty())
+        QDesktopServices::openUrl(QUrl::fromLocalFile(path));
+}
+
+void MainWindow::on_actionOpenFolder_triggered()
+{
+    QString path = ui->treeView->currentIndex().data(Qt::ToolTipRole).toString();
+    /*QFileInfo info(path);
+    if (path.isEmpty())
+        return;
+
+    if (!info.isDir())
+    {
+        path = info.absolutePath();
+    }
+    QDesktopServices::openUrl(QUrl::fromLocalFile(path));*/
+
+    const QString explorer = "explorer.exe";
+    if (explorer.isEmpty())
+    {
+        QMessageBox::warning(this,
+                             tr("Launching Windows Explorer failed"),
+                             tr("Could not find explorer.exe in path to launch Windows Explorer."));
+        return;
+    }
+    QString param;
+    if (!QFileInfo(path).isDir())
+        param = QLatin1String("/select,");
+    param += QDir::toNativeSeparators(path);
+    QString command = explorer + " " + param;
+    QProcess::startDetached(command);
+}
+
+void MainWindow::showContextMenu(const QPoint &pos)
+{
+    QPoint globalPos = ui->treeView->mapToGlobal(pos);
+    QModelIndex index = ui->treeView->indexAt(pos);
+    if (!index.isValid() || index.data(Qt::ToolTipRole).toString().isEmpty())
+        return;
+    if (fileTreeMenu != nullptr)
+        delete fileTreeMenu;
+    fileTreeMenu = new QMenu(this);
+    fileTreeMenu->addAction(ui->actionOpenFile);
+    fileTreeMenu->addAction(ui->actionOpenFolder);
+    fileTreeMenu->exec(globalPos);
 }
