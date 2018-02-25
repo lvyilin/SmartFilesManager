@@ -27,13 +27,6 @@
        <layout class="QGridLayout" name="gridLayout">
         <item row="0" column="1">
          <layout class="QGridLayout" name="gridLayout_5">
-          <item row="2" column="0">
-           <widget class="QListWidget" name="listWidgetField">
-            <property name="editTriggers">
-             <set>QAbstractItemView::NoEditTriggers</set>
-            </property>
-           </widget>
-          </item>
           <item row="0" column="0">
            <widget class="QTableWidget" name="tableWidgetAttr">
             <property name="enabled">
@@ -97,6 +90,21 @@
             </property>
            </widget>
           </item>
+          <item row="2" column="0">
+           <widget class="QTreeWidget" name="treeWidgetField">
+            <property name="editTriggers">
+             <set>QAbstractItemView::NoEditTriggers</set>
+            </property>
+            <attribute name="headerVisible">
+             <bool>false</bool>
+            </attribute>
+            <column>
+             <property name="text">
+              <string notr="true">1</string>
+             </property>
+            </column>
+           </widget>
+          </item>
          </layout>
         </item>
         <item row="0" column="2">
@@ -158,6 +166,9 @@
         </item>
         <item row="0" column="0">
          <widget class="QTreeView" name="treeView">
+          <property name="editTriggers">
+           <set>QAbstractItemView::NoEditTriggers</set>
+          </property>
           <property name="horizontalScrollMode">
            <enum>QAbstractItemView::ScrollPerPixel</enum>
           </property>
@@ -259,21 +270,6 @@
   <action name="actionExit">
    <property name="text">
     <string>退出(&amp;X)</string>
-   </property>
-  </action>
-  <action name="actionciand">
-   <property name="text">
-    <string>ciand</string>
-   </property>
-  </action>
-  <action name="action_2">
-   <property name="text">
-    <string>词典选择(&amp;D)</string>
-   </property>
-  </action>
-  <action name="action_3">
-   <property name="text">
-    <string>自定义导入(&amp;F)</string>
    </property>
   </action>
   <action name="action_4">

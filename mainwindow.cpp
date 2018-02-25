@@ -460,7 +460,7 @@ void MainWindow::fileNotFoundMsgBox()
 
 void MainWindow::on_treeView_clicked(const QModelIndex &index)
 {
-    ui->listWidgetField->clear();
+    ui->treeWidgetField->clear();
     ui->listWidgetKw->clear();
     ui->listWidgetLabel->clear();
     ui->tableWidgetAttr->setRowCount(0);
@@ -511,13 +511,38 @@ void MainWindow::on_treeView_clicked(const QModelIndex &index)
     ui->tableWidgetAttr->setItem(5, 1, witem);
 
     //field view
+    QList<Label> fieldLabels;
+    QList<QTreeWidgetItem *> fieldItems;
+    QList<QTreeWidgetItem *> topLevelItems;
     for (Label &label : fr.labels)
     {
         if (label.type == "field")
+            fieldLabels << label;
+    }
+    for (int i = 0; i < fieldLabels.count(); ++i)
+    {
+        QTreeWidgetItem *item = new QTreeWidgetItem(QStringList() << fieldLabels[i].name);
+        fieldItems << item;
+        if (fieldLabels[i].level == 1)
+            topLevelItems << item;
+        //            root->addChild(item);
+    }
+    for (int i = 0; i < fieldItems.count(); ++i)
+    {
+        if (fieldLabels[i].level != 1)
         {
-            ui->listWidgetField->addItem(new QListWidgetItem(label.name));
+            for (int j = 0; j < fieldLabels.count(); ++j)
+            {
+                if (fieldLabels[i].parentName == fieldLabels[j].name)
+                {
+                    fieldItems[j]->addChild(fieldItems[i]);
+                }
+            }
         }
     }
+
+    ui->treeWidgetField->addTopLevelItems(topLevelItems);
+    ui->treeWidgetField->expandAll();
 
     //keyword view
 

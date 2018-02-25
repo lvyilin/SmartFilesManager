@@ -352,16 +352,32 @@ void DBHelper::getFileResultById(FileResult &fr, int fileId)
     }
 
     //get labels
-    query->prepare("select name, level, type from labels where id in(select label_id from file_labels where file_id=:id)");
+    query->prepare("select name, level, parent, type from labels where id in(select label_id from file_labels where file_id=:id)");
     query->bindValue(":id", fileId);
     query->exec();
+    QVector<int> parentIds;
     while (query->next())
     {
         Label lb;
         lb.name = query->value(0).toString();
         lb.level = query->value(1).toInt();
-        lb.type = query->value(2).toString();
+        lb.type = query->value(3).toString();
+        parentIds <<  query->value(2).toInt();
+
         fr.labels << lb;
+    }
+    for (int i = 0; i < parentIds.count(); ++i)
+    {
+        if (fr.labels[i].type == "field")
+        {
+            query->prepare("select name from labels where id=:id");
+            query->addBindValue(parentIds[i]);
+            query->exec();
+            if (query->next())
+            {
+                fr.labels[i].parentName = query->value(0).toString();
+            }
+        }
     }
 
     //get relations

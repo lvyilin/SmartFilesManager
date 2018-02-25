@@ -21,6 +21,7 @@ struct Label
     QString name;
     int level;
     QString type;
+    QString parentName;
 };
 
 struct Relation
