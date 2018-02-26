@@ -2,12 +2,12 @@
 
 edge::edge() {}
 
-edge::edge(node start_, node end_, double weight_, QList<QString> *value_)
+edge::edge(node start_, node end_, double weight_, QList<QString> value_)
 {
-    setEdge(start_, end_, weight_, *value_);
+    setedge(start_, end_, weight_, value_);
 }
 
-void edge::setedge(node start_, node end_, double weight_, QList<QString> *value_)
+void edge::setedge(node start_, node end_, double weight_, QList<QString> value_)
 {
     if (start_.getid() > end_.getid())
     {
@@ -20,7 +20,7 @@ void edge::setedge(node start_, node end_, double weight_, QList<QString> *value
 
 }
 
-QList<QString> *edge::getvalue()
+QList<QString> edge::getvalue()
 {
     return value;
 }
@@ -30,7 +30,7 @@ double edge::getweight()
     return weight;
 }
 
-QPair<node, node>edge::getQPair()
+QPair<node, node>edge::getpair()
 {
     return nodepair;
 }

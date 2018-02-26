@@ -4,16 +4,14 @@
 #include "QPair"
 
 class edge {
-private:
+public:
     QPair<node, node> nodepair;
     double weight;//关系度大小
-    QList<String> *value;//用于存储当前边所蕴含关键词
-    void setedge(node start_, node end_, double weight_, QList<QString> *value_);
-
-public:
+    QList<QString> value;//用于存储当前边所蕴含关键词
+    void setedge(node start_, node end_, double weight_, QList<QString> value_);
     edge();
-    edge(node start_, node end_, double weight_, QList<QString> *value_);
-    QList<QString> *getvalue();
+    edge(node start_, node end_, double weight_, QList<QString> value_);
+    QList<QString> getvalue();
     double getweight();
     QPair<node, node >getpair();
 };

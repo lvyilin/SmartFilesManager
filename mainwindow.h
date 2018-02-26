@@ -14,6 +14,8 @@
 #include "analyser.h"
 #include "toolkitinitthread.h"
 #include "filetreemodel.h"
+#include "graphwidget.h"
+#include "wordcloudwidget.h"
 
 class SettingsDialog;
 
@@ -62,6 +64,11 @@ private slots:
 
     void setupFileTreeView();
 
+    void on_treeView_clicked(const QModelIndex &index);
+    void drawgraph();
+
+    void drawwordcloud();
+
 private:
     Ui::MainWindow *ui;
 
@@ -69,6 +76,8 @@ private:
     void createTrayIcon();
     void setTrigger();
     void processWorkList(bool triggered = false);
+
+    QString fileSizeHumanReadable(qint64 num);
 
     ConfigHelper *configHelper;
     QSystemTrayIcon *trayIcon;

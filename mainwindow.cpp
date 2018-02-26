@@ -6,7 +6,8 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "fileupdaterthread.h"
-
+#include "wordcloudwidget.h"
+#include "graphwidget.h"
 #include <QCloseEvent>
 #include <QMenu>
 #include <QMessageBox>
@@ -76,6 +77,13 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(toolkitInitThread, &ToolkitInitThread::finishInit, this, &MainWindow::onFinishInitToolkit);
     connect(this, &MainWindow::quitWorkingThread, toolkitInitThread, &ToolkitInitThread::quit);
     toolkitInitThread->start(QThread::LowPriority);
+
+    //draw graph
+    drawgraph();
+
+    //draw wordcloud
+    drawwordcloud();
+
 }
 
 MainWindow::~MainWindow()
@@ -250,6 +258,22 @@ void MainWindow::processWorkList(bool triggered)
     }
 }
 
+QString MainWindow::fileSizeHumanReadable(qint64 num)
+{
+    QStringList list;
+    list << "KB" << "MB" << "GB" << "TB";
+
+    QStringListIterator i(list);
+    QString unit("bytes");
+
+    while (num >= 1024.0 && i.hasNext())
+    {
+        unit = i.next();
+        num /= 1024.0;
+    }
+    return QString().setNum((float)num, 'f', 2) + " " + unit;
+}
+
 void MainWindow::updateFilesList(bool renew)
 {
     ui->statusBar->showMessage(tr("正在更新文件列表..."));
@@ -345,7 +369,7 @@ void MainWindow::onFinishInitToolkit()
 void MainWindow::setupFileTreeView()
 {
     QList<File> fileList;
-    dbHelper->getAllFiles(fileList);
+    dbHelper->getAllFiles(fileList, QList<int>());
     ui->treeView->hide();
     if (fileTreeModel == nullptr)
     {
@@ -359,6 +383,107 @@ void MainWindow::setupFileTreeView()
         delete fileTreeModel;
         fileTreeModel = anotherModel;
     }
+    //<<< <<< < HEAD
     //    ui->treeView->header()->hide();
+    // == == == =
+    // >>> >>> > 16afcd0eaf899c63ce79cd21857263b42b7d8178
     ui->treeView->show();
+}
+
+void MainWindow::on_treeView_clicked(const QModelIndex &index)
+{
+    ui->tableWidgetAttr->clear();
+    ui->listWidgetField->clear();
+    ui->listWidgetKw->clear();
+    ui->listWidgetLabel->clear();
+    ui->tableWidgetRelation->clear();
+
+    FileItem *item = static_cast<FileItem *>(index.internalPointer());
+    QString path = item->data(1).toString();
+    if (path.isEmpty())
+        return;
+    FileResult fr;
+    dbHelper->getFileResultByPath(path, fr);
+
+    //attribute view
+    ui->tableWidgetAttr->setColumnCount(2);
+    ui->tableWidgetAttr->setRowCount(6);
+
+    int fontHeight = ui->tableWidgetAttr->fontMetrics().height();
+    int fontWidth = ui->tableWidgetAttr->fontMetrics().width("修改日期--");
+    ui->tableWidgetAttr->horizontalHeader()->setStretchLastSection(true);//header宽度自适应
+    for (int i = 0; i < 6; ++i)
+        ui->tableWidgetAttr->setRowHeight(i, fontHeight * 1.2);
+    ui->tableWidgetAttr->setColumnWidth(0, fontWidth);
+
+    QTableWidgetItem *witem;
+    ui->tableWidgetAttr->setItem(0, 0, new QTableWidgetItem(QString("名称")));
+    witem = new QTableWidgetItem(fr.file.name);
+    witem->setToolTip(fr.file.name);
+    ui->tableWidgetAttr->setItem(0, 1, witem);
+
+    ui->tableWidgetAttr->setItem(1, 0, new QTableWidgetItem(QString("类型")));
+    witem = new QTableWidgetItem(fr.file.format);
+    ui->tableWidgetAttr->setItem(1, 1, witem);
+
+    ui->tableWidgetAttr->setItem(2, 0, new QTableWidgetItem(QString("路径")));
+    witem = new QTableWidgetItem(fr.file.path);
+    witem->setToolTip(fr.file.path);
+    ui->tableWidgetAttr->setItem(2, 1, witem);
+
+    ui->tableWidgetAttr->setItem(3, 0, new QTableWidgetItem(QString("大小")));
+    witem = new QTableWidgetItem(fileSizeHumanReadable(fr.file.size));
+    ui->tableWidgetAttr->setItem(3, 1, witem);
+
+    ui->tableWidgetAttr->setItem(4, 0, new QTableWidgetItem(QString("创建日期")));
+    witem = new QTableWidgetItem(
+        fr.file.createTime.toString(Qt::SystemLocaleLongDate));
+    witem->setToolTip(fr.file.createTime.toString(Qt::SystemLocaleLongDate));
+    ui->tableWidgetAttr->setItem(4, 1, witem);
+
+    ui->tableWidgetAttr->setItem(5, 0, new QTableWidgetItem(QString("修改日期")));
+    witem = new QTableWidgetItem(
+        fr.file.modifyTime.toString(Qt::SystemLocaleLongDate));
+    witem->setToolTip(fr.file.modifyTime.toString(Qt::SystemLocaleLongDate));
+    ui->tableWidgetAttr->setItem(5, 1, witem);
+
+    //field view
+    for (QPair<QString, QString> label : fr.labels)
+    {
+        if (label.second == "field")
+        {
+            ui->listWidgetField->addItem(new QListWidgetItem(label.first));
+        }
+    }
+
+    //keyword view
+    for (QPair<QString, QString> label : fr.labels)
+    {
+        if (label.second == "keyword")
+        {
+            ui->listWidgetKw->addItem(new QListWidgetItem(label.first));
+        }
+    }
+
+    //label view
+    for (QPair<QString, QString> label : fr.labels)
+    {
+        ui->listWidgetLabel->addItem(new QListWidgetItem(label.first));
+    }
+    //TODO: other view goes here
+}
+
+
+void MainWindow::drawwordcloud()
+{
+    wordcloudwidget *wordcloudwidget_ = new wordcloudwidget();
+    ui->tabWidget_2->addTab(wordcloudwidget_, "标签词云展示");
+    // ui->word_cloud_4 = wordcloudwidget_;
+}
+
+void MainWindow::drawgraph()
+{
+    graphwidget *graphwidget_ = new graphwidget();
+    ui->tabWidget_2->addTab(graphwidget_, "知识图谱类型视图");
+    // ui->graph_view_2 = graphwidget_;
 }

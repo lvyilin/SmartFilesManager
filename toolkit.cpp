@@ -69,4 +69,5 @@ Toolkit::Toolkit()
                                 QString(prefix + IDF_PATH).toStdString(),
                                 QString(prefix + STOP_WORD_PATH).toStdString()
                                );
+    qDebug() << "dict init complete.";
 }

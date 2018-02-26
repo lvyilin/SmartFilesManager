@@ -30,7 +30,7 @@ void AnalyserThread::run()
             return;
         case NoException:
             ++successCount;
-            dbHelper->setFinish(file, true);
+            dbHelper->setFinished(file, true);
             break;
 
         case FileNotFoundException:

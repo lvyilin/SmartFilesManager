@@ -79,7 +79,7 @@ QVariant FileTreeModel::data(const QModelIndex &index, int role) const
     FileItem *item = static_cast<FileItem *>(index.internalPointer());
 
     if (role == Qt::ToolTipRole)
-        return item->data(0);
+        return item->data(1);
 
     if (role != Qt::DisplayRole)
         return QVariant();

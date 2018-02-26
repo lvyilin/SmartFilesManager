@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>678</width>
-    <height>484</height>
+    <width>692</width>
+    <height>550</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,7 +18,7 @@
     <item row="0" column="0">
      <widget class="QTabWidget" name="tabWidget_2">
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="file_view_2">
        <attribute name="title">
@@ -44,18 +44,12 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="0">
-           <widget class="QListView" name="listView"/>
-          </item>
           <item row="2" column="0">
            <widget class="QLabel" name="label_4">
             <property name="text">
              <string>领域信息</string>
             </property>
            </widget>
-          </item>
-          <item row="3" column="0">
-           <widget class="QListView" name="listView_2"/>
           </item>
           <item row="4" column="0">
            <widget class="QLabel" name="label_5">
@@ -64,8 +58,52 @@
             </property>
            </widget>
           </item>
+          <item row="3" column="0">
+           <widget class="QListWidget" name="listWidgetField">
+            <property name="editTriggers">
+             <set>QAbstractItemView::NoEditTriggers</set>
+            </property>
+           </widget>
+          </item>
           <item row="5" column="0">
-           <widget class="QListView" name="listView_3"/>
+           <widget class="QListWidget" name="listWidgetKw"/>
+          </item>
+          <item row="1" column="0">
+           <widget class="QTableWidget" name="tableWidgetAttr">
+            <property name="sizeAdjustPolicy">
+             <enum>QAbstractScrollArea::AdjustIgnored</enum>
+            </property>
+            <property name="editTriggers">
+             <set>QAbstractItemView::NoEditTriggers</set>
+            </property>
+            <property name="selectionMode">
+             <enum>QAbstractItemView::SingleSelection</enum>
+            </property>
+            <property name="selectionBehavior">
+             <enum>QAbstractItemView::SelectRows</enum>
+            </property>
+            <property name="showGrid">
+             <bool>false</bool>
+            </property>
+            <property name="rowCount">
+             <number>0</number>
+            </property>
+            <property name="columnCount">
+             <number>0</number>
+            </property>
+            <attribute name="horizontalHeaderVisible">
+             <bool>false</bool>
+            </attribute>
+            <attribute name="horizontalHeaderHighlightSections">
+             <bool>false</bool>
+            </attribute>
+            <attribute name="verticalHeaderVisible">
+             <bool>false</bool>
+            </attribute>
+            <attribute name="verticalHeaderHighlightSections">
+             <bool>false</bool>
+            </attribute>
+           </widget>
           </item>
          </layout>
         </item>
@@ -107,9 +145,6 @@
             </item>
            </layout>
           </item>
-          <item row="1" column="0">
-           <widget class="QTableView" name="tableView"/>
-          </item>
           <item row="2" column="0">
            <widget class="QLabel" name="label_8">
             <property name="text">
@@ -117,17 +152,15 @@
             </property>
            </widget>
           </item>
+          <item row="1" column="0">
+           <widget class="QTableWidget" name="tableWidgetRelation"/>
+          </item>
           <item row="3" column="0">
-           <widget class="QTableView" name="tableView_2"/>
+           <widget class="QListWidget" name="listWidgetLabel"/>
           </item>
          </layout>
         </item>
        </layout>
-      </widget>
-      <widget class="QWidget" name="graph_view_2">
-       <attribute name="title">
-        <string>知识图谱类型视图</string>
-       </attribute>
       </widget>
       <widget class="QWidget" name="tab_3">
        <attribute name="title">
@@ -185,11 +218,6 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tab_4">
-       <attribute name="title">
-        <string>标签词云展示</string>
-       </attribute>
-      </widget>
      </widget>
     </item>
    </layout>
@@ -199,8 +227,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>678</width>
-     <height>23</height>
+     <width>692</width>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu">

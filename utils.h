@@ -27,7 +27,7 @@ struct FileResult
 {
     File file;
     QMap<QString, double> keywords;
-    QStringList labels;
+    QList<QPair<QString, QString>> labels; //first: name  second: type
     QList<QPair<File, double>> relations;
 };
 

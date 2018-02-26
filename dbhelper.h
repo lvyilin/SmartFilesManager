@@ -45,16 +45,11 @@ public:
     void getWorkList(QVector<File> &li, int maxNum);
 
     /**
-     * @brief initlabels 初始化labels表格
-     */
-    void initLabels();
-
-    /**
      * @brief setFinish 将文件file的is_finished设为finish
      * @param file 文件
      * @param finish is_finished真值
      */
-    void setFinish(const File &file, bool finish);
+    void setFinished(const File &file, bool finish);
 
     /**
      * @brief setValid 将文件file的is_valid值设为valid
@@ -71,13 +66,28 @@ public:
 
     void setFileLabels(const FileProduct &fp, const QStringList &labels);
 
-    void getAllFiles(QList<File> &list);
+    void getAllFiles(QList<File> &list, QList<int> &idList);
+
+    /**
+     * @brief getFileResultByPath 通过路径path获得FileResult
+     * @param path
+     * @param fr
+     */
+    void getFileResultByPath(const QString &path, FileResult &fr);
+
+    /**
+     * @brief getFinishedFileResults 获得所有已完成文件的FileResult
+     * @param frs 空的FileResult List的引用, 用于储存返回结果
+     */
+    void getFinishedFileResults(QList<FileResult> &frs);
 
 signals:
 public slots:
 private:
     void createTable();
-    bool addFile(const File &file);
+    int getFileId(const QString &path);
+    void getFileAndIdByPath(const QString &path, File &file, int &id);
+    void getFileResultById(FileResult &fr, int fileId);
     QSqlDatabase db;
     QSqlQuery *query;
     QMutex mutex;

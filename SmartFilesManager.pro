@@ -40,7 +40,9 @@ SOURCES += \
     graph.cpp \
     node.cpp \
     edge.cpp \
-    wordcloud.cpp
+    wordcloud.cpp \
+    graphwidget.cpp \
+    wordcloudwidget.cpp
 
 HEADERS += \
     settingsdialog.h \
@@ -93,7 +95,9 @@ HEADERS += \
     graph.h \
     edge.h \
     node.h \
-    wordcloud.h
+    wordcloud.h \
+    graphwidget.h \
+    wordcloudwidget.h
 
 FORMS += \
     settingsdialog.ui \
@@ -128,7 +132,7 @@ DEPENDPATH += $$PWD/deps/zlib/include
 #win32:CONFIG(release, debug|release): LIBS += -L$$PWD/deps/quazip/ -lquazip
 #else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/deps/quazip/ -lquazipd
 win32 {
-    contains(QT_ARCH,i386) {
+    contains(QT_ARCH, i386) {
         CONFIG(release, debug|release){
             LIBS += -L$$PWD/deps/quazip/ -lquazip
         } else {

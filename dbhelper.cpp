@@ -33,37 +33,29 @@ bool DBHelper::hasIndex() const
     return true;
 }
 
-bool DBHelper::addFile(const File &file)
-{
-    query->addBindValue(file.name);
-    query->addBindValue(file.format);
-    query->addBindValue(file.path);
-    query->addBindValue(file.size);
-    query->addBindValue(file.createTime.toString(Qt::ISODate));
-    query->addBindValue(file.modifyTime.toString(Qt::ISODate));
-    query->addBindValue(file.isFinished);
-    return query->exec();
-}
-
 void DBHelper::addFiles(const QList<File> &filesList)
 {
-    query->prepare("insert into files (name, format, path, size, create_time, modify_time, is_finished) "
-                   "values(:name, :format, :path, :size, :create_time, :modify_time, :is_finished)");
+    if (!db.transaction())
+    {
+        qDebug() << "db transaction unsupported?";
+    }
     foreach (File file, filesList)
     {
-        if (!addFile(file))
-        {
-            if (query->exec(QString("update files set name = \"%1\" format = \"%2\" path = \"%3\" size = %4 create_time = %5 modify_time = %6 is_finiehed = %7 where path = \"%8\" ")
-                            .arg(file.name)
-                            .arg(file.format)
-                            .arg(file.path)
-                            .arg(file.size)
-                            .arg(file.createTime.toString(Qt::ISODate))
-                            .arg(file.modifyTime.toString(Qt::ISODate))
-                            .arg(file.isFinished)
-                            .arg(file.path)))
-                qDebug() << "update false" << query->lastError();
-        }
+        query->prepare("insert or replace into files (name, format, path, size, create_time, modify_time, is_finished) "
+                       "values(:name, :format, :path, :size, :create_time, :modify_time, :is_finished)");
+        query->addBindValue(file.name);
+        query->addBindValue(file.format);
+        query->addBindValue(file.path);
+        query->addBindValue(file.size);
+        query->addBindValue(file.createTime.toString(Qt::ISODate));
+        query->addBindValue(file.modifyTime.toString(Qt::ISODate));
+        query->addBindValue(file.isFinished);
+        query->exec();
+    }
+    if (!db.commit())
+    {
+        qDebug() << "db commit error: " << db.lastError();
+        db.rollback();
     }
 }
 
@@ -86,7 +78,7 @@ void DBHelper::getWorkList(QVector<File> &li, int maxNum)
     //仅返回可以处理的格式的文件
     for (QString fmt : SUPPORTED_FORMATS)
     {
-        if (!query->exec(QString("select * from files where format = %1 and is_finished = 0 and is_valid = 1 limit %2").arg(fmt).arg(maxNum)))
+        if (!query->exec(QString("select * from files where format = \"%1\" and is_finished = 0 and is_valid = 1 limit %2").arg(fmt).arg(maxNum)))
         {
             qDebug() << "【getWorkList】 error: " << query->lastError().text();
         }
@@ -133,16 +125,16 @@ void DBHelper::createTable()
     else
         qDebug() << "table create success";
 
-    if (!query->exec("create table if not exists file_labels(file_id integer,label_id integer,FOREIGN KEY(file_id) REFERENCES files(id) on delete cascade on update cascade ,FOREIGN KEY(label_id) REFERENCES labels(id)on delete cascade on update cascade ,constraint pk_t2 primary key (file_id,label_id))"))
+    if (!query->exec("create table if not exists file_labels(file_id integer,label_id integer,FOREIGN KEY(file_id) REFERENCES files(id) on delete cascade on update cascade ,FOREIGN KEY(label_id) REFERENCES labels(id), constraint pk_t2 primary key (file_id,label_id))"))
         qDebug() << "file_labels create false" << query->lastError().text();
     else
         qDebug() << "table create success";
 
-    if (!query->exec("create table if not exists file_relations(file_a_id integer,file_b_id integer,relation int NOT NULL, relation_type int NOT NULL,FOREIGN KEY(file_a_id) REFERENCES files(id) on delete cascade on update cascade ,FOREIGN KEY(file_b_id) REFERENCES labels(id) on delete cascade on update cascade  ,constraint pk_t2 primary key (file_a_id,file_b_id))"))
+    if (!query->exec("create table if not exists file_relations(file_a_id int, file_b_id int, degree double NOT NULL, type int NOT NULL, FOREIGN KEY(file_a_id) REFERENCES files(id) on delete cascade on update cascade ,FOREIGN KEY(file_b_id) REFERENCES files(id) on delete cascade on update cascade  ,constraint pk_t2 primary key (file_a_id,file_b_id))"))
         qDebug() << "file_relations create false" << query->lastError().text();
     else
         qDebug() << "table create success";
-    if (!query->exec("create table if not exists file_keyword(file_id integer,keyword varchar(255),weight double NOT NULL,FOREIGN KEY(file_id) REFERENCES files(id) on delete cascade on update cascade ,constraint pk_t2 primary key (file_id,keyword))"))
+    if (!query->exec("create table if not exists file_keywords(file_id integer,keyword varchar(255),weight double NOT NULL,FOREIGN KEY(file_id) REFERENCES files(id) on delete cascade on update cascade ,constraint pk_t2 primary key (file_id,keyword))"))
         qDebug() << "file_relations create false" << query->lastError().text();
     else
         qDebug() << "table create success";
@@ -152,50 +144,21 @@ void DBHelper::createTable()
         qDebug() << "foreign_keys have opened"; //打开外键约束
 }
 
-
-void DBHelper::initLabels()
+int DBHelper::getFileId(const QString &path)
 {
-    //TODO: 需要init吗?
-    /*if (!query->exec("insert into labels(name,level,is_leaf,type) values(\"格式\",1,0,\"格式视图\")"))
-        qDebug() << query->lastError();
-    query->exec("insert into labels(name,level,is_leaf,type) values(\"知识图谱\",1,0,\"知识图谱视图\")");
-    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"文档\",2,1,0,\"格式视图\")");
-    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"图片\",2,1,0,\"格式视图\")");
-    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"视频\",2,1,0,\"格式视图\")");
-    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"音频\",2,1,0,\"格式视图\")");
-    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"压缩包\",2,1,0,\"格式视图\")");
-    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"其他\",2,1,0,\"格式视图\")");
-    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"TXT文件\",3,3,1,\"格式视图\")");
-    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"HTML文件\",3,3,1,\"格式视图\")");
-    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"WORD文档文件\",3,3,1,\"格式视图\")");
-    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"WPS文件\",3,3,1,\"格式视图\")");
-    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"POWERPOINT文件\",3,3,1,\"格式视图\")");
-    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"PDF文件\",3,3,1,\"格式视图\")");
-    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"INF文件\",3,3,1,\"格式视图\")");
-    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"BMP文件\",3,4,1,\"格式视图\")");
-    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"JPG、JPEG文件\",3,4,1,\"格式视图\")");
-    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"PNG文件\",3,4,1,\"格式视图\")");
-    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"PSD文件\",3,4,1,\"格式视图\")");
-    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"ICO文件\",3,4,1,\"格式视图\")");
-    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"MP3文件\",3,5,1,\"格式视图\")");
-    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"WAV文件\",3,5,1,\"格式视图\")");
-    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"ACC文件\",3,5,1,\"格式视图\")");
-    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"MID文件\",3,5,1,\"格式视图\")");
-    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"VST文件\",3,5,1,\"格式视图\")");
-    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"AVI文件\",3,6,1,\"格式视图\")");
-    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"DAT文件\",3,6,1,\"格式视图\")");
-    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"ANI文件\",3,6,1,\"格式视图\")");
-    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"MOV文件\",3,6,1,\"格式视图\")");
-    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"MNG文件\",3,6,1,\"格式视图\")");
-    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"JAR文件\",3,7,1,\"格式视图\")");
-    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"APK文件\",3,7,1,\"格式视图\")");
-    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"RAR文件\",3,7,1,\"格式视图\")");
-    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"ZIP文件\",3,7,1,\"格式视图\")");
-    query->exec("insert into labels(name,level,parent,is_leaf,type) values(\"IMG文件\",3,7,1,\"格式视图\")");*/
+    query->prepare("select id from files where path=:path");
+    query->bindValue(":path", path);
+    query->exec();
+    if (query->next())
+    {
+        return query->value(0).toInt();
+    }
+
+    qDebug() << "cannot find file id" << path;
+    return 0;
 }
 
-
-void DBHelper::setFinish(const File &file, bool finish)
+void DBHelper::setFinished(const File &file, bool finish)
 {
     mutex.lock();
     query->exec(QString("update files set is_finished = %1 where path = \"%2\"").arg(finish).arg(file.path));
@@ -213,19 +176,7 @@ void DBHelper::setFileProduct(const FileProduct &fp)
 {
     mutex.lock();
 
-    QString fileId = "";
-
-    query->prepare("select id from files where path=:path");
-    query->bindValue(":path", fp.file.path);
-    query->exec();
-    if (query->next())
-    {
-        fileId = query->value(0).toString();
-    }
-    if (fileId == "")
-    {
-        qDebug() << "cannot find file id" << fp.file.name;
-    }
+    int fileId = getFileId(fp.file.path);
 
     QMapIterator<QString, double> map(fp.keywords);
     if (!db.transaction())
@@ -238,7 +189,7 @@ void DBHelper::setFileProduct(const FileProduct &fp)
         QString temp_keyword = map.key();
         double temp_weight = map.value();
         if (!query->exec(
-                    QString("insert into file_keyword(file_id,keyword,weight) values(\"%1\", \"%2\", \"%3\")")
+                    QString("insert into file_keywords(file_id,keyword,weight) values(%1, \"%2\", \"%3\")")
                     .arg(fileId).arg(temp_keyword).arg(temp_weight)))
         {
             qDebug() << "save file product failed: " << query->lastError().text();
@@ -256,20 +207,7 @@ void DBHelper::setFileProduct(const FileProduct &fp)
 void DBHelper::setFileLabels(const FileProduct &fp, const QStringList &labels)
 {
     mutex.lock();
-
-    QString fileId = "";
-
-    query->prepare("select id from files where path=:path");
-    query->bindValue(":path", fp.file.path);
-    query->exec();
-    if (query->next())
-    {
-        fileId = query->value(0).toString();
-    }
-    if (fileId == "")
-    {
-        qDebug() << "cannot find file id" << fp.file.name;
-    }
+    int fileId = getFileId(fp.file.path);
 
     foreach (QString label, labels)
     {
@@ -279,13 +217,12 @@ void DBHelper::setFileLabels(const FileProduct &fp, const QStringList &labels)
         QVector<QPair<int, int>> itemGroup; //单个标签在库中可能出现多次，Pair中first=id,second=parent_id
         while (query->next())
         {
-            qDebug() << "label: " << query->value(1).toString();
             int labelId = query->value(0).toInt();
             int parentId = query->value(3).toInt();
             QPair<int, int> item(labelId, parentId);
             itemGroup.append(item);
         }
-        foreach (auto item, itemGroup)
+        for (QPair<int, int> item : itemGroup)
         {
             int id = item.first;
             int parentId = item.second;
@@ -297,7 +234,7 @@ void DBHelper::setFileLabels(const FileProduct &fp, const QStringList &labels)
                 query->exec();
                 if (parentId == 0)break;
                 query->prepare("select * from labels where id=:id");
-                query->bindValue("id", parentId);
+                query->bindValue(":id", parentId);
                 query->exec();
                 if (query->next())
                 {
@@ -312,10 +249,30 @@ void DBHelper::setFileLabels(const FileProduct &fp, const QStringList &labels)
     mutex.unlock();
 }
 
-void DBHelper::getAllFiles(QList<File> &list)
+void DBHelper::getFileAndIdByPath(const QString &path, File &file, int &id)
+{
+    query->prepare("select * from files where path=:path");
+    query->addBindValue(path);
+    query->exec();
+    if (!query->next())
+        return;
+
+    id = query->value(0).toInt();
+    file.name = query->value(1).toString();
+    file.format = query->value(2).toString();
+    file.path = query->value(3).toString();
+    file.size = query->value(4).toLongLong();
+    file.createTime = query->value(5).toDateTime();
+    file.modifyTime = query->value(6).toDateTime();
+    file.isFinished = query->value(7).toBool();
+    file.isValid = query->value(8).toBool();
+}
+
+void DBHelper::getAllFiles(QList<File> &list, QList<int> &idList)
 {
     query->exec("select * from files");
     list.clear();
+    idList.clear();
     while (query->next())
     {
         File temp;
@@ -326,7 +283,61 @@ void DBHelper::getAllFiles(QList<File> &list)
         temp.createTime = query->value(5).toDateTime();
         temp.modifyTime = query->value(6).toDateTime();
         temp.isFinished = query->value(7).toBool();
+        idList << query->value(0).toInt();
         list << temp;
     }
 }
+
+void DBHelper::getFileResultByPath(const QString &path, FileResult &fr)
+{
+
+    File file;
+    int fileId;
+    getFileAndIdByPath(path, file, fileId);
+
+    if (!file.isValid)
+        return;
+
+    fr.file = file;
+    getFileResultById(fr, fileId);
+}
+
+void DBHelper::getFileResultById(FileResult &fr, int fileId)
+{
+    //get keywords
+    query->prepare("select * from file_keywords where file_id=:id");
+    query->bindValue(":id", fileId);
+    query->exec();
+    while (query->next())
+    {
+        fr.keywords.insert(query->value(1).toString(), query->value(1).toDouble());
+    }
+
+    //get labels
+    query->prepare("select name, type from labels where id in(select label_id from file_labels where file_id=:id)");
+    query->bindValue(":id", fileId);
+    query->exec();
+    while (query->next())
+    {
+        fr.labels << QPair<QString, QString>(query->value(0).toString(), query->value(1).toString());
+    }
+
+    //get relations
+    //TODO
+}
+
+void DBHelper::getFinishedFileResults(QList<FileResult> &frs)
+{
+    QList<File> list;
+    QList<int> idList;
+    getAllFiles(list, idList);
+    for (int i = 0; i < list.count(); ++i)
+    {
+        FileResult fr;
+        fr.file = list[i];
+        getFileResultById(fr, idList[i]);
+        frs << fr;
+    }
+}
+
 

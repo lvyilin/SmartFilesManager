@@ -16,9 +16,9 @@ FileItem::FileItem(const QString &s, FileItem *parent)
 
 FileItem::FileItem(const File &file, FileItem *parent)
 {
-    itemData << file.name;
+    itemData << file.name
 //             << file.format
-//             << file.path
+             << file.path;
 //             << file.size
 //             << file.createTime
 //             << file.modifyTime;
