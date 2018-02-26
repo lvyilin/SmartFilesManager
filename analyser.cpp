@@ -34,6 +34,7 @@ void Analyser::processFileList(const QList<File> &fileList)
     connect(this, &Analyser::threadQuit, workerThread, &AnalyserThread::abortProgress);
     connect(this, &Analyser::threadWait, workerThread, &AnalyserThread::wait);
     connect(workerThread, &AnalyserThread::finishOne, this, &Analyser::threadProgressAdded);
+
     workerThread->start();
     qDebug() << "[Analyser] total threads now: " << threadCount;
 }

@@ -121,6 +121,15 @@ void MainWindow::closeEvent(QCloseEvent *event)
     }
 }
 
+void MainWindow::resizeEvent(QResizeEvent *event)
+{
+    QMainWindow::resizeEvent(event);
+    int fontWidth = ui->tableWidgetRelation->fontMetrics().width("一一一一");
+    int scrollBarWidth = fontWidth / 3;
+    ui->tableWidgetRelation->setColumnWidth(0, ui->tableWidgetRelation->width() - fontWidth - scrollBarWidth);
+    ui->tableWidgetRelation->setColumnWidth(1, fontWidth);
+}
+
 void MainWindow::iconActivated(QSystemTrayIcon::ActivationReason reason)
 {
     switch (reason)
@@ -409,19 +418,21 @@ void MainWindow::setupView()
     ui->tableWidgetAttr->setHorizontalHeaderLabels(QStringList() << "文件属性" << "值");
     ui->tableWidgetAttr->horizontalHeader()->setVisible(true);
 
-    int fontWidth = ui->tableWidgetAttr->fontMetrics().width("修改日期--");
+    int fontWidth = ui->tableWidgetAttr->fontMetrics().width("一一一一一");
     ui->tableWidgetAttr->setColumnWidth(0, fontWidth);
 
     ui->tableWidgetRelation->setColumnCount(2);
     ui->tableWidgetRelation->setHorizontalHeaderLabels(QStringList() << "关联文件" << "关系度");
     ui->tableWidgetRelation->horizontalHeader()->setVisible(true);
 
-    ui->tableWidgetRelation->setColumnWidth(0, ui->tableWidgetRelation->width() - fontWidth);
+    int scrollBarWidth = fontWidth / 3.75;
+    ui->tableWidgetRelation->setColumnWidth(0, ui->tableWidgetRelation->width() - fontWidth - scrollBarWidth);
     ui->tableWidgetRelation->setColumnWidth(1, fontWidth);
 
     QList<int> idList;
 
     connect(ui->treeView, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(showContextMenu(QPoint)));
+    connect(ui->treeView, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(on_actionOpenFile_triggered()));
 
     dbHelper->getAllFiles(fileList, idList);
     //    ui->treeView->hide();
@@ -579,6 +590,11 @@ void MainWindow::on_treeView_clicked(const QModelIndex &index)
         ui->tableWidgetRelation->setItem(i, 1, new NumericTableWidgetItem(QString("%1%").arg(totalRelation * 100, 0, 'f', 1)));
     }
     ui->tableWidgetRelation->sortItems(1, Qt::DescendingOrder);
+
+    int fontWidth = ui->tableWidgetRelation->fontMetrics().width("一一一一");
+    int scrollBarWidth = fontWidth / 3;
+    ui->tableWidgetRelation->setColumnWidth(0, ui->tableWidgetRelation->width() - fontWidth - scrollBarWidth);
+    ui->tableWidgetRelation->setColumnWidth(1, fontWidth);
 }
 
 void MainWindow::startCalculateRelation()
