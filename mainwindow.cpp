@@ -6,14 +6,21 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "fileupdaterthread.h"
+
 #include "wordcloudwidget.h"
 #include "graphwidget.h"
+
+#include "numerictablewidgetitem.h"
+
+
 #include <QCloseEvent>
 #include <QMenu>
 #include <QMessageBox>
 #include <QTime>
-
+#include <QDesktopServices>
+#include <QProcess>
 #include <qDebug>
+
 
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -24,20 +31,40 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     //ui
     ui->setupUi(this);
+
     setWindowTitle(QCoreApplication::applicationName());
+    searchBox = new SearchBox(&fileList, this);
+    QPushButton *searchButton = new QPushButton(QIcon(":/images/icons/search.png"), QString(), this);
+    searchButton->setToolTip("搜索/下一个");
+    connect(searchButton, &QPushButton::clicked, searchBox, &QLineEdit::returnPressed);
+    searchBox->setPlaceholderText("快速搜索");
+    searchBox->setFixedHeight(searchButton->height() * 0.9);
+    searchBox->setMaximumWidth(this->width() / 2);
+    connect(searchBox, &SearchBox::findFile, this, &MainWindow::treeViewFocus);
+    connect(searchBox, &SearchBox::fileNotFound, this, &MainWindow::fileNotFoundMsgBox);
+    QWidget *spacer = new QWidget(this);
+    spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    ui->toolBar->addWidget(spacer);
+    ui->toolBar->addWidget(searchBox);
+    ui->toolBar->addWidget(searchButton);
+
     //    connect(ui->processButton, SIGNAL(clicked(bool)), this, SLOT(processWorkList()));
     //primary init
     configHelper->readSettings();
     settingsDialog = new SettingsDialog(configHelper, this);
+    searchDialog = new SearchDialog(this);
     dbHelper = new DBHelper(QString("SFM"), QString("sfm.db"), this);
-    //    if (configHelper->isFirstTimeUsing())
-    //        dbHelper->initLabels();
+    connect(this, &MainWindow::quitTask, dbHelper, &DBHelper::abortProgress);
+    connect(dbHelper, &DBHelper::dbInterrupted, this, &MainWindow::dbHelperInterrupted);
+    connect(dbHelper, &DBHelper::calRelationProgress, this, &MainWindow::showCalRelationProgress);
+
     analyser = new Analyser(dbHelper, this);
     connect(analyser, &Analyser::interrupted, this, &MainWindow::analyserInterrupted);
-    connect(analyser, &Analyser::processFinished, this, &MainWindow::notifyResult);
+    connect(analyser, &Analyser::processFinished, this, &MainWindow::notifyIndexResult);
+    connect(analyser, &Analyser::analyseProgress, this, &MainWindow::showAnalyserProgress);
 
-    //model-view
-    setupFileTreeView();
+    //view
+    setupView();
 
     //tray
     createTrayIcon();
@@ -66,16 +93,21 @@ MainWindow::MainWindow(QWidget *parent) :
                 break;
             case AnalyserInterrupt:
                 processWorkList();
+                break;
+            case DBInterrupt:
+                startCalculateRelation();
+                break;
             default:
                 break;
             }
         }
     }
     //init dict
-    ToolkitInitThread *toolkitInitThread =  new ToolkitInitThread(this);
+    /*ToolkitInitThread *toolkitInitThread =  new ToolkitInitThread(this);
     connect(toolkitInitThread, &ToolkitInitThread::startInit, this, &MainWindow::onStartInitToolkit);
     connect(toolkitInitThread, &ToolkitInitThread::finishInit, this, &MainWindow::onFinishInitToolkit);
     connect(this, &MainWindow::quitWorkingThread, toolkitInitThread, &ToolkitInitThread::quit);
+
     toolkitInitThread->start(QThread::LowPriority);
 
     //draw graph
@@ -83,6 +115,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     //draw wordcloud
     drawwordcloud();
+
+
+    toolkitInitThread->start(QThread::LowPriority);*/
 
 }
 
@@ -97,7 +132,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
     {
         hide();
         if (configHelper->isFirstTimeUsing())
-            trayIcon->showMessage(tr("智能文件管家"), tr("后台运行中"));
+            trayIcon->showMessage(QCoreApplication::applicationName(), tr("后台运行中"));
         event->ignore();
     }
 }
@@ -117,15 +152,15 @@ void MainWindow::iconActivated(QSystemTrayIcon::ActivationReason reason)
 
 void MainWindow::readyQuit()
 {
+    disconnect(relationCalculator, &RelationCalculator::allTasksFinished, this, &MainWindow::notifyRelationFinished);
     configHelper->setInterruptionType(NoInterrupt);
 
-    emit quitWorkingThread();
-    //    emit fileUpdaterWait();
+    emit quitTask();
 
     analyser->quitAll();
-    dbHelper->close();
     configHelper->close();
     this->thread()->wait(1000);
+    dbHelper->close();
     qDebug() << "Safely exit, Bye!";
     QCoreApplication::quit();
 }
@@ -142,7 +177,7 @@ void MainWindow::createTrayIcon()
     trayIcon = new QSystemTrayIcon(QIcon(":/images/icons/tray.png"), this);
 
     trayIcon->setContextMenu(trayIconMenu);
-    trayIcon->setToolTip(tr("打开智能文件管家"));
+    trayIcon->setToolTip("打开" + QCoreApplication::applicationName());
 }
 
 void MainWindow::setTrigger()
@@ -233,7 +268,7 @@ void MainWindow::processWorkList(bool triggered)
         return;
     }
     qDebug() << "【processWorkList】 start process work list...";
-    ui->statusBar->showMessage(tr("正在处理文件列表..."));
+    //    ui->statusBar->showMessage(tr("正在处理文件列表..."));
 
     //获取一次任务最大文件数个文件，再分配到多个线程
     QVector<File> workList;
@@ -244,7 +279,7 @@ void MainWindow::processWorkList(bool triggered)
         {
             if (i == 0)
             {
-                notifyResult(0, 0);
+                notifyIndexResult(0, 0);
             }
             break;
         }
@@ -287,16 +322,16 @@ void MainWindow::updateFilesList(bool renew)
         pathList << configHelper->pathModel->item(i)->text();
     }
 
-    FileUpdaterThread *updateThread =  new FileUpdaterThread(dbHelper, SUPPORTED_FORMATS_FILTER, pathList, this);
+    FileUpdaterThread *updateThread =  new FileUpdaterThread(dbHelper, FORMATS_FILTER, pathList, this);
     connect(updateThread, &FileUpdaterThread::resultReady, this, &MainWindow::showUpdaterResult);
     connect(updateThread, &FileUpdaterThread::findFilesProgress, this, &MainWindow::showUpdaterProgress);
     connect(updateThread, &FileUpdaterThread::startDbProgress, this, &MainWindow::showUpdaterDbProgress);
     connect(updateThread, &FileUpdaterThread::finished, this, &MainWindow::fileUpdaterFinished);
-    connect(updateThread, &FileUpdaterThread::finished, this, &MainWindow::setupFileTreeView);
+    connect(updateThread, &FileUpdaterThread::finished, this, &MainWindow::setupView);
     connect(updateThread, &FileUpdaterThread::finished, &QObject::deleteLater);
     connect(updateThread, &FileUpdaterThread::aborted, this, &MainWindow::fileUpdaterInterrupted);
     //    connect(this, &MainWindow::fileUpdaterWait, updateThread, &FileUpdaterThread::wait);
-    connect(this, &MainWindow::quitWorkingThread, updateThread, &FileUpdaterThread::abortProgress);
+    connect(this, &MainWindow::quitTask, updateThread, &FileUpdaterThread::abortProgress);
     updateThread->start();
 }
 
@@ -315,6 +350,11 @@ void MainWindow::analyserInterrupted()
     configHelper->setInterruptionType(AnalyserInterrupt);
 }
 
+void MainWindow::dbHelperInterrupted()
+{
+    configHelper->setInterruptionType(DBInterrupt);
+}
+
 void MainWindow::showUpdaterResult(const QString &res)
 {
     ui->statusBar->showMessage(res);
@@ -330,14 +370,32 @@ void MainWindow::showUpdaterProgress(int num)
     ui->statusBar->showMessage(tr("正在添加文件...已找到 %1").arg(num));
 }
 
-void MainWindow::notifyResult(int success, int fail)
+void MainWindow::showAnalyserProgress(int num)
 {
-    ui->statusBar->showMessage(tr("文件列表处理完成."));
-    trayIcon->showMessage(tr("智能文件管家"),
-                          tr("索引建立完成, 成功%1个，失败%2个, 打开主页面以查看结果")
-                          .arg(success)
-                          .arg(fail));
-    connect(trayIcon, SIGNAL(messageClicked()), this, SLOT(showWindowAndDisconnect()));
+    ui->statusBar->showMessage(tr("正在分析文件...已完成 %1").arg(num));
+}
+
+void MainWindow::showCalRelationProgress(int num, int total)
+{
+    ui->statusBar->showMessage(tr("正在保存文件关系计算结果...(%1/%2)").arg(num).arg(total));
+}
+
+void MainWindow::notifyIndexResult(int success, int fail)
+{
+    ui->statusBar->showMessage(tr("文件索引建立完成."));
+    if (configHelper->isAutoCalRelation())
+    {
+        calculateRelationSeparately = false;
+        startCalculateRelation();
+    }
+    else
+    {
+        trayIcon->showMessage(QCoreApplication::applicationName(),
+                              tr("索引建立完成, 成功%1个，失败%2个, 打开主页面以查看结果")
+                              .arg(success)
+                              .arg(fail));
+        connect(trayIcon, SIGNAL(messageClicked()), this, SLOT(showWindowAndDisconnect()));
+    }
 }
 
 void MainWindow::showWindowAndDisconnect()
@@ -351,14 +409,9 @@ void MainWindow::on_actionAbout_triggered()
     about();
 }
 
-void MainWindow::on_actionStart_triggered()
-{
-    processWorkList();
-}
-
 void MainWindow::onStartInitToolkit()
 {
-    ui->statusBar->showMessage(tr("正在初始化词典中..."), 0);
+    ui->statusBar->showMessage(tr("正在初始化词典..."));
 }
 
 void MainWindow::onFinishInitToolkit()
@@ -366,11 +419,28 @@ void MainWindow::onFinishInitToolkit()
     ui->statusBar->showMessage(tr("词典初始化完成."));
 }
 
-void MainWindow::setupFileTreeView()
+void MainWindow::setupView()
 {
-    QList<File> fileList;
-    dbHelper->getAllFiles(fileList, QList<int>());
-    ui->treeView->hide();
+    ui->tableWidgetAttr->setColumnCount(2);
+    ui->tableWidgetAttr->setHorizontalHeaderLabels(QStringList() << "文件属性" << "值");
+    ui->tableWidgetAttr->horizontalHeader()->setVisible(true);
+
+    int fontWidth = ui->tableWidgetAttr->fontMetrics().width("修改日期--");
+    ui->tableWidgetAttr->setColumnWidth(0, fontWidth);
+
+    ui->tableWidgetRelation->setColumnCount(2);
+    ui->tableWidgetRelation->setHorizontalHeaderLabels(QStringList() << "关联文件" << "关系度");
+    ui->tableWidgetRelation->horizontalHeader()->setVisible(true);
+
+    ui->tableWidgetRelation->setColumnWidth(0, ui->tableWidgetRelation->width() - fontWidth);
+    ui->tableWidgetRelation->setColumnWidth(1, fontWidth);
+
+    QList<int> idList;
+
+    connect(ui->treeView, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(showContextMenu(QPoint)));
+
+    dbHelper->getAllFiles(fileList, idList);
+    //    ui->treeView->hide();
     if (fileTreeModel == nullptr)
     {
         fileTreeModel = new FileTreeModel(fileList, this);
@@ -390,13 +460,36 @@ void MainWindow::setupFileTreeView()
     ui->treeView->show();
 }
 
+void MainWindow::treeViewFocus(const QString &str)
+{
+
+    QModelIndexList idxs = fileTreeModel->match(
+                               fileTreeModel->index(0, 0),
+                               Qt::ToolTipRole,
+                               QVariant(str),
+                               1,
+                               Qt::MatchRecursive);
+    if (idxs.isEmpty())
+    {
+        fileNotFoundMsgBox();
+        return;
+    }
+    ui->treeView->setCurrentIndex(idxs[0]);
+    on_treeView_clicked(idxs[0]);
+}
+
+void MainWindow::fileNotFoundMsgBox()
+{
+    QMessageBox::information(this, QCoreApplication::applicationName(), "找不到文件");
+}
+
 void MainWindow::on_treeView_clicked(const QModelIndex &index)
 {
-    ui->tableWidgetAttr->clear();
-    ui->listWidgetField->clear();
+    ui->treeWidgetField->clear();
     ui->listWidgetKw->clear();
     ui->listWidgetLabel->clear();
-    ui->tableWidgetRelation->clear();
+    ui->tableWidgetAttr->setRowCount(0);
+    ui->tableWidgetRelation->setRowCount(0);
 
     FileItem *item = static_cast<FileItem *>(index.internalPointer());
     QString path = item->data(1).toString();
@@ -406,15 +499,10 @@ void MainWindow::on_treeView_clicked(const QModelIndex &index)
     dbHelper->getFileResultByPath(path, fr);
 
     //attribute view
-    ui->tableWidgetAttr->setColumnCount(2);
     ui->tableWidgetAttr->setRowCount(6);
-
     int fontHeight = ui->tableWidgetAttr->fontMetrics().height();
-    int fontWidth = ui->tableWidgetAttr->fontMetrics().width("修改日期--");
-    ui->tableWidgetAttr->horizontalHeader()->setStretchLastSection(true);//header宽度自适应
     for (int i = 0; i < 6; ++i)
         ui->tableWidgetAttr->setRowHeight(i, fontHeight * 1.2);
-    ui->tableWidgetAttr->setColumnWidth(0, fontWidth);
 
     QTableWidgetItem *witem;
     ui->tableWidgetAttr->setItem(0, 0, new QTableWidgetItem(QString("名称")));
@@ -448,29 +536,175 @@ void MainWindow::on_treeView_clicked(const QModelIndex &index)
     ui->tableWidgetAttr->setItem(5, 1, witem);
 
     //field view
-    for (QPair<QString, QString> label : fr.labels)
+    QList<Label> fieldLabels;
+    QList<QTreeWidgetItem *> fieldItems;
+    QList<QTreeWidgetItem *> topLevelItems;
+    for (Label &label : fr.labels)
     {
-        if (label.second == "field")
+        if (label.type == "field")
+            fieldLabels << label;
+    }
+    for (int i = 0; i < fieldLabels.count(); ++i)
+    {
+        QTreeWidgetItem *item = new QTreeWidgetItem(QStringList() << fieldLabels[i].name);
+        fieldItems << item;
+        if (fieldLabels[i].level == 1)
+            topLevelItems << item;
+        //            root->addChild(item);
+    }
+    for (int i = 0; i < fieldItems.count(); ++i)
+    {
+        if (fieldLabels[i].level != 1)
         {
-            ui->listWidgetField->addItem(new QListWidgetItem(label.first));
+            for (int j = 0; j < fieldLabels.count(); ++j)
+            {
+                if (fieldLabels[i].parentName == fieldLabels[j].name)
+                {
+                    fieldItems[j]->addChild(fieldItems[i]);
+                }
+            }
         }
     }
 
+    ui->treeWidgetField->addTopLevelItems(topLevelItems);
+    ui->treeWidgetField->expandAll();
+
     //keyword view
-    for (QPair<QString, QString> label : fr.labels)
+
+    QMapIterator<QString, double> iter(fr.keywords);
+    while (iter.hasNext())
     {
-        if (label.second == "keyword")
-        {
-            ui->listWidgetKw->addItem(new QListWidgetItem(label.first));
-        }
+        iter.next();
+        ui->listWidgetKw->addItem(new QListWidgetItem(iter.key()));
     }
 
     //label view
-    for (QPair<QString, QString> label : fr.labels)
+    for (Label &label : fr.labels)
     {
-        ui->listWidgetLabel->addItem(new QListWidgetItem(label.first));
+        ui->listWidgetLabel->addItem(new QListWidgetItem(label.name));
     }
-    //TODO: other view goes here
+    //relation view
+    ui->tableWidgetRelation->setRowCount(fr.relations.size());
+    for (int i = 0; i < fr.relations.size(); ++i)
+        ui->tableWidgetRelation->setRowHeight(i, fontHeight * 1.2);
+
+    for (int i = 0; i < fr.relations.size(); ++i)
+    {
+        QTableWidgetItem *rlItem = new QTableWidgetItem(fr.relations[i].file.name);
+        rlItem->setToolTip(fr.relations[i].file.name);
+        ui->tableWidgetRelation->setItem(i, 0, rlItem);
+        double totalRelation = fr.relations[i].keywordDegree * KEYWORD_RELATION_WEIGHT
+                               + fr.relations[i].labelDegree * LABEL_RELATION_WEIGHT
+                               + fr.relations[i].attributeDegree * ATTRIBUTE_RELATION_WEIGHT;
+        ui->tableWidgetRelation->setItem(i, 1, new NumericTableWidgetItem(QString("%1%").arg(totalRelation * 100, 0, 'f', 1)));
+    }
+    ui->tableWidgetRelation->sortItems(1, Qt::DescendingOrder);
+}
+
+void MainWindow::startCalculateRelation()
+{
+    if (!relationCalculator)
+    {
+        relationCalculator = new RelationCalculator(dbHelper, this);
+        connect(relationCalculator, &RelationCalculator::allTasksFinished, this, &MainWindow::notifyRelationFinished);
+        relationCalculator->start();
+    }
+    else if (relationCalculator->isFinished())
+    {
+        relationCalculator->start();
+    }
+
+}
+
+void MainWindow::notifyRelationFinished()
+{
+    ui->statusBar->showMessage(tr("文件关系计算完成."));
+    QString finishMsg;
+    if (!calculateRelationSeparately)
+    {
+        finishMsg = "本次任务完成，打开界面以查看结果";
+    }
+    else
+    {
+        finishMsg = "文件关系建立完成";
+    }
+    trayIcon->showMessage(QCoreApplication::applicationName(), finishMsg);
+}
+
+void MainWindow::on_actionIndex_triggered()
+{
+    onStartInitToolkit();
+    processWorkList();
+}
+
+void MainWindow::on_actionBuildRelation_triggered()
+{
+    startCalculateRelation();
+}
+
+void MainWindow::on_actionQuickSearch_triggered()
+{
+    searchBox->setFocus();
+}
+
+void MainWindow::on_actionAdvancedSearch_triggered()
+{
+    searchDialog->show();
+}
+
+void MainWindow::on_actionRefrashFiles_triggered()
+{
+    rebuildFilesList();
+}
+
+void MainWindow::on_actionOpenFile_triggered()
+{
+    QString path = ui->treeView->currentIndex().data(Qt::ToolTipRole).toString();
+    if (!path.isEmpty())
+        QDesktopServices::openUrl(QUrl::fromLocalFile(path));
+}
+
+void MainWindow::on_actionOpenFolder_triggered()
+{
+    QString path = ui->treeView->currentIndex().data(Qt::ToolTipRole).toString();
+    /*QFileInfo info(path);
+    if (path.isEmpty())
+        return;
+
+    if (!info.isDir())
+    {
+        path = info.absolutePath();
+    }
+    QDesktopServices::openUrl(QUrl::fromLocalFile(path));*/
+
+    const QString explorer = "explorer.exe";
+    if (explorer.isEmpty())
+    {
+        QMessageBox::warning(this,
+                             tr("Launching Windows Explorer failed"),
+                             tr("Could not find explorer.exe in path to launch Windows Explorer."));
+        return;
+    }
+    QString param;
+    if (!QFileInfo(path).isDir())
+        param = QLatin1String("/select,");
+    param += QDir::toNativeSeparators(path);
+    QString command = explorer + " " + param;
+    QProcess::startDetached(command);
+}
+
+void MainWindow::showContextMenu(const QPoint &pos)
+{
+    QPoint globalPos = ui->treeView->mapToGlobal(pos);
+    QModelIndex index = ui->treeView->indexAt(pos);
+    if (!index.isValid() || index.data(Qt::ToolTipRole).toString().isEmpty())
+        return;
+    if (fileTreeMenu != nullptr)
+        delete fileTreeMenu;
+    fileTreeMenu = new QMenu(this);
+    fileTreeMenu->addAction(ui->actionOpenFile);
+    fileTreeMenu->addAction(ui->actionOpenFolder);
+    fileTreeMenu->exec(globalPos);
 }
 
 

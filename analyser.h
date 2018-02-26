@@ -30,10 +30,12 @@ signals:
     void threadQuit();
     void threadWait(unsigned long time);
     void interrupted();
+    void analyseProgress(int num);
 
 public slots:
     void handleResult(int success, int fail);
     void analyserInterrupted();
+    void threadProgressAdded();
 
 private:
     DBHelper *dbHelper;
@@ -41,6 +43,7 @@ private:
     int failCount;
     int threadCount;
     QMutex mutex;
+    int finishCount;
 
 };
 

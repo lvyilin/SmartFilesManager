@@ -23,8 +23,8 @@ public:
     QTime &getTimeTriggerPoint();
     int getScanInterval() const;
 
-    void setSettings(bool st, int cpuPct, int intv);
-    void setSettings(bool st, const QTime &timeTriPt, int intv);
+    void setSettings(bool st, int cpuPct, int intv, bool autoCal);
+    void setSettings(bool st, const QTime &timeTriPt, int intv, bool autoCal);
 
     bool hasLastInterrupted() const;
     InterruptionType getInterruptionType() const;
@@ -36,6 +36,7 @@ public:
 
     void setFileIndexFinished(bool value);
     bool isFileIndexFinished() const;
+    bool isAutoCalRelation() const;
 
 signals:
 public slots:
@@ -55,6 +56,7 @@ private:
 
     InterruptionType interruptionType;
 
+    bool autoCalculateRelation;
 };
 
 #endif // CONFIGHELPER_H

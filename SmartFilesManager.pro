@@ -42,7 +42,13 @@ SOURCES += \
     edge.cpp \
     wordcloud.cpp \
     graphwidget.cpp \
-    wordcloudwidget.cpp
+    wordcloudwidget.cpp \
+    relationcalculatetask.cpp \
+    relationcalculator.cpp \
+    numerictablewidgetitem.cpp \
+    searchdialog.cpp \
+    searchbox.cpp \
+    searchpopup.cpp
 
 HEADERS += \
     settingsdialog.h \
@@ -97,11 +103,18 @@ HEADERS += \
     node.h \
     wordcloud.h \
     graphwidget.h \
-    wordcloudwidget.h
+    wordcloudwidget.h \
+    relationcalculatetask.h \
+    relationcalculator.h \
+    numerictablewidgetitem.h \
+    searchdialog.h \
+    searchbox.h \
+    searchpopup.h
 
 FORMS += \
     settingsdialog.ui \
-    mainwindow.ui
+    mainwindow.ui \
+    searchdialog.ui
 
 RESOURCES += \
     images.qrc

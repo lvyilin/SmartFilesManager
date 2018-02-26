@@ -19,6 +19,7 @@ public:
 signals:
     void resultReady(int success, int fail);
     void aborted();
+    void finishOne();
 
 public slots:
     void abortProgress();

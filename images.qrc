@@ -1,5 +1,9 @@
 <RCC>
     <qresource prefix="/images">
         <file>icons/tray.png</file>
+        <file>icons/index.png</file>
+        <file>icons/relation.png</file>
+        <file>icons/search.png</file>
+        <file>icons/refresh.png</file>
     </qresource>
 </RCC>

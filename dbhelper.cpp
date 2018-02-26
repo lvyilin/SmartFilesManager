@@ -4,6 +4,7 @@
 
 #include "dbhelper.h"
 #include <qDebug>
+#include <QCoreApplication>
 
 DBHelper::DBHelper(const QString &conName, const QString &dbName, QObject *parent) : QObject(parent)
 {
@@ -35,6 +36,7 @@ bool DBHelper::hasIndex() const
 
 void DBHelper::addFiles(const QList<File> &filesList)
 {
+    working = true;
     if (!db.transaction())
     {
         qDebug() << "db transaction unsupported?";
@@ -57,6 +59,7 @@ void DBHelper::addFiles(const QList<File> &filesList)
         qDebug() << "db commit error: " << db.lastError();
         db.rollback();
     }
+    working = false;
 }
 
 void DBHelper::cleanFiles()
@@ -70,11 +73,13 @@ void DBHelper::cleanFiles()
 
 void DBHelper::close()
 {
+    query->finish();
     db.close();
 }
 
 void DBHelper::getWorkList(QVector<File> &li, int maxNum)
 {
+    working = true;
     //仅返回可以处理的格式的文件
     for (QString fmt : SUPPORTED_FORMATS)
     {
@@ -95,6 +100,7 @@ void DBHelper::getWorkList(QVector<File> &li, int maxNum)
             li.append(temp);
         }
     }
+    working = false;
 }
 
 void DBHelper::createTable()
@@ -130,7 +136,7 @@ void DBHelper::createTable()
     else
         qDebug() << "table create success";
 
-    if (!query->exec("create table if not exists file_relations(file_a_id int, file_b_id int, degree double NOT NULL, type int NOT NULL, FOREIGN KEY(file_a_id) REFERENCES files(id) on delete cascade on update cascade ,FOREIGN KEY(file_b_id) REFERENCES files(id) on delete cascade on update cascade  ,constraint pk_t2 primary key (file_a_id,file_b_id))"))
+    if (!query->exec("create table if not exists file_relations(file_a_id int, file_b_id int, keyword_degree double NOT NULL, label_degree double NOT NULL, attribute_degree double NOT NULL, FOREIGN KEY(file_a_id) REFERENCES files(id) on delete cascade on update cascade ,FOREIGN KEY(file_b_id) REFERENCES files(id) on delete cascade on update cascade  ,constraint pk_t2 primary key (file_a_id,file_b_id))"))
         qDebug() << "file_relations create false" << query->lastError().text();
     else
         qDebug() << "table create success";
@@ -186,11 +192,11 @@ void DBHelper::setFileProduct(const FileProduct &fp)
     while (map.hasNext())
     {
         map.next();
-        QString temp_keyword = map.key();
-        double temp_weight = map.value();
+        QString tempKeyword = map.key();
+        double tempWeight = map.value();
         if (!query->exec(
                     QString("insert into file_keywords(file_id,keyword,weight) values(%1, \"%2\", \"%3\")")
-                    .arg(fileId).arg(temp_keyword).arg(temp_weight)))
+                    .arg(fileId).arg(tempKeyword).arg(tempWeight)))
         {
             qDebug() << "save file product failed: " << query->lastError().text();
         }
@@ -209,23 +215,45 @@ void DBHelper::setFileLabels(const FileProduct &fp, const QStringList &labels)
     mutex.lock();
     int fileId = getFileId(fp.file.path);
 
-    foreach (QString label, labels)
+    QMap<int, QVector<int> > countMap; //计数每个关键词的标签所在领域
+    for (int i = 0; i < labels.count(); ++i)
     {
-        query->prepare("select * from labels where name=:name");
-        query->bindValue(":name", label);
+        query->prepare("select id, parent,is_leaf from labels where name=:name");
+        query->bindValue(":name", labels[i]);
         query->exec();
-        QVector<QPair<int, int>> itemGroup; //单个标签在库中可能出现多次，Pair中first=id,second=parent_id
-        while (query->next())
+        if (query->next())
         {
-            int labelId = query->value(0).toInt();
-            int parentId = query->value(3).toInt();
-            QPair<int, int> item(labelId, parentId);
-            itemGroup.append(item);
+            int id = query->value(0).toInt();
+            int parentId = query->value(1).toInt();
+            bool isLeaf = query->value(2).toBool();
+            if (isLeaf)
+                countMap[parentId].append(id);
+            else
+                countMap[id].append(id);
         }
-        for (QPair<int, int> item : itemGroup)
+    }
+    QMapIterator<int, QVector<int> > iter(countMap);
+    int maxSize = 0;
+    QVector<int> maxKeys;
+    while (iter.hasNext())
+    {
+        iter.next();
+        if (iter.value().count() > maxSize)
         {
-            int id = item.first;
-            int parentId = item.second;
+            maxSize = iter.value().count();
+            maxKeys.clear();
+            maxKeys << iter.key();
+        }
+        else if (iter.value().count() == maxSize)
+            maxKeys << iter.key();
+    }
+    if (maxSize >= LABEL_JUDGEMENT_NEEDED_KEYWORD_NUMBER)
+    {
+        for (int key : maxKeys)
+        {
+            int parentId = key;
+            int id = countMap[key].at(0);
+            //仅第一个标签需要向上打父标签
             while (true)
             {
                 query->prepare("insert into file_labels(file_id ,label_id) values(:file_id, :label_id)");
@@ -233,15 +261,22 @@ void DBHelper::setFileLabels(const FileProduct &fp, const QStringList &labels)
                 query->bindValue(":label_id", id);
                 query->exec();
                 if (parentId == 0)break;
-                query->prepare("select * from labels where id=:id");
+                query->prepare("select id, parent from labels where id=:id");
                 query->bindValue(":id", parentId);
                 query->exec();
                 if (query->next())
                 {
                     id = query->value(0).toInt();
-                    parentId = query->value(3).toInt();
+                    parentId = query->value(1).toInt();
                 }
                 else break;
+            }
+            for (int i = 1; i < countMap[key].count(); ++i)
+            {
+                query->prepare("insert into file_labels(file_id ,label_id) values(:file_id, :label_id)");
+                query->bindValue(":file_id", fileId);
+                query->bindValue(":label_id", countMap[key][i]);
+                query->exec();
             }
         }
     }
@@ -268,9 +303,12 @@ void DBHelper::getFileAndIdByPath(const QString &path, File &file, int &id)
     file.isValid = query->value(8).toBool();
 }
 
-void DBHelper::getAllFiles(QList<File> &list, QList<int> &idList)
+void DBHelper::getAllFiles(QList<File> &list, QList<int> &idList, bool finished)
 {
-    query->exec("select * from files");
+    if (!finished)
+        query->exec("select * from files");
+    else
+        query->exec("select * from files where is_finished=1");
     list.clear();
     idList.clear();
     while (query->next())
@@ -310,33 +348,178 @@ void DBHelper::getFileResultById(FileResult &fr, int fileId)
     query->exec();
     while (query->next())
     {
-        fr.keywords.insert(query->value(1).toString(), query->value(1).toDouble());
+        fr.keywords.insert(query->value(1).toString(), query->value(2).toDouble());
     }
 
     //get labels
-    query->prepare("select name, type from labels where id in(select label_id from file_labels where file_id=:id)");
+    query->prepare("select name, level, parent, type from labels where id in(select label_id from file_labels where file_id=:id)");
     query->bindValue(":id", fileId);
     query->exec();
+    QVector<int> parentIds;
     while (query->next())
     {
-        fr.labels << QPair<QString, QString>(query->value(0).toString(), query->value(1).toString());
+        Label lb;
+        lb.name = query->value(0).toString();
+        lb.level = query->value(1).toInt();
+        lb.type = query->value(3).toString();
+        parentIds <<  query->value(2).toInt();
+
+        fr.labels << lb;
+    }
+    for (int i = 0; i < parentIds.count(); ++i)
+    {
+        if (fr.labels[i].type == "field")
+        {
+            query->prepare("select name from labels where id=:id");
+            query->addBindValue(parentIds[i]);
+            query->exec();
+            if (query->next())
+            {
+                fr.labels[i].parentName = query->value(0).toString();
+            }
+        }
     }
 
     //get relations
-    //TODO
+    query->prepare("select * from file_relations where file_a_id=:id");
+    query->bindValue(":id", fileId);
+    query->exec();
+    QList<int> relationIdList;
+    while (query->next())
+    {
+        relationIdList << query->value(1).toInt();
+        Relation rl;
+        rl.keywordDegree = query->value(2).toDouble();
+        rl.labelDegree = query->value(3).toDouble();
+        rl.attributeDegree = query->value(4).toDouble();
+        fr.relations << rl;
+    }
+    for (int i = 0; i < fr.relations.size(); ++i)
+    {
+        getFileById(fr.relations[i].file, relationIdList[i]);
+    }
+
+}
+
+void DBHelper::getFileById(File &f, int fileId)
+{
+    query->prepare("select * from files where id=:id");
+    query->bindValue(":id", fileId);
+    query->exec();
+    if (query->next())
+    {
+        f.name = query->value(1).toString();
+        f.format = query->value(2).toString();
+        f.path = query->value(3).toString();
+        f.size = query->value(4).toLongLong();
+        f.createTime = query->value(5).toDateTime();
+        f.modifyTime = query->value(6).toDateTime();
+        f.isFinished = query->value(7).toBool();
+    }
 }
 
 void DBHelper::getFinishedFileResults(QList<FileResult> &frs)
 {
     QList<File> list;
     QList<int> idList;
-    getAllFiles(list, idList);
+    getAllFiles(list, idList, true);
     for (int i = 0; i < list.count(); ++i)
     {
+        //        QCoreApplication::processEvents();
         FileResult fr;
         fr.file = list[i];
         getFileResultById(fr, idList[i]);
         frs << fr;
+    }
+}
+
+void DBHelper::saveFileResults(QList<FileResult> &frs)
+{
+    working = true;
+    const int size = frs.size();
+    for (int i = 0; i < size; ++i)
+    {
+        emit calRelationProgress(i + 1, size);
+        int id = getFileId(frs[i].file.path);
+        for (int j = 0; j < frs[i].relations.size(); ++j)
+        {
+            if (abortFlag)
+                return;
+            QCoreApplication::processEvents();
+            //            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+            int idB = getFileId(frs[i].relations[j].file.path);
+            db.transaction();
+
+            query->prepare("insert or replace into file_relations(file_a_id, file_b_id, keyword_degree, label_degree, attribute_degree) "
+                           "values(:id, :id_b, :kw, :lb, :attr)");
+            query->bindValue(":id", id);
+            query->bindValue(":id_b", idB);
+            query->bindValue(":kw", frs[i].relations[j].keywordDegree);
+            query->bindValue(":lb", frs[i].relations[j].labelDegree);
+            query->bindValue(":attr", frs[i].relations[j].attributeDegree);
+            query->exec();
+
+            query->prepare("insert or replace into file_relations(file_a_id, file_b_id, keyword_degree, label_degree, attribute_degree) "
+                           "values(:id, :id_b, :kw, :lb, :attr)");
+            query->bindValue(":id", idB);
+            query->bindValue(":id_b", id);
+            query->bindValue(":kw", frs[i].relations[j].keywordDegree);
+            query->bindValue(":lb", frs[i].relations[j].labelDegree);
+            query->bindValue(":attr", frs[i].relations[j].attributeDegree);
+            query->exec();
+
+            if (!db.commit())
+            {
+                qDebug() << "db commit error: " << db.lastError();
+                db.rollback();
+            }
+        }
+    }
+    working = false;
+}
+
+void DBHelper::saveSingleFileResult(const FileResult &fr)
+{
+    mutex.lock();
+    int id = getFileId(fr.file.path);
+    for (int j = 0; j < fr.relations.size(); ++j)
+    {
+        int idB = getFileId(fr.relations[j].file.path);
+        db.transaction();
+
+        query->prepare("insert or replace into file_relations(file_a_id, file_b_id, keyword_degree, label_degree, attribute_degree) "
+                       "values(:id, :id_b, :kw, :lb, :attr)");
+        query->bindValue(":id", id);
+        query->bindValue(":id_b", idB);
+        query->bindValue(":kw", fr.relations[j].keywordDegree);
+        query->bindValue(":lb", fr.relations[j].labelDegree);
+        query->bindValue(":attr", fr.relations[j].attributeDegree);
+        query->exec();
+
+        query->prepare("insert or replace into file_relations(file_a_id, file_b_id, keyword_degree, label_degree, attribute_degree) "
+                       "values(:id, :id_b, :kw, :lb, :attr)");
+        query->bindValue(":id", idB);
+        query->bindValue(":id_b", id);
+        query->bindValue(":kw", fr.relations[j].keywordDegree);
+        query->bindValue(":lb", fr.relations[j].labelDegree);
+        query->bindValue(":attr", fr.relations[j].attributeDegree);
+        query->exec();
+
+        if (!db.commit())
+        {
+            qDebug() << "db commit error: " << db.lastError();
+            db.rollback();
+        }
+    }
+    mutex.unlock();
+}
+
+void DBHelper::abortProgress()
+{
+    if (working)
+    {
+        abortFlag = true;
+        emit dbInterrupted();
     }
 }
 

@@ -17,6 +17,7 @@ public:
 
     QStringList getSegment(QString text);
     QMap<QString, double> getKeywords(QString text);
+
 private:
     Toolkit();
     cppjieba::Jieba *jieba;

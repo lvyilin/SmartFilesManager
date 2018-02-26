@@ -8,14 +8,20 @@
 #include <QSet>
 #include <QFileInfo>
 #include <QTimer>
+#include <QLineEdit>
+#include <QPushButton>
 #include "utils.h"
 #include "confighelper.h"
 #include "dbhelper.h"
 #include "analyser.h"
-#include "toolkitinitthread.h"
+
 #include "filetreemodel.h"
 #include "graphwidget.h"
 #include "wordcloudwidget.h"
+#include "relationcalculator.h"
+#include "searchdialog.h"
+#include "searchbox.h"
+
 
 class SettingsDialog;
 
@@ -31,8 +37,12 @@ public:
     ~MainWindow();
 
 signals:
-    void quitWorkingThread();
+    void quitTask();
     void fileUpdaterWait(unsigned long time);
+
+public slots:
+    void treeViewFocus(const QString &str);
+    void fileNotFoundMsgBox();
 
 protected:
     void closeEvent(QCloseEvent *event) override;
@@ -49,33 +59,52 @@ private slots:
     void on_actionAbout_triggered();
     void showUpdaterResult(const QString &res);
     void showUpdaterProgress(int num);
+    void showAnalyserProgress(int num);
+    void showCalRelationProgress(int num, int total);
     void showUpdaterDbProgress();
-    void notifyResult(int success, int fail);
+    void notifyIndexResult(int success, int fail);
     void updateFilesList(bool renew = false);
 
     void fileUpdaterInterrupted();
     void fileUpdaterFinished();
     void analyserInterrupted();
-
-    void on_actionStart_triggered();
+    void dbHelperInterrupted();
 
     void onStartInitToolkit();
     void onFinishInitToolkit();
 
-    void setupFileTreeView();
+    void setupView();
 
     void on_treeView_clicked(const QModelIndex &index);
     void drawgraph();
 
     void drawwordcloud();
 
+    void notifyRelationFinished();
+
+    void on_actionIndex_triggered();
+
+    void on_actionBuildRelation_triggered();
+
+    void on_actionQuickSearch_triggered();
+
+    void on_actionAdvancedSearch_triggered();
+
+    void on_actionRefrashFiles_triggered();
+
+    void on_actionOpenFile_triggered();
+    void on_actionOpenFolder_triggered();
+    void showContextMenu(const QPoint &pos);
+
 private:
     Ui::MainWindow *ui;
+    bool calculateRelationSeparately = true;
 
     void readyQuit();
     void createTrayIcon();
     void setTrigger();
     void processWorkList(bool triggered = false);
+    void startCalculateRelation();
 
     QString fileSizeHumanReadable(qint64 num);
 
@@ -83,11 +112,18 @@ private:
     QSystemTrayIcon *trayIcon;
     QMenu *trayIconMenu;
     SettingsDialog *settingsDialog;
+    SearchDialog *searchDialog;
     DBHelper *dbHelper;
     QTimer *triggerTimer;
     Analyser *analyser;
-
     FileTreeModel *fileTreeModel = nullptr;
+    RelationCalculator *relationCalculator = nullptr;
+
+    SearchBox *searchBox;
+    QList<File> fileList;
+
+    QMenu *fileTreeMenu = nullptr;
+
 };
 
 #endif // MAINWINDOW_H

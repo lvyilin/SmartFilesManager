@@ -10,7 +10,6 @@ int main(int argc, char *argv[])
     QApplication app(argc, argv);
     QCoreApplication::setApplicationName("智能文件管家");
     QCoreApplication::setOrganizationName("SFM");
-    QCoreApplication::setApplicationName("SmartFilesManager");
     MainWindow mainWindow;
     mainWindow.show();
     return app.exec();

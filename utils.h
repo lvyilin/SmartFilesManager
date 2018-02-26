@@ -16,6 +16,22 @@ struct File
     bool isValid;
 };
 
+struct Label
+{
+    QString name;
+    int level;
+    QString type;
+    QString parentName;
+};
+
+struct Relation
+{
+    File file;
+    double keywordDegree;
+    double labelDegree;
+    double attributeDegree;
+};
+
 struct FileProduct
 {
     File file;
@@ -27,8 +43,8 @@ struct FileResult
 {
     File file;
     QMap<QString, double> keywords;
-    QList<QPair<QString, QString>> labels; //first: name  second: type
-    QList<QPair<File, double>> relations;
+    QList<Label> labels;
+    QList<Relation> relations;
 };
 
 enum RunningStrategy
@@ -38,7 +54,7 @@ enum RunningStrategy
 
 enum InterruptionType
 {
-    NoInterrupt, AnalyserInterrupt, FileUpdaterInterrupt, TerminateInterrupt
+    NoInterrupt, AnalyserInterrupt, FileUpdaterInterrupt, DBInterrupt, TerminateInterrupt
 };
 
 enum ProcessingResult
@@ -54,7 +70,7 @@ enum ProcessingResult
 
 //format
 const static QStringList SUPPORTED_FORMATS = {"docx", "txt"};
-const static QStringList SUPPORTED_FORMATS_FILTER = {"*.*"};
+const static QStringList FORMATS_FILTER = {"*.*"};
 
 const static QStringList DOCUMENT_FORMATS = {"doc", "docx", "xls", "xlsx", "ppt", "pptx", "odt", "rtf",
                                              "txt", "pdf", "htm", "html", "tex"
@@ -78,14 +94,21 @@ const static QStringList IMAGE_FORMATS = {"ani", "bmp", "cal", "fax", "gif", "im
 
 //magic value
 //Toolkit
-const int NEEDED_TOP_KEYWORDS = 20;
-const double FILENAME_WEIGHTED_VARIANCE = 2.0;
+const static int NEEDED_TOP_KEYWORDS = 20;
+const static double FILENAME_WEIGHTED_VARIANCE = 2.0;
 //MainWindow
-const int WORKLIST_SIZE = 100;
-const int MAX_WORKLIST_NUM = 10;
+const static int WORKLIST_SIZE = 100;
+const static int MAX_WORKLIST_NUM = 10;
 //Analyser
-const int MAX_THREAD_NUM = MAX_WORKLIST_NUM;
+const static int MAX_THREAD_NUM = MAX_WORKLIST_NUM;
 //FileUpdater
-const int MAX_FILES_NUMBER = 5000;
+const static int MAX_FILES_NUMBER = 5000;
+
+//label judge
+const static int LABEL_JUDGEMENT_NEEDED_KEYWORD_NUMBER = 2;
+//relation calculate
+const static double KEYWORD_RELATION_WEIGHT = 0.35;
+const static double LABEL_RELATION_WEIGHT = 0.45;
+const static double ATTRIBUTE_RELATION_WEIGHT = 0.2;
 
 #endif // UTILS_H

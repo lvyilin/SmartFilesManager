@@ -70,7 +70,7 @@ void wordcloudwidget::paintEvent(QPaintEvent *event)
 void wordcloudwidget::setwordcloud()
 {
     a = new wordcloud();
-    a->filename = ;
+    /*a->filename = ;
 
-    a->Keywords = ;
+    a->Keywords = ;*/
 }

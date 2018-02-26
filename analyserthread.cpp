@@ -44,7 +44,7 @@ void AnalyserThread::run()
         default:
             break;
         }
-
+        finishOne();
     }
     emit resultReady(successCount, failCount);
 }
@@ -97,9 +97,9 @@ ProcessingResult AnalyserThread::processFile(const File &file)
     else return FileFormatNotSupported;
 
     if (abortFlag) return ProcessAborted;
-//
-//开始对文件内容进行处理
-//
+    //
+    //开始对文件内容进行处理
+    //
     FileProduct fileProduct;
     fileProduct.file = file;
     fileProduct.contents = textContent;
@@ -121,7 +121,8 @@ void AnalyserThread::generateKeywords(FileProduct &fpd)
              << fpd.file.name;
     fpd.keywords = Toolkit::getInstance().getKeywords(fpd.contents);
     if (abortFlag) return;
-    QMap<QString, double> filenameMap = Toolkit::getInstance().getKeywords(fpd.file.name);
+    QMap<QString, double> filenameMap =
+        Toolkit::getInstance().getKeywords(fpd.file.name.split(".", QString::SkipEmptyParts).at(0));
     QMapIterator<QString, double> itr(filenameMap);
     while (!abortFlag && itr.hasNext())
     {
