@@ -14,11 +14,14 @@
 #include "confighelper.h"
 #include "dbhelper.h"
 #include "analyser.h"
-//#include "toolkitinitthread.h"
+
 #include "filetreemodel.h"
+#include "graphwidget.h"
+#include "wordcloudwidget.h"
 #include "relationcalculator.h"
 #include "searchdialog.h"
 #include "searchbox.h"
+
 
 class SettingsDialog;
 
@@ -74,6 +77,9 @@ private slots:
     void setupView();
 
     void on_treeView_clicked(const QModelIndex &index);
+    void drawgraph();
+
+    void drawwordcloud();
 
     void notifyRelationFinished();
 

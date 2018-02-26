@@ -6,7 +6,12 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "fileupdaterthread.h"
+
+#include "wordcloudwidget.h"
+#include "graphwidget.h"
+
 #include "numerictablewidgetitem.h"
+
 
 #include <QCloseEvent>
 #include <QMenu>
@@ -102,7 +107,18 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(toolkitInitThread, &ToolkitInitThread::startInit, this, &MainWindow::onStartInitToolkit);
     connect(toolkitInitThread, &ToolkitInitThread::finishInit, this, &MainWindow::onFinishInitToolkit);
     connect(this, &MainWindow::quitWorkingThread, toolkitInitThread, &ToolkitInitThread::quit);
+
+    toolkitInitThread->start(QThread::LowPriority);
+
+    //draw graph
+    drawgraph();
+
+    //draw wordcloud
+    drawwordcloud();
+
+
     toolkitInitThread->start(QThread::LowPriority);*/
+
 }
 
 MainWindow::~MainWindow()
@@ -448,6 +464,10 @@ void MainWindow::setupView()
         delete fileTreeModel;
         fileTreeModel = anotherModel;
     }
+    //<<< <<< < HEAD
+    //    ui->treeView->header()->hide();
+    // == == == =
+    // >>> >>> > 16afcd0eaf899c63ce79cd21857263b42b7d8178
     ui->treeView->show();
 }
 
@@ -701,4 +721,19 @@ void MainWindow::showContextMenu(const QPoint &pos)
     fileTreeMenu->addAction(ui->actionOpenFile);
     fileTreeMenu->addAction(ui->actionOpenFolder);
     fileTreeMenu->exec(globalPos);
+}
+
+
+void MainWindow::drawwordcloud()
+{
+    wordcloudwidget *wordcloudwidget_ = new wordcloudwidget();
+    ui->tabWidget_2->addTab(wordcloudwidget_, "标签词云展示");
+    // ui->word_cloud_4 = wordcloudwidget_;
+}
+
+void MainWindow::drawgraph()
+{
+    graphwidget *graphwidget_ = new graphwidget();
+    ui->tabWidget_2->addTab(graphwidget_, "知识图谱类型视图");
+    // ui->graph_view_2 = graphwidget_;
 }
