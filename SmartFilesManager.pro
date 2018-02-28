@@ -164,3 +164,13 @@ INCLUDEPATH += $$PWD/deps/quazip/include
 DEPENDPATH += $$PWD/deps/quazip/include
 
 DISTFILES +=
+
+win32 {
+    contains(QT_ARCH, i386) {
+       LIBS += -L$$PWD/deps/ogdf/ -logdf
+    } else {
+       LIBS += -L$$PWD/deps/ogdf/x64/ -logdf
+    }
+}
+INCLUDEPATH += $$PWD/deps/ogdf/include
+DEPENDPATH += $$PWD/deps/ogdf/include
