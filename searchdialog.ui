@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>523</width>
-    <height>422</height>
+    <width>522</width>
+    <height>473</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,10 +16,10 @@
   <widget class="QDialogButtonBox" name="buttonBox">
    <property name="geometry">
     <rect>
-     <x>420</x>
-     <y>20</y>
-     <width>81</width>
-     <height>61</height>
+     <x>397</x>
+     <y>21</y>
+     <width>93</width>
+     <height>63</height>
     </rect>
    </property>
    <property name="orientation">
@@ -38,6 +38,109 @@
      <height>31</height>
     </rect>
    </property>
+  </widget>
+  <widget class="QWidget" name="">
+   <property name="geometry">
+    <rect>
+     <x>32</x>
+     <y>153</y>
+     <width>191</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <layout class="QHBoxLayout" name="horizontalLayoutField">
+    <item>
+     <widget class="QCheckBox" name="checkBoxField">
+      <property name="text">
+       <string>领域筛选:</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QComboBox" name="comboBoxField">
+      <item>
+       <property name="text">
+        <string>请选择</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="">
+   <property name="geometry">
+    <rect>
+     <x>32</x>
+     <y>205</y>
+     <width>451</width>
+     <height>24</height>
+    </rect>
+   </property>
+   <layout class="QHBoxLayout" name="horizontalLayoutSize">
+    <item>
+     <widget class="QRadioButton" name="radioButtonBigSize">
+      <property name="text">
+       <string>大文件</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QRadioButton" name="radioButtonSmallSize">
+      <property name="text">
+       <string>小文件</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QRadioButton" name="radioButtonOtherSize">
+      <property name="text">
+       <string>其他</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QSlider" name="horizontalSlider">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QComboBox" name="comboBoxSizeUnit"/>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="">
+   <property name="geometry">
+    <rect>
+     <x>34</x>
+     <y>103</y>
+     <width>281</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <layout class="QHBoxLayout" name="horizontalLayoutFormat">
+    <item>
+     <widget class="QCheckBox" name="checkBoxFormat">
+      <property name="text">
+       <string>格式筛选:</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="labelFormatNone">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="text">
+       <string>无</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLineEdit" name="lineEditFormaAdd"/>
+    </item>
+   </layout>
   </widget>
  </widget>
  <resources/>

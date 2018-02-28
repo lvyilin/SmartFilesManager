@@ -13,3 +13,8 @@ SearchDialog::~SearchDialog()
 {
     delete ui;
 }
+
+void SearchDialog::on_checkBoxFormat_toggled(bool checked)
+{
+    ui->lineEditFormaAdd->setEnabled(checked);
+}
