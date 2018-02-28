@@ -5,6 +5,8 @@
 #include "analyserthread.h"
 #include <qDebug>
 #include "toolkit.h"
+#include <QProcess>
+#include <QTemporaryDir>
 
 AnalyserThread::AnalyserThread(DBHelper *db, const QList<File> &f, QObject *parent) :
     dbHelper(db),
@@ -37,7 +39,7 @@ void AnalyserThread::run()
         case FileAccessException:
         case FileReadException:
         case FileFormatNotSupported:
-        case DocxExtractException:
+        case DocExtractException:
             ++failCount;
             dbHelper->setValid(file, false);
             break;
@@ -91,7 +93,16 @@ ProcessingResult AnalyserThread::processFile(const File &file)
         if (textContent.isNull())
         {
             qDebug() << "【Analyser】extract docx file failed" << file.name;
-            return DocxExtractException;
+            return DocExtractException;
+        }
+    }
+    else if (file.format == "doc")
+    {
+        textContent = docExtract(file);
+        if (textContent.isNull())
+        {
+            qDebug() << "【Analyser】extract doc file failed" << file.name;
+            return DocExtractException;
         }
     }
     else return FileFormatNotSupported;
@@ -203,4 +214,44 @@ QString AnalyserThread::docxExtract(const File &file)
         ret += qnl.item(i).toElement().text();
     }
     return ret;
+}
+
+QString AnalyserThread::docExtract(const File &file)
+{
+    const QString DOC2TXT = "/deps/doc2txt.exe";
+
+    QString curPath = QDir::currentPath();
+    QString exePath = curPath + DOC2TXT;
+    QString prefix;
+    if (QFileInfo(exePath).exists())
+        prefix = curPath;
+    else
+    {
+        QDir dir = curPath;
+        dir.cd("../SmartFilesManager/");
+        if (dir.exists() && QFileInfo(dir.absolutePath() + DOC2TXT).exists())
+            prefix = dir.absolutePath();
+        else
+            qDebug() << "cannot find doc2txt!";
+    }
+    QStringList args;
+    QTemporaryDir tmpDir;
+    QString tmpTxtFilePath = tmpDir.filePath("doc_extract.txt");
+    if (!tmpDir.isValid())
+        return QString();
+    args << QDir::toNativeSeparators(file.path)
+         << tmpTxtFilePath;
+    QProcess exProgress;
+    exProgress.start(prefix + DOC2TXT, args);
+    if (exProgress.waitForFinished(10000))
+    {
+        QFile docFile(tmpTxtFilePath);
+        if (!docFile.open(QIODevice::ReadOnly | QIODevice::Text))
+            return QString();
+        QTextStream stream(&docFile);
+        QString ret =  stream.readAll();
+        docFile.close();
+        return ret;
+    }
+    return QString();
 }

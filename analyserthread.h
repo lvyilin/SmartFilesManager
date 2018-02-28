@@ -30,6 +30,7 @@ private:
     bool abortFlag;
 
     QString docxExtract(const File &file);
+    QString docExtract(const File &file);
     ProcessingResult processFile(const File &file);
     void generateKeywords(FileProduct &fpd);
     void generateFileLabels(FileProduct &fpd);
