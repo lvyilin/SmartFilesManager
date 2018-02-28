@@ -4,6 +4,8 @@
 #include <QWidget>
 #include "wordcloud.h"
 #include "Qpainter"
+#include "utils.h"
+#include "qdebug.h"
 
 
 class wordcloudwidget : public QWidget {

@@ -5,9 +5,9 @@ node::node()
 
 }
 
-node::node(int id_, QString name_)
+node::node(int id_, QString name_, QList<Relation> relations_, QString path_)
 {
-    setnode(id_, name_);
+    setnode(id_, name_, relations_, path_);
 }
 
 int node::getid()
@@ -15,10 +15,7 @@ int node::getid()
     return id;
 }
 
-QPair<double, double> node::getcoordinate()
-{
-    return coordinate;
-}
+
 
 QString node::getname()
 {
@@ -27,14 +24,16 @@ QString node::getname()
 
 void node::setcoordinate(double x_, double y_)
 {
-    coordinate.first = x_;
-    coordinate.second = y_;
+    x = x_;
+    y = y_;
 }
 
-void node::setnode(int id_, QString name_)
+void node::setnode(int id_, QString name_, QList<Relation> relations_, QString path_)
 {
     id = id_;
     name = name_;
+    relations = relations_;
+    path = path_;
 }
 
 bool node::getis_set()

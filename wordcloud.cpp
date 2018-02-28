@@ -5,9 +5,10 @@ wordcloud::wordcloud()
 
 }
 
-void wordcloud::setwordcloud(QString filename_, QMap<QString/*keyword*/, double/*size*/ > Keywords_)
+void wordcloud::setwordcloud()
 {
-    filename = filename_;
-    Keywords = Keywords_;
+    filename = fl.file.name;
+    Keywords = fl.keywords;
+    labels = fl.labels;
 }
 

@@ -5,13 +5,16 @@
 #include "QMap"
 #include "QTextItem"
 #include "QPaintEvent"
+#include "utils.h"
 
 class wordcloud {
 public:
     wordcloud();
     QString filename;
+    FileResult fl;
     QMap<QString/*keyword*/, double/*size*/ > Keywords;
-    void setwordcloud(QString filename_, QMap<QString/*keyword*/, double/*size*/ > Keywords_);
+    QList<Label> labels;
+    void setwordcloud();
 };
 
 #endif // WORDCLOUD_H

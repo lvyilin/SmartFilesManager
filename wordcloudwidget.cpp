@@ -65,12 +65,16 @@ void wordcloudwidget::paintEvent(QPaintEvent *event)
         painter.drawEllipse(temp_x, temp_y, 20 + temp_size * 15, 20 + temp_size * 15);
         painter.drawText(temp_x - 10, temp_y, temp_keyword);
     }
+
+    painter.setPen(QPen(Qt::red, 5));
+    foreach (Label lb, a->labels)
+    {
+        painter.drawText(319, 222, lb.name);
+    }
 }
 
 void wordcloudwidget::setwordcloud()
 {
     a = new wordcloud();
-    /*a->filename = ;
-
-    a->Keywords = ;*/
+    a->setwordcloud();
 }

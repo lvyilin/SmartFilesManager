@@ -23,6 +23,7 @@
 #include "searchbox.h"
 
 
+
 class SettingsDialog;
 
 namespace Ui {

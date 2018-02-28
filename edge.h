@@ -7,11 +7,9 @@ class edge {
 public:
     QPair<node, node> nodepair;
     double weight;//关系度大小
-    QList<QString> value;//用于存储当前边所蕴含关键词
-    void setedge(node start_, node end_, double weight_, QList<QString> value_);
+    void setedge(node start_, node end_, double weight_);
     edge();
-    edge(node start_, node end_, double weight_, QList<QString> value_);
-    QList<QString> getvalue();
+    edge(node start_, node end_, double weight_);
     double getweight();
     QPair<node, node >getpair();
 };

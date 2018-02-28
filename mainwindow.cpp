@@ -119,6 +119,11 @@ MainWindow::MainWindow(QWidget *parent) :
 
     toolkitInitThread->start(QThread::LowPriority);*/
 
+
+
+    //draw graph
+    drawgraph();
+
 }
 
 MainWindow::~MainWindow()
@@ -613,7 +618,6 @@ void MainWindow::startCalculateRelation()
     {
         relationCalculator->start();
     }
-
 }
 
 void MainWindow::notifyRelationFinished()
@@ -717,7 +721,7 @@ void MainWindow::drawwordcloud()
 
 void MainWindow::drawgraph()
 {
-    graphwidget *graphwidget_ = new graphwidget();
+    graphwidget *graphwidget_ = new graphwidget(nullptr, dbHelper);
     ui->tabWidget_2->addTab(graphwidget_, "知识图谱类型视图");
     // ui->graph_view_2 = graphwidget_;
 }

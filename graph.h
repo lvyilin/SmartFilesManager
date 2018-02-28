@@ -4,16 +4,25 @@
 #include "node.h"
 #include "QList"
 #include "qmath.h"
+#include "utils.h"
+#include "dbhelper.h"
+#include "qdebug.h"
+
 class graph {
 public:
+
+    QList<FileResult> frs;
     QList<node> nodelist;
     QList<edge> edgelist;
-    graph();
+    graph(DBHelper *db);
     ~graph();
-    void setnodecoordinate(QList<edge> edgelist_);
     void setnode();
     void setedge();
-    graph(QList<node> nodelist_, QList<edge> edgrlist_);
+    void start();
+    void setnodecoordinate();
+private:
+    DBHelper *dbHelper;
+
 
 };
 
