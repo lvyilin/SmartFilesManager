@@ -1,5 +1,6 @@
 #include "searchdialog.h"
 #include "ui_searchdialog.h"
+#include <QPushButton>
 
 SearchDialog::SearchDialog(QWidget *parent) :
     QDialog(parent),
@@ -7,6 +8,9 @@ SearchDialog::SearchDialog(QWidget *parent) :
 {
     ui->setupUi(this);
     setWindowTitle(tr("高级搜索"));
+    //    QPushButton buttonAdd(QIcon(":/images/icons/add.png"),QString(),this);
+    //    QPushButton buttonClear
+    //    ui->horizontalLayoutFormat->addWidget();
 }
 
 SearchDialog::~SearchDialog()
@@ -16,5 +20,5 @@ SearchDialog::~SearchDialog()
 
 void SearchDialog::on_checkBoxFormat_toggled(bool checked)
 {
-    ui->lineEditFormaAdd->setEnabled(checked);
+    ui->lineEditFormatAdd->setEnabled(checked);
 }
