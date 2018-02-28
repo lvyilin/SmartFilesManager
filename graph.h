@@ -7,15 +7,16 @@
 #include "utils.h"
 #include "dbhelper.h"
 #include "qdebug.h"
+#include <ogdf/basic/Graph.h>
 
-class graph {
+class graph_ {
 public:
 
     QList<FileResult> frs;
-    QList<node> nodelist;
-    QList<edge> edgelist;
-    graph(DBHelper *db);
-    ~graph();
+    QList<node_> nodelist;
+    QList<edge_> edgelist;
+    graph_(DBHelper *db);
+    ~graph_();
     void setnode();
     void setedge();
     void start();

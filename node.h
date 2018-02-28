@@ -3,21 +3,24 @@
 #include "QString"
 #include "QList"
 #include "utils.h"
+#include "ogdf/basic/Graph.h"
 
-class node {
+
+class node_ {
 public:
     int id;
     QString name;
     QString path;
+    ogdf::node ogdfID;
     double x, y; //用于画图
     void setnode(int id_, QString name_, QList<Relation> relations_, QString path_);
     bool is_seted;
-    QList<node> connectednode;
+    QList<node_> connectednode;
     QList<Label> labels;
     QList<Relation> relations;
 
-    node();
-    node(int id_, QString name_, QList<Relation> relations_, QString path_);
+    node_();
+    node_(int id_, QString name_, QList<Relation> relations_, QString path_);
 
     int getid();
     QString getname();
