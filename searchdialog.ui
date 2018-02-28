@@ -115,8 +115,8 @@
     <rect>
      <x>34</x>
      <y>103</y>
-     <width>281</width>
-     <height>30</height>
+     <width>461</width>
+     <height>31</height>
     </rect>
    </property>
    <layout class="QHBoxLayout" name="horizontalLayoutFormat">
@@ -139,6 +139,19 @@
     </item>
     <item>
      <widget class="QLineEdit" name="lineEditFormatAdd"/>
+    </item>
+    <item>
+     <spacer name="horizontalSpacer">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>40</width>
+        <height>20</height>
+       </size>
+      </property>
+     </spacer>
     </item>
    </layout>
   </widget>
