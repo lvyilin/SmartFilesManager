@@ -3,14 +3,11 @@
 #include "node.h"
 #include "QPair"
 
-class edge {
+class edge_ {
 public:
-    QPair<node, node> nodepair;
+    node_ *first, *second;
     double weight;//关系度大小
-    void setedge(node start_, node end_, double weight_);
-    edge();
-    edge(node start_, node end_, double weight_);
+    edge_();
     double getweight();
-    QPair<node, node >getpair();
 };
 #endif

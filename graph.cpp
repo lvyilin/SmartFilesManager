@@ -1,6 +1,6 @@
 #include"graph.h"
 
-graph::graph(DBHelper *db):
+graph_::graph_(DBHelper *db):
     dbHelper(db)
 {
 
@@ -8,7 +8,7 @@ graph::graph(DBHelper *db):
 
 
 //setnodecoordinate
-void graph::setnodecoordinate()
+void graph_::setnodecoordinate()
 {
 
 }
@@ -18,35 +18,34 @@ void graph::setnodecoordinate()
  * QList<node> nodelist;
  * QList<edge> edgelist;
 */
-void graph::start()
+void graph_::start()
 {
     dbHelper->getFinishedFileResults(frs);
-    int i = 1;
-    foreach (FileResult fr, frs)
+    for (int i = 0; i < frs.count(); i++)
     {
-        node n;
-        n.setnode(i, fr.file.name, fr.relations, fr.file.path);
-        i++;
+        node_ n;
+        n.setnode(i, frs[i].file.name, frs[i].relations, frs[i].file.path);
         nodelist.append(n);
     }
-    foreach (node n, nodelist)
+    for (int i = 0; i < nodelist.count(); i++)
     {
-        foreach (Relation r, n.relations)
+        for (int c = 0 ; c < nodelist[i].relations.count(); c++)
         {
-            edge e;
-            foreach (node tempn, nodelist)
+            edge_ e;
+            for (int b = 0; b < nodelist.count(); b++)
             {
-                if (tempn.path == r.file.path)
+                double weight = nodelist[i].relations[c].keywordDegree * KEYWORD_RELATION_WEIGHT
+                                + nodelist[i].relations[c].labelDegree * LABEL_RELATION_WEIGHT
+                                + nodelist[i].relations[c].attributeDegree * ATTRIBUTE_RELATION_WEIGHT;
+
+                if (nodelist[i].relations[c].file.path == nodelist[b].path)
                 {
-                    e.setedge(n, tempn,
-                              r.keywordDegree * KEYWORD_RELATION_WEIGHT
-                              + r.labelDegree * LABEL_RELATION_WEIGHT
-                              + r.attributeDegree * ATTRIBUTE_RELATION_WEIGHT
-                             );
-                    break;
+                    e.first = &nodelist[i];
+                    e.second = &nodelist[b];
+                    e.weight = weight;
+                    edgelist.append(e);
                 }
             }
-            edgelist.append(e);
         }
     }
 }
