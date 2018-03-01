@@ -38,7 +38,7 @@ void graph_::start()
                                 + nodelist[i].relations[c].labelDegree * LABEL_RELATION_WEIGHT
                                 + nodelist[i].relations[c].attributeDegree * ATTRIBUTE_RELATION_WEIGHT;
 
-                if (nodelist[i].relations[c].file.path == nodelist[b].path)
+                if (nodelist[i].relations[c].file.path == nodelist[b].path && weight >= 0.12)
                 {
                     e.first = &nodelist[i];
                     e.second = &nodelist[b];
