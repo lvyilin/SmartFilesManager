@@ -147,10 +147,17 @@ void SearchDialog::on_pushButtonSearch_clicked()
     QList<FileResult> result;
     if (!ui->lineEditFilename->text().isEmpty())
     {
+        QStringList keywords = ui->lineEditFilename->text().split(' ', QString::SkipEmptyParts);
         for (auto fr : fileResults)
         {
-            if (fr.file.name.contains(ui->lineEditFilename->text(), Qt::CaseInsensitive))
-                result << fr;
+            for (QString kw : keywords)
+            {
+                if (fr.file.name.contains(kw, Qt::CaseInsensitive))
+                {
+                    result << fr;
+                    break;
+                }
+            }
         }
     }
     else
@@ -160,13 +167,21 @@ void SearchDialog::on_pushButtonSearch_clicked()
 
     if (!ui->lineEditKeyword->text().isEmpty())
     {
+        QStringList keywords = ui->lineEditKeyword->text().split(' ', QString::SkipEmptyParts);
         int i = result.count() - 1;
         for (; i >= 0; --i)
         {
-            if (!result[i].keywords.contains(ui->lineEditKeyword->text()))
+            bool del = true;
+            for (QString kw : keywords)
             {
-                result.removeAt(i);
+                if (result[i].keywords.contains(kw))
+                {
+                    del = false;
+                    break;
+                }
             }
+            if (del)
+                result.removeAt(i);
         }
     }
 
