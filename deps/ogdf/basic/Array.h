@@ -1,4 +1,4 @@
-/*
+﻿/*
  * $Revision: 3975 $
  *
  * last checkin:
@@ -592,13 +592,13 @@ namespace ogdf
         if(m_pStart != 0)
         {
             E* p = static_cast<E*>(realloc(m_pStart, sNew * sizeof(E)));
-            if(p == 0) OGDF_THROW(InsufficientMemoryException);
+//            if(p == 0) OGDF_THROW(InsufficientMemoryException);
             m_pStart = p;
         }
         else
         {
             m_pStart = static_cast<E*>(malloc(sNew * sizeof(E)));
-            if(m_pStart == 0) OGDF_THROW(InsufficientMemoryException);
+//            if(m_pStart == 0) OGDF_THROW(InsufficientMemoryException);
         }
 
         m_vpStart = m_pStart - m_low;
@@ -655,7 +655,7 @@ namespace ogdf
         else
         {
             m_pStart = static_cast<E*>(malloc(s * sizeof(E)));
-            if(m_pStart == 0) OGDF_THROW(InsufficientMemoryException);
+//            if(m_pStart == 0) OGDF_THROW(InsufficientMemoryException);
 
             m_vpStart = m_pStart - a;
             m_pStop = m_pStart + s;

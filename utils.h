@@ -110,5 +110,6 @@ const static int LABEL_JUDGEMENT_NEEDED_KEYWORD_NUMBER = 2;
 const static double KEYWORD_RELATION_WEIGHT = 0.35;
 const static double LABEL_RELATION_WEIGHT = 0.45;
 const static double ATTRIBUTE_RELATION_WEIGHT = 0.2;
+const static int STORE_TOP_RELATION_NUM = 10;
 
 #endif // UTILS_H

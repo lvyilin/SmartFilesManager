@@ -20,7 +20,7 @@ void graph_::setnodecoordinate()
 */
 void graph_::start()
 {
-    dbHelper->getFinishedFileResults(frs);
+    dbHelper->getFileResults(frs);
     for (int i = 0; i < frs.count(); i++)
     {
         node_ n;

@@ -6,46 +6,20 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>522</width>
-    <height>473</height>
+    <width>521</width>
+    <height>474</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
-  <widget class="QDialogButtonBox" name="buttonBox">
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
-     <x>397</x>
-     <y>21</y>
-     <width>93</width>
-     <height>63</height>
-    </rect>
-   </property>
-   <property name="orientation">
-    <enum>Qt::Vertical</enum>
-   </property>
-   <property name="standardButtons">
-    <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-   </property>
-  </widget>
-  <widget class="QLineEdit" name="lineEditKeyword">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>20</y>
-     <width>361</width>
+     <x>30</x>
+     <y>160</y>
+     <width>461</width>
      <height>31</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QWidget" name="">
-   <property name="geometry">
-    <rect>
-     <x>32</x>
-     <y>153</y>
-     <width>191</width>
-     <height>23</height>
     </rect>
    </property>
    <layout class="QHBoxLayout" name="horizontalLayoutField">
@@ -65,56 +39,93 @@
       </item>
      </widget>
     </item>
+    <item>
+     <spacer name="horizontalSpacer_2">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>40</width>
+        <height>20</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
    </layout>
   </widget>
-  <widget class="QWidget" name="">
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
-     <x>32</x>
-     <y>205</y>
-     <width>451</width>
-     <height>24</height>
+     <x>30</x>
+     <y>210</y>
+     <width>301</width>
+     <height>31</height>
     </rect>
    </property>
    <layout class="QHBoxLayout" name="horizontalLayoutSize">
     <item>
-     <widget class="QRadioButton" name="radioButtonBigSize">
+     <widget class="QCheckBox" name="checkBoxSize">
       <property name="text">
-       <string>大文件</string>
+       <string>大小筛选:</string>
       </property>
      </widget>
     </item>
     <item>
-     <widget class="QRadioButton" name="radioButtonSmallSize">
+     <widget class="QSpinBox" name="spinBoxSizeFrom">
+      <property name="maximum">
+       <number>1024</number>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="labelSize">
       <property name="text">
-       <string>小文件</string>
+       <string>-</string>
+      </property>
+      <property name="scaledContents">
+       <bool>false</bool>
       </property>
      </widget>
     </item>
     <item>
-     <widget class="QRadioButton" name="radioButtonOtherSize">
-      <property name="text">
-       <string>其他</string>
+     <widget class="QSpinBox" name="spinBoxSizeTo">
+      <property name="maximum">
+       <number>1024</number>
       </property>
      </widget>
     </item>
     <item>
-     <widget class="QSlider" name="horizontalSlider">
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
+     <widget class="QComboBox" name="comboBoxSizeUnit">
+      <item>
+       <property name="text">
+        <string>B</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>KB</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>MB</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>GB</string>
+       </property>
+      </item>
      </widget>
-    </item>
-    <item>
-     <widget class="QComboBox" name="comboBoxSizeUnit"/>
     </item>
    </layout>
   </widget>
-  <widget class="QWidget" name="">
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
-     <x>34</x>
-     <y>103</y>
+     <x>30</x>
+     <y>120</y>
      <width>461</width>
      <height>31</height>
     </rect>
@@ -155,40 +166,133 @@
     </item>
    </layout>
   </widget>
+  <widget class="QWidget" name="layoutWidget">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>260</y>
+     <width>346</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <layout class="QHBoxLayout" name="horizontalLayoutDate">
+    <item>
+     <widget class="QCheckBox" name="checkBoxDate">
+      <property name="text">
+       <string>日期筛选:</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QDateEdit" name="dateEditFrom"/>
+    </item>
+    <item>
+     <widget class="QLabel" name="labelDate">
+      <property name="text">
+       <string>-</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QDateEdit" name="dateEditTo"/>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="layoutWidget">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>30</y>
+     <width>331</width>
+     <height>61</height>
+    </rect>
+   </property>
+   <layout class="QFormLayout" name="formLayout">
+    <item row="0" column="0">
+     <widget class="QLabel" name="label">
+      <property name="text">
+       <string>文件名:</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="1">
+     <widget class="QLineEdit" name="lineEditFilename"/>
+    </item>
+    <item row="1" column="1">
+     <widget class="QLineEdit" name="lineEditKeyword"/>
+    </item>
+    <item row="1" column="0">
+     <widget class="QLabel" name="label_2">
+      <property name="text">
+       <string>关键词:</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QGroupBox" name="groupBox">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>300</y>
+     <width>471</width>
+     <height>161</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>搜索结果</string>
+   </property>
+   <widget class="QListWidget" name="listWidgetResult">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>20</y>
+      <width>451</width>
+      <height>111</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="labelResultNum">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>130</y>
+      <width>91</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>共0个结果</string>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QWidget" name="layoutWidget">
+   <property name="geometry">
+    <rect>
+     <x>380</x>
+     <y>30</y>
+     <width>95</width>
+     <height>65</height>
+    </rect>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <widget class="QPushButton" name="pushButtonSearch">
+      <property name="text">
+       <string>搜索</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="pushButtonCancel">
+      <property name="text">
+       <string>取消</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
  </widget>
  <resources/>
- <connections>
-  <connection>
-   <sender>buttonBox</sender>
-   <signal>accepted()</signal>
-   <receiver>SearchDialog</receiver>
-   <slot>accept()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>248</x>
-     <y>254</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>157</x>
-     <y>274</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>buttonBox</sender>
-   <signal>rejected()</signal>
-   <receiver>SearchDialog</receiver>
-   <slot>reject()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>316</x>
-     <y>260</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>286</x>
-     <y>274</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>

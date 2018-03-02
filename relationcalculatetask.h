@@ -28,6 +28,7 @@ private:
     double getLabelNorm(FileResult *fr);
 
     double getAttrDegree(FileResult *frA, FileResult *frB);
+    bool isSameType(const QString &fmt1, const QString &fmt2);
 
 
 };

@@ -3,6 +3,17 @@
 #include <QDir>
 #include <QDebug>
 
+bool relationLessThan(const Relation &r1, const Relation &r2)
+{
+    double t1 = r1.keywordDegree * KEYWORD_RELATION_WEIGHT
+                + r1.labelDegree * LABEL_RELATION_WEIGHT
+                + r1.attributeDegree * ATTRIBUTE_RELATION_WEIGHT;
+    double t2 = r2.keywordDegree * KEYWORD_RELATION_WEIGHT
+                + r2.labelDegree * LABEL_RELATION_WEIGHT
+                + r2.attributeDegree * ATTRIBUTE_RELATION_WEIGHT;
+    return t1 < t2;
+}
+
 RelationCalculateTask::RelationCalculateTask(FileResult *fr, QList<FileResult> li, QObject *parent):
     QObject(parent)
 {
@@ -14,10 +25,11 @@ void RelationCalculateTask::run()
 {
     double keywordNorm = getKeywordNorm(fileResult);
     double labelNorm = getLabelNorm(fileResult);
+    QList<Relation> rlList;
     for (int i = 0; i < list.size(); ++i)
     {
         FileResult *anotherFileResult = &(list[i]);
-        if (fileResult->file.format != anotherFileResult->file.format)
+        if (!isSameType(fileResult->file.format, anotherFileResult->file.format))
         {
             Relation foo = {anotherFileResult->file, 0.0, 0.0, getAttrDegree(fileResult, anotherFileResult)};
             fileResult->relations << foo;
@@ -39,9 +51,18 @@ void RelationCalculateTask::run()
         //attribute relation
         r.attributeDegree = getAttrDegree(fileResult, anotherFileResult);
 
-        fileResult->relations << r;
+        rlList << r;
     }
-
+    std::sort(rlList.begin(), rlList.end(), relationLessThan);
+    if (rlList.count() > STORE_TOP_RELATION_NUM)
+    {
+        for (int i = 0; i < STORE_TOP_RELATION_NUM; ++i)
+            fileResult->relations << rlList.takeLast();
+    }
+    else
+    {
+        fileResult->relations = rlList;
+    }
     emit finished(fileResult);
 }
 
@@ -73,9 +94,9 @@ double RelationCalculateTask::getLabelNumerator(FileResult *frA, FileResult *frB
 {
     int sum = 0.0;
     QMap<QString, int> mapA, mapB;
-    for (Label la : frA->labels)
+    for (Label &la : frA->labels)
         mapA.insert(la.name, la.type == "field" ? la.level : 1);
-    for (Label lb : frB->labels)
+    for (Label &lb : frB->labels)
         mapB.insert(lb.name, lb.type == "field" ? lb.level : 1);
     QMapIterator<QString, int> itr(mapA);
     while (itr.hasNext())
@@ -104,10 +125,7 @@ double RelationCalculateTask::getAttrDegree(FileResult *frA, FileResult *frB)
     double sum = 0.0;
     if (frA->file.format == frB->file.format)
         sum += 0.4;
-    else if ((DOCUMENT_FORMATS.contains(frA->file.format) && DOCUMENT_FORMATS.contains(frB->file.format))
-             || (IMAGE_FORMATS.contains(frA->file.format) && IMAGE_FORMATS.contains(frB->file.format))
-             || (VIDEO_FORMATS.contains(frA->file.format) && VIDEO_FORMATS.contains(frB->file.format))
-             || (AUDIO_FORMATS.contains(frA->file.format) && AUDIO_FORMATS.contains(frB->file.format)))
+    else if (isSameType(frA->file.format, frB->file.format))
         sum += 0.2;
     else;
 
@@ -145,6 +163,16 @@ double RelationCalculateTask::getAttrDegree(FileResult *frA, FileResult *frB)
     else;
 
     return sum;
+}
+
+bool RelationCalculateTask::isSameType(const QString &fmt1, const QString &fmt2)
+{
+    if (fmt1 == fmt2)
+        return true;
+    return (DOCUMENT_FORMATS.contains(fmt1) && DOCUMENT_FORMATS.contains(fmt2))
+           || (IMAGE_FORMATS.contains(fmt1) && IMAGE_FORMATS.contains(fmt2))
+           || (VIDEO_FORMATS.contains(fmt1) && VIDEO_FORMATS.contains(fmt2))
+           || (AUDIO_FORMATS.contains(fmt1) && AUDIO_FORMATS.contains(fmt2));
 }
 
 
