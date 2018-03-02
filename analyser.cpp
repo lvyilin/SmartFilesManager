@@ -28,6 +28,7 @@ void Analyser::processFileList(const QList<File> &fileList)
     }
     AnalyserThread *workerThread = new AnalyserThread(dbHelper, fileList, this);
     ++threadCount;
+    successCount = failCount = 0;
     connect(workerThread, &AnalyserThread::resultReady, this, &Analyser::handleResult);
     connect(workerThread, &AnalyserThread::finished, workerThread, &QObject::deleteLater);
     connect(workerThread, &AnalyserThread::aborted, this, &Analyser::analyserInterrupted);

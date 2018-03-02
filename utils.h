@@ -65,11 +65,12 @@ enum ProcessingResult
     FileAccessException,
     FileReadException,
     FileFormatNotSupported,
-    DocExtractException
+    DocExtractException,
+    PdfExtractException
 };
 
 //format
-const static QStringList SUPPORTED_FORMATS = {"docx", "doc", "txt"};
+const static QStringList SUPPORTED_FORMATS = {"docx", "doc", "pdf", "txt"};
 const static QStringList FORMATS_FILTER = {"*.*"};
 
 const static QStringList DOCUMENT_FORMATS = {"doc", "docx", "xls", "xlsx", "ppt", "pptx", "odt", "rtf",
