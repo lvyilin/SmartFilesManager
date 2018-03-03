@@ -65,11 +65,12 @@ enum ProcessingResult
     FileAccessException,
     FileReadException,
     FileFormatNotSupported,
-    DocExtractException
+    DocExtractException,
+    PdfExtractException
 };
 
 //format
-const static QStringList SUPPORTED_FORMATS = {"docx", "doc", "txt"};
+const static QStringList SUPPORTED_FORMATS = {"docx", "doc", "pdf", "txt"};
 const static QStringList FORMATS_FILTER = {"*.*"};
 
 const static QStringList DOCUMENT_FORMATS = {"doc", "docx", "xls", "xlsx", "ppt", "pptx", "odt", "rtf",
@@ -110,5 +111,6 @@ const static int LABEL_JUDGEMENT_NEEDED_KEYWORD_NUMBER = 2;
 const static double KEYWORD_RELATION_WEIGHT = 0.35;
 const static double LABEL_RELATION_WEIGHT = 0.45;
 const static double ATTRIBUTE_RELATION_WEIGHT = 0.2;
+const static int STORE_TOP_RELATION_NUM = 10;
 
 #endif // UTILS_H

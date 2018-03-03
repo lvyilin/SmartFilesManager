@@ -71,6 +71,11 @@ void DBHelper::cleanFiles()
         qDebug() << "table cleared" ;
 }
 
+void DBHelper::cleanRelations()
+{
+    query->exec("delete from file_relations");
+}
+
 void DBHelper::close()
 {
     query->finish();
@@ -352,10 +357,11 @@ void DBHelper::getFileResultById(FileResult &fr, int fileId)
     }
 
     //get labels
-    query->prepare("select name, level, parent, type from labels where id in(select label_id from file_labels where file_id=:id)");
+    query->prepare("select name, level, parent, type, id from labels where id in(select label_id from file_labels where file_id=:id)");
     query->bindValue(":id", fileId);
     query->exec();
     QVector<int> parentIds;
+    QVector<int> ids;
     while (query->next())
     {
         Label lb;
@@ -363,19 +369,28 @@ void DBHelper::getFileResultById(FileResult &fr, int fileId)
         lb.level = query->value(1).toInt();
         lb.type = query->value(3).toString();
         parentIds <<  query->value(2).toInt();
-
+        ids << query->value(4).toInt();
         fr.labels << lb;
     }
     for (int i = 0; i < parentIds.count(); ++i)
     {
-        if (fr.labels[i].type == "field")
+        if (fr.labels[i].type == "field" && parentIds[i] != 0)
         {
-            query->prepare("select name from labels where id=:id");
+            /*query->prepare("select name from labels where id=:id");
             query->addBindValue(parentIds[i]);
             query->exec();
             if (query->next())
             {
                 fr.labels[i].parentName = query->value(0).toString();
+            }*/
+            //reduce a db query
+            for (int j = 0; j < ids.count(); ++j)
+            {
+                if (parentIds[i] == ids[j])
+                {
+                    fr.labels[i].parentName = fr.labels[j].name;
+                    break;
+                }
             }
         }
     }
@@ -418,11 +433,11 @@ void DBHelper::getFileById(File &f, int fileId)
     }
 }
 
-void DBHelper::getFinishedFileResults(QList<FileResult> &frs)
+void DBHelper::getFileResults(QList<FileResult> &frs, bool finished)
 {
     QList<File> list;
     QList<int> idList;
-    getAllFiles(list, idList, true);
+    getAllFiles(list, idList, finished);
     for (int i = 0; i < list.count(); ++i)
     {
         //        QCoreApplication::processEvents();
@@ -512,6 +527,37 @@ void DBHelper::saveSingleFileResult(const FileResult &fr)
         }
     }
     mutex.unlock();
+}
+
+void DBHelper::getAllFieldLabels(QList<Label> &li)
+{
+    query->exec("select name, level, parent,id from labels where type='field'");
+    QVector<int> parentIds;
+    QVector<int> ids;
+    while (query->next())
+    {
+        Label lb;
+        lb.name = query->value(0).toString();
+        lb.level = query->value(1).toInt();
+        lb.type = "field";
+        parentIds <<  query->value(2).toInt();
+        ids << query->value(3).toInt();
+        li << lb;
+    }
+    for (int i = 0; i < parentIds.count(); ++i)
+    {
+        if (parentIds[i] != 0)
+        {
+            for (int j = 0; j < ids.count(); ++j)
+            {
+                if (parentIds[i] == ids[j])
+                {
+                    li[i].parentName = li[j].name;
+                    break;
+                }
+            }
+        }
+    }
 }
 
 void DBHelper::abortProgress()

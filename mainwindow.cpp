@@ -31,8 +31,25 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     //ui
     ui->setupUi(this);
-
     setWindowTitle(QCoreApplication::applicationName());
+
+    //primary init
+    configHelper->readSettings();
+    settingsDialog = new SettingsDialog(configHelper, this);
+    dbHelper = new DBHelper(QString("SFM"), QString("sfm.db"), this);
+    connect(this, &MainWindow::quitTask, dbHelper, &DBHelper::abortProgress);
+    connect(dbHelper, &DBHelper::dbInterrupted, this, &MainWindow::dbHelperInterrupted);
+    connect(dbHelper, &DBHelper::calRelationProgress, this, &MainWindow::showCalRelationProgress);
+
+    analyser = new Analyser(dbHelper, this);
+    connect(analyser, &Analyser::interrupted, this, &MainWindow::analyserInterrupted);
+    connect(analyser, &Analyser::processFinished, this, &MainWindow::notifyIndexResult);
+    connect(analyser, &Analyser::analyseProgress, this, &MainWindow::showAnalyserProgress);
+
+    //view
+    setupView();
+
+    //search
     searchBox = new SearchBox(&fileList, this);
     QPushButton *searchButton = new QPushButton(QIcon(":/images/icons/search.png"), QString(), this);
     searchButton->setToolTip("搜索/下一个");
@@ -48,23 +65,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->toolBar->addWidget(searchBox);
     ui->toolBar->addWidget(searchButton);
 
-    //    connect(ui->processButton, SIGNAL(clicked(bool)), this, SLOT(processWorkList()));
-    //primary init
-    configHelper->readSettings();
-    settingsDialog = new SettingsDialog(configHelper, this);
-    searchDialog = new SearchDialog(this);
-    dbHelper = new DBHelper(QString("SFM"), QString("sfm.db"), this);
-    connect(this, &MainWindow::quitTask, dbHelper, &DBHelper::abortProgress);
-    connect(dbHelper, &DBHelper::dbInterrupted, this, &MainWindow::dbHelperInterrupted);
-    connect(dbHelper, &DBHelper::calRelationProgress, this, &MainWindow::showCalRelationProgress);
-
-    analyser = new Analyser(dbHelper, this);
-    connect(analyser, &Analyser::interrupted, this, &MainWindow::analyserInterrupted);
-    connect(analyser, &Analyser::processFinished, this, &MainWindow::notifyIndexResult);
-    connect(analyser, &Analyser::analyseProgress, this, &MainWindow::showAnalyserProgress);
-
-    //view
-    setupView();
 
     //tray
     createTrayIcon();
@@ -624,6 +624,7 @@ void MainWindow::on_treeView_clicked(const QModelIndex &index)
 
 void MainWindow::startCalculateRelation()
 {
+    dbHelper->cleanRelations();
     if (!relationCalculator)
     {
         relationCalculator = new RelationCalculator(dbHelper, this);
@@ -669,6 +670,8 @@ void MainWindow::on_actionQuickSearch_triggered()
 
 void MainWindow::on_actionAdvancedSearch_triggered()
 {
+    if (searchDialog == nullptr)
+        searchDialog = new SearchDialog(dbHelper, this);
     searchDialog->show();
 }
 
@@ -737,7 +740,7 @@ void MainWindow::drawwordcloud()
 
 void MainWindow::drawgraph()
 {
-    graphwidget *graphwidget_ = new graphwidget(nullptr, dbHelper);
+    graphwidget *graphwidget_ = new graphwidget(this, dbHelper);
     ui->tabWidget_2->addTab(graphwidget_, "知识图谱类型视图");
     // ui->graph_view_2 = graphwidget_;
 }

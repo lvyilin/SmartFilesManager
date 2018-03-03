@@ -36,7 +36,11 @@ QMap<QString, double> Toolkit::getKeywords(QString text)
     QMap<QString, double> res;
     foreach (cppjieba::KeywordExtractor::Word kw, keywordres)
     {
-        res.insert(QString::fromStdString(kw.word), kw.weight);
+        QString str = QString::fromStdString(kw.word);
+        bool num;
+        str.toDouble(&num);
+        if (!num)
+            res.insert(str, kw.weight);
     }
     return res;
 }

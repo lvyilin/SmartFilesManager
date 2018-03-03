@@ -13,7 +13,7 @@ RelationCalculator::RelationCalculator(DBHelper *db, QObject *parent):
 void RelationCalculator::start()
 {
     fileResultList.clear();
-    dbHelper->getFinishedFileResults(fileResultList);
+    dbHelper->getFileResults(fileResultList);
     for (int i = fileResultList.count() - 1; i > 0; --i)
     {
         //reduce size of list

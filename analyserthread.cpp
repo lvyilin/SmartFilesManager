@@ -40,6 +40,7 @@ void AnalyserThread::run()
         case FileReadException:
         case FileFormatNotSupported:
         case DocExtractException:
+        case PdfExtractException:
             ++failCount;
             dbHelper->setValid(file, false);
             break;
@@ -105,6 +106,15 @@ ProcessingResult AnalyserThread::processFile(const File &file)
             return DocExtractException;
         }
     }
+    else if (file.format == "pdf")
+    {
+        textContent = pdfExtract(file);
+        if (textContent.isNull())
+        {
+            qDebug() << "【Analyser】extract pdf file failed" << file.name;
+            return PdfExtractException;
+        }
+    }
     else return FileFormatNotSupported;
 
     if (abortFlag) return ProcessAborted;
@@ -161,6 +171,7 @@ void AnalyserThread::generateFileLabels(FileProduct &fpd)
     while (!abortFlag && itr.hasNext())
     {
         itr.next();
+
         keywords.append(itr.key());
     }
     if (abortFlag)return;
@@ -232,7 +243,10 @@ QString AnalyserThread::docExtract(const File &file)
         if (dir.exists() && QFileInfo(dir.absolutePath() + DOC2TXT).exists())
             prefix = dir.absolutePath();
         else
+        {
             qDebug() << "cannot find doc2txt!";
+            return QString();
+        }
     }
     QStringList args;
     QTemporaryDir tmpDir;
@@ -251,6 +265,49 @@ QString AnalyserThread::docExtract(const File &file)
         QTextStream stream(&docFile);
         QString ret =  stream.readAll();
         docFile.close();
+        return ret;
+    }
+    return QString();
+}
+
+QString AnalyserThread::pdfExtract(const File &file)
+{
+    const QString PDF2TXT = "/deps/pdftotext.exe";
+
+    QString curPath = QDir::currentPath();
+    QString exePath = curPath + PDF2TXT;
+    QString prefix;
+    if (QFileInfo(exePath).exists())
+        prefix = curPath;
+    else
+    {
+        QDir dir = curPath;
+        dir.cd("../SmartFilesManager/");
+        if (dir.exists() && QFileInfo(dir.absolutePath() + PDF2TXT).exists())
+            prefix = dir.absolutePath();
+        else
+        {
+            qDebug() << "cannot find doc2txt!";
+            return QString();
+        }
+    }
+    QStringList args;
+    QTemporaryDir tmpDir;
+    QString tmpTxtFilePath = tmpDir.filePath("pdf_extract.txt");
+    if (!tmpDir.isValid())
+        return QString();
+    args << QDir::toNativeSeparators(file.path)
+         << tmpTxtFilePath;
+    QProcess exProgress;
+    exProgress.start(prefix + PDF2TXT, args);
+    if (exProgress.waitForFinished(10000))
+    {
+        QFile pdfFile(tmpTxtFilePath);
+        if (!pdfFile.open(QIODevice::ReadOnly | QIODevice::Text))
+            return QString();
+        QTextStream stream(&pdfFile);
+        QString ret =  stream.readAll();
+        pdfFile.close();
         return ret;
     }
     return QString();

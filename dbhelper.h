@@ -31,6 +31,7 @@ public:
      * @brief cleanFiles 清空文件表
      */
     void cleanFiles();
+    void cleanRelations();
 
     /**
      * @brief close 关闭数据库
@@ -79,10 +80,11 @@ public:
      * @brief getFinishedFileResults 获得所有已完成文件的FileResult
      * @param frs 空的FileResult List的引用, 用于储存返回结果
      */
-    void getFinishedFileResults(QList<FileResult> &frs);
+    void getFileResults(QList<FileResult> &frs, bool finished = true);
 
     void saveFileResults(QList<FileResult> &frs);
     void saveSingleFileResult(const FileResult &fr);
+    void getAllFieldLabels(QList<Label> &li);
 
 signals:
     void calRelationProgress(int num, int total);

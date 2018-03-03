@@ -177,6 +177,3 @@ win32 {
 
 INCLUDEPATH += $$PWD/deps/
 DEPENDPATH += $$PWD/deps/
-
-#INCLUDEPATH += C:\Program Files (x86)\Windows Kits\10\Include\10.0.10150.0\ucrt
-#LIBS += -L"C:\Program Files (x86)\Windows Kits\10\Lib\10.0.10150.0\ucrt\x86"

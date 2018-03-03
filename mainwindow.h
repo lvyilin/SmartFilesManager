@@ -114,7 +114,6 @@ private:
     QSystemTrayIcon *trayIcon;
     QMenu *trayIconMenu;
     SettingsDialog *settingsDialog;
-    SearchDialog *searchDialog;
     DBHelper *dbHelper;
     QTimer *triggerTimer;
     Analyser *analyser;
@@ -123,6 +122,7 @@ private:
 
     SearchBox *searchBox;
     QList<File> fileList;
+    SearchDialog *searchDialog = nullptr;
 
     QMenu *fileTreeMenu = nullptr;
 
