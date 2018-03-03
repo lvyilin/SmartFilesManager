@@ -245,16 +245,6 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="graph_view_2">
-       <attribute name="title">
-        <string>知识图谱类型视图</string>
-       </attribute>
-      </widget>
-      <widget class="QWidget" name="tab_4">
-       <attribute name="title">
-        <string>标签词云展示</string>
-       </attribute>
-      </widget>
      </widget>
     </item>
    </layout>
