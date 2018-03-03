@@ -53,25 +53,23 @@ void graphwidget::paintEvent(QPaintEvent *event)
         dolayout();
         is_drawed = true;
     }
+    int z = 1;
     rec = this->geometry(); //获取窗口的位置以及大小并保存在rec中。
     for (int i = 0; i < a->nodelist.count(); i++)
     {
-        painter.setBrush(QColor(choosecolor(i)));
-        painter.setPen(QColor(choosecolor(i)));
-        foreach (edge_ e, a->edgelist)
+        painter.setBrush(QColor(choosecolor(i % 50)));
+        painter.setPen(QColor(choosecolor(i % 50)));
+        for (int j = 0; j < a->edgelist.count(); j++)
         {
-            if (e.first->path == a->nodelist[i].path)
+            if (a->edgelist[j].first->path == a->nodelist[i].path)
             {
                 painter.drawEllipse(a->nodelist[i].x, a->nodelist[i].y, 20, 20);
-                painter.drawEllipse(e.second->x, e.second->y, 20, 20);
-                painter.drawLine(a->nodelist[i].x, a->nodelist[i].y, e.second->x, e.second->y);
-                /* painter.drawText((a->nodelist[i].x + a->nodelist[b].x) / 2,
-                                  (a->nodelist[i].y + a->nodelist[b].y) / 2,
-                                  QString::number(e.weight));*/
+                painter.drawEllipse(a->edgelist[j].second->x, a->edgelist[j].second->y, 20, 20);
+                painter.drawLine(a->nodelist[i].x, a->nodelist[i].y, a->edgelist[j].second->x, a->edgelist[j].second->y);
             }
         }
+        z++;
     }
-
     for (int i = 0; i < a->nodelist.count(); i++)
     {
         //qDebug() << (h_Point.x() - a->nodelist[i].x) * (h_Point.x() - a->nodelist[i].x) + (h_Point.y() - a->nodelist[i].y) * (h_Point.y() - a->nodelist[i].y);
@@ -128,7 +126,6 @@ void graphwidget::paintEvent(QPaintEvent *event)
                 if (e.first->path == a->nodelist[i].path)
                 {
                     counter += 1;
-                    qDebug() << counter;
                     painter.setPen(QColor("#734488"));
                     painter.drawLine(e.first->x, e.first->y, e.second->x, e.second->y);
                     painter.setPen(Qt::black);
@@ -155,11 +152,8 @@ void graphwidget::dolayout()
     {
         a->nodelist[i].ogdfID = G.newNode(i);
     }
-    qDebug() << a->edgelist.count();
     for (int i = 0; i < a->edgelist.count(); i++)
     {
-        qDebug() << a->edgelist[i].first->name;
-        qDebug() << a->edgelist[i].second->name;
         G.newEdge(a->edgelist[i].first->ogdfID, a->edgelist[i].second->ogdfID);
     }
     GraphAttributes GA_FMMM(G);
@@ -169,13 +163,11 @@ void graphwidget::dolayout()
     Layout.newInitialPlacement(true);
     Layout.qualityVersusSpeed(FMMMLayout::qvsGorgeousAndEfficient);
     Layout.call(GA_FMMM);
-
     DRect rect = GA_FMMM.boundingBox();
     double xk = NORMALIZED_GRAPH_WIDTH_AND_HEIGHT / rect.width();
     double yk = NORMALIZED_GRAPH_WIDTH_AND_HEIGHT / rect.height();
     double x0 = rect.p1().m_x; //最小x
     double y0 = rect.p1().m_y; //最小y
-    qDebug() << a->nodelist.count();
     for (int i = 0; i < a->nodelist.count(); i++)
     {
         //坐标转化到 [0,NORMALIZED_GRAPH_WIDTH_AND_HEIGHT] 区间内
@@ -316,6 +308,46 @@ QString graphwidget::choosecolor(int i)
         return "#071A52";
     case 29:
         return "#7CBD1E";
+    case 30:
+        return"#EEE685";
+    case 31:
+        return"#EEE5DE";
+    case 32:
+        return"#EEDC82";
+    case 33:
+        return"#EECFA1";
+    case 34:
+        return"#EEC591";
+    case 35:
+        return"#EE82EE";
+    case 36:
+        return"#EE4000";
+    case 37:
+        return"#EBEBEB";
+    case 38:
+        return"#E0FFFF";
+    case 39:
+        return"#DC143C";
+    case 40:
+        return"#DB7093";
+    case 41:
+        return"#CD8500";
+    case 42:
+        return"#C1FFC1";
+    case 43:
+        return"#C6E2FF";
+    case 44:
+        return"#CAFF70";
+    case 45:
+        return"#8B475D";
+    case 46:
+        return"#8B0A50";
+    case 47:
+        return"#778899";
+    case 48:
+        return"#6E8B3D";
+    case 49:
+        return"#696969";
     default:
         break;
     }
