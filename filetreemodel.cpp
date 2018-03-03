@@ -5,10 +5,9 @@
 #include "filetreemodel.h"
 #include <QDebug>
 
-FileTreeModel::FileTreeModel(const QList<File> fileList, QObject *parent)
-    : QAbstractItemModel(parent)
+FileTreeModel::FileTreeModel(const QList<File> &li, DBHelper *db, QObject *parent)
+    : fileList(li), dbHelper(db), QAbstractItemModel(parent)
 {
-    setupModelData(fileList);
 }
 
 FileTreeModel::~FileTreeModel()
@@ -24,7 +23,7 @@ QModelIndex FileTreeModel::index(int row, int column, const QModelIndex &parent)
     FileItem *parentItem;
 
     if (!parent.isValid())
-        parentItem = rootItem;
+        parentItem =  rootItem;
     else
         parentItem = static_cast<FileItem *>(parent.internalPointer());
 
@@ -104,9 +103,11 @@ QVariant FileTreeModel::headerData(int section, Qt::Orientation orientation,
     return QVariant();
 }
 
-void FileTreeModel::setupModelData(const QList<File> &fileList)
+void FileTreeModel::setupTypeModelData()
 {
-    rootItem = new FileItem("文件", nullptr);
+    if (rootItem != nullptr)
+        delete rootItem;
+    rootItem = new FileItem("类型分类", nullptr);
     QVector<FileItem *> typeItems;
     typeItems << new FileItem("文档", rootItem);
     typeItems << new FileItem("图片", rootItem);
@@ -135,6 +136,59 @@ void FileTreeModel::setupModelData(const QList<File> &fileList)
     }
 }
 
+void FileTreeModel::setupFieldModelData()
+{
+    if (rootItem != nullptr)
+        delete rootItem;
+    rootItem = new FileItem("领域分类", nullptr);
+    QVector<QVector<FileItem *> > fieldItems(MAX_LABEL_LEVEL);
+    QSet<QString> addedField;
+    QVector<QVector<Label> > labelList =  dbHelper->getFieldLabels(fileList);
+    for (int curFieldLevel = 1; curFieldLevel <= MAX_LABEL_LEVEL; ++curFieldLevel)
+    {
+        for (int i = 0; i < labelList.count(); ++i)
+        {
+            for (int j = 0; j < labelList[i].count(); ++j)
+            {
+                if (labelList[i][j].level == curFieldLevel)
+                {
+                    if (!addedField.contains(labelList[i][j].name))
+                    {
+                        addedField << labelList[i][j].name;
+                        if (curFieldLevel == 1)
+                            fieldItems[curFieldLevel - 1] << new FileItem(labelList[i][j].name, rootItem);
+                        else
+                            fieldItems[curFieldLevel - 1] <<
+                                                          new FileItem(labelList[i][j].name,
+                                                                       getParentFieldItem(labelList[i][j].parentName, fieldItems[curFieldLevel - 2]));
+                    }
+                }
+            }
+        }
+    }
+    FileItem *undefinedField = new FileItem("其它", rootItem);
+    for (int i = 0; i < fileList.count(); ++i)
+    {
+        int maxLevel = 0;
+        QString maxLevelName;
+        for (int j = 0; j < labelList[i].count(); ++j)
+        {
+
+            if (labelList[i][j].level > maxLevel)
+            {
+                maxLevel = labelList[i][j].level;
+                maxLevelName = labelList[i][j].name;
+            }
+        }
+        FileItem *parentItem;
+        if (maxLevel == 0)
+            parentItem =  undefinedField;
+        else
+            parentItem = getParentFieldItem(maxLevelName, fieldItems[maxLevel - 1]);
+        new FileItem(fileList[i], parentItem);
+    }
+}
+
 FileItem *FileTreeModel::getTypeItem(const QString &format, const QVector<FileItem *> &typeItems)
 {
     QString tp;
@@ -149,5 +203,15 @@ FileItem *FileTreeModel::getTypeItem(const QString &format, const QVector<FileIt
         if (item->itemName == tp)
             return item;
     }
-    return nullptr;
+    return rootItem;
+}
+
+FileItem *FileTreeModel::getParentFieldItem(const QString &parentName, const QVector<FileItem *> &fieldItems)
+{
+    for (FileItem *item : fieldItems)
+    {
+        if (parentName == item->itemName)
+            return item;
+    }
+    return rootItem;
 }

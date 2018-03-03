@@ -113,4 +113,5 @@ const static double LABEL_RELATION_WEIGHT = 0.45;
 const static double ATTRIBUTE_RELATION_WEIGHT = 0.2;
 const static int STORE_TOP_RELATION_NUM = 10;
 
+const static int MAX_LABEL_LEVEL = 3;
 #endif // UTILS_H

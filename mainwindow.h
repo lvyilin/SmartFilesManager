@@ -42,7 +42,7 @@ signals:
     void fileUpdaterWait(unsigned long time);
 
 public slots:
-    void treeViewFocus(const QString &str);
+    void treeViewFocus(const QString &str, bool byPath = true);
     void fileNotFoundMsgBox();
 
 protected:
@@ -97,6 +97,9 @@ private slots:
     void on_actionOpenFile_triggered();
     void on_actionOpenFolder_triggered();
     void showContextMenu(const QPoint &pos);
+    void focusFile();
+
+    void on_comboBoxTreeViewType_currentIndexChanged(int index);
 
 private:
     Ui::MainWindow *ui;

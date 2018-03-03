@@ -85,6 +85,7 @@ public:
     void saveFileResults(QList<FileResult> &frs);
     void saveSingleFileResult(const FileResult &fr);
     void getAllFieldLabels(QList<Label> &li);
+    QVector<QVector<Label> > getFieldLabels(const QList<File> &li);
 
 signals:
     void calRelationProgress(int num, int total);

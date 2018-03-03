@@ -4,12 +4,13 @@
 #include <QAbstractItemModel>
 #include "utils.h"
 #include "fileitem.h"
+#include "dbhelper.h"
 
 class FileTreeModel : public QAbstractItemModel {
     Q_OBJECT
 
 public:
-    explicit FileTreeModel(const QList<File> fileList, QObject *parent = nullptr);
+    explicit FileTreeModel(const QList<File> &li, DBHelper *db, QObject *parent = nullptr);
     ~FileTreeModel();
 
     // Basic functionality:
@@ -25,10 +26,14 @@ public:
     QVariant headerData(int section, Qt::Orientation orientation,
                         int role = Qt::DisplayRole) const override;
 
+    void setupTypeModelData();
+    void setupFieldModelData();
 private:
-    void setupModelData(const QList<File> &fileList);
     FileItem *getTypeItem(const QString &format, const QVector<FileItem *> &typeItems);
-    FileItem *rootItem;
+    FileItem *getParentFieldItem(const QString &parentName, const QVector<FileItem *> &fieldItems);
+    const QList<File> &fileList;
+    DBHelper *dbHelper;
+    FileItem *rootItem = nullptr;
 };
 
 #endif // FILETREEMODEL_H

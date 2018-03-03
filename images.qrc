@@ -7,5 +7,6 @@
         <file>icons/refresh.png</file>
         <file>icons/add.png</file>
         <file>icons/trashbin.png</file>
+        <file>icons/reload.png</file>
     </qresource>
 </RCC>

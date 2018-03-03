@@ -11,7 +11,7 @@ public:
     explicit SearchBox(const QList<File> *li, QWidget *parent = nullptr);
 
 signals:
-    void findFile(const QString path);
+    void findFile(const QString path, bool byPath = true);
     void fileNotFound();
 
 public slots:
