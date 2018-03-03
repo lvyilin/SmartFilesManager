@@ -624,6 +624,7 @@ void MainWindow::on_treeView_clicked(const QModelIndex &index)
 
 void MainWindow::startCalculateRelation()
 {
+    dbHelper->cleanRelations();
     if (!relationCalculator)
     {
         relationCalculator = new RelationCalculator(dbHelper, this);

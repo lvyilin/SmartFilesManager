@@ -31,6 +31,7 @@ public:
      * @brief cleanFiles 清空文件表
      */
     void cleanFiles();
+    void cleanRelations();
 
     /**
      * @brief close 关闭数据库

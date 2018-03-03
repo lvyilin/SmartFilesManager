@@ -71,6 +71,11 @@ void DBHelper::cleanFiles()
         qDebug() << "table cleared" ;
 }
 
+void DBHelper::cleanRelations()
+{
+    query->exec("delete from file_relations");
+}
+
 void DBHelper::close()
 {
     query->finish();
