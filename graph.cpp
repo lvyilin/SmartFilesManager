@@ -25,6 +25,7 @@ void graph_::start()
     {
         node_ n;
         n.setnode(i, frs[i].file.name, frs[i].relations, frs[i].file.path);
+        n.keywords = frs[i].keywords;
         nodelist.append(n);
     }
     for (int i = 0; i < nodelist.count(); i++)

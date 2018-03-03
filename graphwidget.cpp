@@ -1,4 +1,7 @@
 #include "graphwidget.h"
+#include "qfont.h"
+#include "qmath.h"
+#include"qtimer.h"
 #include <ogdf/energybased/FMMMLayout.h>
 using namespace ogdf;
 using namespace std;
@@ -8,6 +11,17 @@ graphwidget::graphwidget(QWidget *parent, DBHelper *db) :
 {
     setMinimumSize(208, 427);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding); //可选;
+    labelName = new QLabel(this);
+    labelName->setStyleSheet("QLabel{color: green; font: 13pt bold;}");
+    labelInfo = new QLabel(this);
+    labelInfo->setStyleSheet("QLabel{color: gray;}");
+    verlayout = new QVBoxLayout();
+    verlayout->setContentsMargins(0, 0, 0, 0);
+    verlayout->addWidget(labelName);
+    verlayout->addWidget(labelInfo);
+    timer = new QTimer(this);
+    connect(timer, SIGNAL(timeout()), this, SLOT(update()));
+    timer->start(10000);
     dbHelper = db;
 }
 
@@ -15,42 +29,115 @@ graphwidget::~graphwidget()
 {
 }
 
+void graphwidget::setText(QString name, QString info)
+{
+    labelName->setText(name);
+    labelInfo->setText(info);
+}
+
+
 //draw graph
 void graphwidget::paintEvent(QPaintEvent *event)
 {
     Q_UNUSED(event);
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing, true);
-    painter.setBrush(QColor(155, 128, 138, 135));
-    painter.setPen(QPen(Qt::black, 5));
     if (is_drawed == false)
     {
         a = new graph_(dbHelper);
-        qDebug() << "here";
         a->start();
         dolayout();
         is_drawed = true;
     }
-    qDebug() << a->nodelist.count();
+    rec = this->geometry(); //获取窗口的位置以及大小并保存在rec中。
     for (int i = 0; i < a->nodelist.count(); i++)
     {
-
-        painter.setBrush(QColor(155, 128, 138, 135));
-        painter.setPen(QPen(Qt::black, 5));
-        painter.drawEllipse(a->nodelist[i].x, a->nodelist[i].y, 20, 20);
+        painter.setBrush(QColor(choosecolor(i)));
+        painter.setPen(QColor(choosecolor(i)));
         foreach (edge_ e, a->edgelist)
         {
-            for (int b = 0; b < a->nodelist.count(); b++)
+            if (e.first->path == a->nodelist[i].path)
             {
-                if (e.first->path == a->nodelist[i].path && e.second->path == a->nodelist[b].path)
+                painter.drawEllipse(a->nodelist[i].x, a->nodelist[i].y, 20, 20);
+                painter.drawEllipse(e.second->x, e.second->y, 20, 20);
+                painter.drawLine(a->nodelist[i].x, a->nodelist[i].y, e.second->x, e.second->y);
+                /* painter.drawText((a->nodelist[i].x + a->nodelist[b].x) / 2,
+                                  (a->nodelist[i].y + a->nodelist[b].y) / 2,
+                                  QString::number(e.weight));*/
+            }
+        }
+    }
+
+    for (int i = 0; i < a->nodelist.count(); i++)
+    {
+        //qDebug() << (h_Point.x() - a->nodelist[i].x) * (h_Point.x() - a->nodelist[i].x) + (h_Point.y() - a->nodelist[i].y) * (h_Point.y() - a->nodelist[i].y);
+        if ((h_Point.x() - a->nodelist[i].x) * (h_Point.x() - a->nodelist[i].x) + (h_Point.y() - a->nodelist[i].y) * (h_Point.y() - a->nodelist[i].y) <= 300)
+        {
+            int counter = 0;
+            QString edge_inf;
+            QString labels, keywords;
+            QMap<QString, double>::const_iterator it;
+            int temp = 0;
+            if (a->nodelist[i].labels.count() > 1)
+            {
+                foreach (Label l, a->nodelist[i].labels)
                 {
-                    painter.setPen(Qt::green);
-                    painter.drawLine(a->nodelist[i].x, a->nodelist[i].y, a->nodelist[b].x, a->nodelist[b].y);
-                    painter.drawText((a->nodelist[i].x + a->nodelist[b].x) / 2,
-                                     (a->nodelist[i].y + a->nodelist[b].y) / 2,
-                                     QString::number(e.weight));
+                    labels += l.name + l.type + l.level + " ";
+                    if (temp == 10)
+                    {
+                        break;
+                    }
+                    temp++;
+                    qDebug() << labels;
                 }
             }
+            else
+            {
+                labels = "NULL";
+            }
+            temp = 0;
+            painter.drawLine(h_Point.x(), h_Point.y(), h_Point.x() + 1, h_Point.y() + 4);
+            QFont font;
+            font.setFamily("Microsoft YaHei");
+            // 大小
+            font.setPointSize(8);
+            font.setLetterSpacing(QFont::AbsoluteSpacing, 1);
+            painter.setFont(font);
+            painter.setPen(Qt::black);
+            painter.setBrush(QColor("#1FFFFF"));
+            QTextOption option(Qt::AlignLeft | Qt::AlignVCenter);
+            option.setWrapMode(QTextOption::WordWrap);
+            painter.drawText(h_Point.x() + 225, h_Point.y() + 4, "name: " + a->nodelist[i].name + "\n");
+            painter.drawText(h_Point.x() + 225, h_Point.y() + 26, + "labels: " + labels + "\n");
+            for (it = a->nodelist[i].keywords.constBegin(); it != a->nodelist[i].keywords.constEnd(); ++it)
+            {
+                keywords = it.key() + "    value:  " + QString::number(it.value());
+                painter.drawText(h_Point.x() + 225, h_Point.y() + 48 + temp * 16, "keywords:  " + keywords);
+                painter.drawText(h_Point.x() + 225, h_Point.y() + 48 + temp * 16, "keywords:  " + keywords);
+                temp++;
+            }
+
+            painter.drawEllipse(a->nodelist[i].x, a->nodelist[i].y, 30, 30);
+
+            foreach (edge_ e, a->edgelist)
+            {
+                if (e.first->path == a->nodelist[i].path)
+                {
+                    counter += 1;
+                    qDebug() << counter;
+                    painter.setPen(QColor("#734488"));
+                    painter.drawLine(e.first->x, e.first->y, e.second->x, e.second->y);
+                    painter.setPen(Qt::black);
+                    painter.drawText(e.second->x,  e.second->y,  QString::number(counter));
+                    edge_inf = "This node connect to node " + QString::number(counter) + ": " + e.second->name + "weight :" + QString::number(e.weight);
+                    painter.drawText(h_Point.x() + 225, h_Point.y() - 18 * counter, edge_inf);
+                }
+            }
+            /*(h_Point.x() + 220,
+             h_Point.y() - 5 - counter * 18,
+             500,
+             (h_Point.y() + 48 + a->nodelist[i].keywords.count() * 16 + 5) - (h_Point.y() - 5 - counter * 18));*/
+            break;
         }
     }
     painter.end();
@@ -64,7 +151,6 @@ void graphwidget::dolayout()
     {
         a->nodelist[i].ogdfID = G.newNode(i);
     }
-    qDebug() << "hei";
     qDebug() << a->edgelist.count();
     for (int i = 0; i < a->edgelist.count(); i++)
     {
@@ -102,12 +188,17 @@ void graphwidget::mousePressEvent(QMouseEvent *event)
         QCursor cursor1;//创建光标对象
         cursor1.setShape(Qt::OpenHandCursor);//设置光标形态
         setCursor(cursor1);//使用手掌光标
-
         //这里获取指针位置和窗口位置的差值
         offset = event->globalPos() - this->pos();
-
     }
 }
+
+void graphwidget::mouseDoubleClickEvent(QMouseEvent *event)
+{
+    h_Point = event->pos();
+    this->update();
+}
+
 void graphwidget::mouseMoveEvent(QMouseEvent *event)
 {
     if (event->buttons() == Qt::LeftButton) //如果鼠标按下的是左键
@@ -115,6 +206,7 @@ void graphwidget::mouseMoveEvent(QMouseEvent *event)
         QPoint tmp;
         tmp = event->globalPos() - offset;
         move(tmp);
+        return;
     }
 }
 
@@ -129,28 +221,99 @@ void graphwidget::mouseReleaseEvent(QMouseEvent *event)
 
 void graphwidget::wheelEvent(QWheelEvent *event)
 {
-    /*QRect tmp = this->geometry(); //获取窗口的位置以及大小并保存在tmp中。
-    int n =event->delta() / 60;
-    double k = 1.0;
     if (event->delta() > 0) //如果滚轮往上滚
     {
-        tmp.setWidth(tmp.width() + 25); //设置宽度为原有基础上+25
-        tmp.setHeight(tmp.height() + 15); //设置窗口高度为原有基础上+20
-        this->setGeometry(tmp);//然后设置窗口大小。
-            for(int j=0;j<n;j++)
-                k*=1.1;
-
+        rec.setWidth(rec.width() + 25); //设置宽度为原有基础上+25
+        rec.setHeight(rec.height() + 15); //设置窗口高度为原有基础上+20
+        this->setGeometry(rec);//然后设置窗口大小。
+        foreach (node_ n, a->nodelist)
+        {
+            n.x = n.x * 1.1;
+            n.y = n.y * 1.1;
+        }
     }
     else  //同样的
     {
-        tmp.setWidth(tmp.width() - 25);
-        tmp.setHeight(tmp.height() - 15);
+        rec.setWidth(rec.width() - 25);
+        rec.setHeight(rec.height() - 15);
         //如果缩小之后的窗口不小于设置的最小窗口尺寸，则执行缩放。
-        if (this->minimumSize().height() < tmp.height() && this->minimumSize().width() < tmp.width())
-            this->setGeometry(tmp);
-        for(int j=0;j>n;j--)
-            k*=0.9;
+        if (this->minimumSize().height() < rec.height() && this->minimumSize().width() < rec.width())
+            this->setGeometry(rec);
+        foreach (node_ n, a->nodelist)
+        {
+            n.x = n.x * 0.9;
+            n.y = n.y * 0.9;
+        }
     }
-    viewCenterX += (1-k)*mouseX/viewScale;
-    viewCenterY += (1-k)*mouseY/viewScale;*/
 }
+
+
+QString graphwidget::choosecolor(int i)
+{
+    switch (i)
+    {
+    case 0:
+        return "#6B0848";
+    case 1:
+        return "#A40A3C";
+    case 2:
+        return "#EC610A";
+    case 3:
+        return "#FFC300";
+    case 4:
+        return "#0278AE";
+    case 5:
+        return "#A5ECD7";
+    case 6:
+        return "#E8FFC1";
+    case 7:
+        return "#70D4B4";
+    case 8:
+        return "#FFEBB7";
+    case 9:
+        return "#BBBBBB";
+    case 10:
+        return "#EFEFEF";
+    case 11:
+        return "#E61C5D";
+    case 12:
+        return "#194769";
+    case 13:
+        return "#F6F6E9";
+    case 14:
+        return "#D7EEF2";
+    case 15:
+        return "#F2855E";
+    case 16:
+        return "#0E9577";
+    case 17:
+        return "#970747";
+    case 18:
+        return "#9F609C";
+    case 19:
+        return "#351F39";
+    case 20:
+        return "#36626A";
+    case 21:
+        return "#CA82F8";
+    case 22:
+        return "#155263";
+    case 23:
+        return "#FFB6B9";
+    case 24:
+        return "#DD3E3E";
+    case 25:
+        return "#5F4444";
+    case 26:
+        return "#24BDDF";
+    case 27:
+        return "#A7FF83";
+    case 28:
+        return "#071A52";
+    case 29:
+        return "#7CBD1E";
+    default:
+        break;
+    }
+}
+
