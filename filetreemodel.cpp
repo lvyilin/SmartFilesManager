@@ -166,26 +166,42 @@ void FileTreeModel::setupFieldModelData()
             }
         }
     }
-    FileItem *undefinedField = new FileItem("其它", rootItem);
+
     for (int i = 0; i < fileList.count(); ++i)
     {
         int maxLevel = 0;
-        QString maxLevelName;
+        QStringList maxLevelName;
         for (int j = 0; j < labelList[i].count(); ++j)
         {
-
             if (labelList[i][j].level > maxLevel)
             {
                 maxLevel = labelList[i][j].level;
-                maxLevelName = labelList[i][j].name;
+                if (maxLevel == 1) continue;
+                maxLevelName.clear();
+                maxLevelName << labelList[i][j].name;
+            }
+            else if (labelList[i][j].level == maxLevel)
+            {
+                if (maxLevel == 1) continue;
+                maxLevelName << labelList[i][j].name;
             }
         }
         FileItem *parentItem;
         if (maxLevel == 0)
+        {
+            if (undefinedField == nullptr)
+                undefinedField = new FileItem("其它", rootItem);
             parentItem =  undefinedField;
+            new FileItem(fileList[i], parentItem);
+        }
         else
-            parentItem = getParentFieldItem(maxLevelName, fieldItems[maxLevel - 1]);
-        new FileItem(fileList[i], parentItem);
+        {
+            for (QString s : maxLevelName)
+            {
+                parentItem = getParentFieldItem(s, fieldItems[maxLevel - 1]);
+                new FileItem(fileList[i], parentItem);
+            }
+        }
     }
 }
 

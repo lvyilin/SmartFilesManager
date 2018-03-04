@@ -34,6 +34,7 @@ private:
     const QList<File> &fileList;
     DBHelper *dbHelper;
     FileItem *rootItem = nullptr;
+    FileItem *undefinedField = nullptr;
 };
 
 #endif // FILETREEMODEL_H
