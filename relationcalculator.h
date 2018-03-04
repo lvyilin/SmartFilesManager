@@ -1,27 +1,31 @@
 ﻿#ifndef RELATIONCALCULATOR_H
 #define RELATIONCALCULATOR_H
 
-#include <QThreadPool>
+#include <QThread>
 #include "utils.h"
 #include "dbhelper.h"
+#include "relationcalculatetask.h"
 
-class RelationCalculator : public QObject {
+class RelationCalculator : public QThread {
     Q_OBJECT
 public:
     explicit RelationCalculator(DBHelper *db, QObject *parent = nullptr);
-    void start();
+    ~RelationCalculator();
+    void run() override;
     bool isFinished();
 signals:
+    void startTask();
     void allTasksFinished();
 public slots:
-    void singleTaskFinished(FileResult *fr);
+    void taskFinished();
+    void newTaskOk();
 
 private:
-    QThreadPool *pool;
+    bool finished;
     DBHelper *dbHelper;
     QList<FileResult> fileResultList;
+    QList<RelationCalculateTask *> taskList;
 
-    int threadCount = 0;
     bool isSupportedFormat(const QString &format);
 };
 

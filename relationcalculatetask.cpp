@@ -63,7 +63,7 @@ void RelationCalculateTask::run()
     {
         fileResult->relations = rlList;
     }
-    emit finished(fileResult);
+    emit finished();
 }
 
 double RelationCalculateTask::getKeywordNumerator(FileResult *frA, FileResult *frB)

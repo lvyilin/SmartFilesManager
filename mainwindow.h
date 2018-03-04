@@ -63,6 +63,8 @@ private slots:
     void showUpdaterProgress(int num);
     void showAnalyserProgress(int num);
     void showCalRelationProgress(int num, int total);
+    void showStartCalRelation();
+
     void showUpdaterDbProgress();
     void notifyIndexResult(int success, int fail);
     void updateFilesList(bool renew = false);

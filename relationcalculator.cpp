@@ -1,18 +1,30 @@
 ﻿#include "relationcalculator.h"
-#include "relationcalculatetask.h"
 #include <QDebug>
 #include <QCoreApplication>
 
 RelationCalculator::RelationCalculator(DBHelper *db, QObject *parent):
     dbHelper(db),
-    QObject(parent)
+    QThread(parent)
 {
-    pool = QThreadPool::globalInstance();
 }
 
-void RelationCalculator::start()
+RelationCalculator::~RelationCalculator()
 {
+    for (auto task : taskList)
+        delete task;
+}
+
+void RelationCalculator::run()
+{
+    emit startTask();
+    finished = false;
+    if (!fileResultList.isEmpty())
+    {
+        for (auto task : taskList)
+            delete task;
+    }
     fileResultList.clear();
+    taskList.clear();
     dbHelper->getFileResults(fileResultList);
     for (int i = fileResultList.count() - 1; i > 0; --i)
     {
@@ -33,28 +45,27 @@ void RelationCalculator::start()
         }
 
         RelationCalculateTask *task = new RelationCalculateTask(&fileResultList[i], li);
-        connect(task, &RelationCalculateTask::finished, this, &RelationCalculator::singleTaskFinished);
-        ++threadCount;
-        pool->start(task);
-        qDebug() << "start relation calculate:" << fileResultList[i].file.name;
+        //        connect()
+        taskList << task;
+        task->run();
     }
+    taskFinished();
 }
 
 bool RelationCalculator::isFinished()
 {
-    return threadCount == 0;
+    return finished;
 }
 
-void RelationCalculator::singleTaskFinished(FileResult *fr)
+void RelationCalculator::taskFinished()
 {
-    --threadCount;
-    qDebug() << "finish one task, task count: " << threadCount;
-    //    dbHelper->saveSingleFileResult(*fr);
-    if (threadCount == 0)
-    {
-        dbHelper->saveFileResults(fileResultList);
-        emit allTasksFinished();
-    }
+    dbHelper->saveFileResults(fileResultList);
+    emit allTasksFinished();
+}
+
+void RelationCalculator::newTaskOk()
+{
+    finished = true;
 }
 
 bool RelationCalculator::isSupportedFormat(const QString &format)

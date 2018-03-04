@@ -396,6 +396,11 @@ void MainWindow::showCalRelationProgress(int num, int total)
     ui->statusBar->showMessage(tr("正在保存文件关系计算结果...(%1/%2)").arg(num).arg(total));
 }
 
+void MainWindow::showStartCalRelation()
+{
+    ui->statusBar->showMessage(tr("正在计算文件关系..."));
+}
+
 void MainWindow::notifyIndexResult(int success, int fail)
 {
     ui->statusBar->showMessage(tr("文件索引建立完成."));
@@ -630,11 +635,17 @@ void MainWindow::startCalculateRelation()
     {
         relationCalculator = new RelationCalculator(dbHelper, this);
         connect(relationCalculator, &RelationCalculator::allTasksFinished, this, &MainWindow::notifyRelationFinished);
+        connect(relationCalculator, &RelationCalculator::startTask, this, &MainWindow::showStartCalRelation);
+        connect(dbHelper, &DBHelper::finishSaveFileResult, relationCalculator, &RelationCalculator::newTaskOk);
         relationCalculator->start();
     }
     else if (relationCalculator->isFinished())
     {
         relationCalculator->start();
+    }
+    else
+    {
+        QMessageBox::information(this, QCoreApplication::applicationName(), tr("当前计算任务尚未完成."));
     }
 }
 

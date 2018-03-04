@@ -5,17 +5,16 @@
 #include <QObject>
 #include "utils.h"
 
-class RelationCalculateTask : public QObject, public QRunnable {
+class RelationCalculateTask : public QObject {
     Q_OBJECT
 public:
     explicit RelationCalculateTask(FileResult *fr,
                                    QList<FileResult> li,
                                    QObject *parent = nullptr);
-    void run() override;
+    void run();
 
 signals:
-    void finished(FileResult *fr);
-
+    void finished();
 
 private:
     FileResult *fileResult;
