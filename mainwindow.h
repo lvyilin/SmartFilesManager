@@ -78,6 +78,7 @@ private slots:
     void onFinishInitToolkit();
 
     void setupView();
+    void reloadView();
 
     void on_treeView_clicked(const QModelIndex &index);
     void drawgraph();

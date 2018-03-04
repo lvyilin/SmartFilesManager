@@ -50,6 +50,7 @@ MainWindow::MainWindow(QWidget *parent) :
     setupView();
     ui->pushButtonReload->setIcon(QIcon(":/images/icons/reload.png"));
     ui->pushButtonReload->setMaximumSize(ui->comboBoxTreeViewType->height(), ui->comboBoxTreeViewType->height());
+    connect(ui->pushButtonReload, &QPushButton::clicked, this, &MainWindow::reloadView);
 
     //search
     searchBox = new SearchBox(&fileList, this);
@@ -479,6 +480,36 @@ void MainWindow::setupView()
         fileTreeModel = anotherModel;
     }
     ui->treeView->show();
+}
+
+void MainWindow::reloadView()
+{
+    QList<int> idList;
+    dbHelper->getAllFiles(fileList, idList);
+    int idx = ui->comboBoxTreeViewType->currentIndex();
+    //    ui->treeView->hide();
+    if (fileTreeModel == nullptr)
+    {
+        fileTreeModel = new FileTreeModel(fileList, dbHelper, this);
+        if (idx == 0)
+            fileTreeModel->setupTypeModelData();
+        else if (idx == 1)
+            fileTreeModel->setupFieldModelData();
+        ui->treeView->setModel(fileTreeModel);
+    }
+    else
+    {
+        FileTreeModel *anotherModel = new FileTreeModel(fileList, dbHelper, this);
+        if (idx == 0)
+            anotherModel->setupTypeModelData();
+        else if (idx == 1)
+            anotherModel->setupFieldModelData();
+        ui->treeView->setModel(anotherModel);
+        delete fileTreeModel;
+        fileTreeModel = anotherModel;
+    }
+    //    ui->treeView->setCurrentIndex(fileTreeModel->index(0, 0));
+    on_treeView_clicked(fileTreeModel->index(0, 0));
 }
 
 void MainWindow:: treeViewFocus(const QString &str, bool byPath)

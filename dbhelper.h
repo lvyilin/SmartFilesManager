@@ -90,6 +90,7 @@ public:
 signals:
     void calRelationProgress(int num, int total);
     void dbInterrupted();
+    void finishSaveFileResult();
 public slots:
     void abortProgress();
 private:

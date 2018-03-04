@@ -487,6 +487,7 @@ void DBHelper::saveFileResults(QList<FileResult> &frs)
         }
     }
     working = false;
+    emit finishSaveFileResult();
 }
 
 void DBHelper::saveSingleFileResult(const FileResult &fr)
@@ -523,6 +524,7 @@ void DBHelper::saveSingleFileResult(const FileResult &fr)
         }
     }
     mutex.unlock();
+    emit finishSaveFileResult();
 }
 
 void DBHelper::getAllFieldLabels(QList<Label> &li)
