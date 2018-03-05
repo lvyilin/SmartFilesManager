@@ -52,7 +52,17 @@ void graphwidget::paintEvent(QPaintEvent *event)
         a->start();
         dolayout();
         is_drawed = true;
+        qDebug() << "yo";
     }
+
+    changepoint(z_temp);
+    z_temp = 0;
+
+    qDebug() <<  "-----------";
+    qDebug() << a->nodelist[1].x;
+    qDebug() << a->nodelist[1].y;
+    qDebug() <<  "-----------";
+
     int z = 1;
     rec = this->geometry(); //获取窗口的位置以及大小并保存在rec中。
     for (int i = 0; i < a->nodelist.count(); i++)
@@ -63,17 +73,19 @@ void graphwidget::paintEvent(QPaintEvent *event)
         {
             if (a->edgelist[j].first->path == a->nodelist[i].path)
             {
-                painter.drawEllipse(a->nodelist[i].x - 8, a->nodelist[i].y - 8, 20, 20);
-                painter.drawEllipse(a->edgelist[j].second->x - 8, a->edgelist[j].second->y - 8, 20, 20);
+                painter.drawEllipse(a->edgelist[j].first->x - 8, a->edgelist[j].first->y - 8, r, r);
+                painter.drawEllipse(a->edgelist[j].second->x - 8, a->edgelist[j].second->y - 8, r, r);
                 painter.drawLine(a->nodelist[i].x, a->nodelist[i].y, a->edgelist[j].second->x, a->edgelist[j].second->y);
             }
         }
         z++;
     }
+
+
     for (int i = 0; i < a->nodelist.count(); i++)
     {
         //qDebug() << (h_Point.x() - a->nodelist[i].x) * (h_Point.x() - a->nodelist[i].x) + (h_Point.y() - a->nodelist[i].y) * (h_Point.y() - a->nodelist[i].y);
-        if ((h_Point.x() - a->nodelist[i].x) * (h_Point.x() - a->nodelist[i].x) + (h_Point.y() - a->nodelist[i].y) * (h_Point.y() - a->nodelist[i].y) <= 300)
+        if ((z_temp == 0) && (h_Point.x() - a->nodelist[i].x) * (h_Point.x() - a->nodelist[i].x) + (h_Point.y() - a->nodelist[i].y) * (h_Point.y() - a->nodelist[i].y) <= 300)
         {
             int counter = 0;
             QString edge_inf;
@@ -105,28 +117,30 @@ void graphwidget::paintEvent(QPaintEvent *event)
             font.setPointSize(8);
             font.setLetterSpacing(QFont::AbsoluteSpacing, 1);
             painter.setFont(font);
-            painter.setPen(Qt::black);
+            painter.setPen(QPen(QColor("#1FFFFF"), 3));
             painter.setBrush(QColor("#1FFFFF"));
             QTextOption option(Qt::AlignLeft | Qt::AlignVCenter);
             option.setWrapMode(QTextOption::WordWrap);
+            painter.setPen(Qt::black);
             painter.drawText(h_Point.x() + 225, h_Point.y() + 4, "name: " + a->nodelist[i].name + "\n");
             painter.drawText(h_Point.x() + 225, h_Point.y() + 26, + "labels: " + labels + "\n");
             for (it = a->nodelist[i].keywords.constBegin(); it != a->nodelist[i].keywords.constEnd(); ++it)
             {
                 keywords = it.key() + "    value:  " + QString::number(it.value());
+                painter.setPen(Qt::black);
                 painter.drawText(h_Point.x() + 225, h_Point.y() + 48 + temp * 16, "keywords:  " + keywords);
                 painter.drawText(h_Point.x() + 225, h_Point.y() + 48 + temp * 16, "keywords:  " + keywords);
                 temp++;
             }
-
-            painter.drawEllipse(a->nodelist[i].x - 8, a->nodelist[i].y - 8, 25, 25);
+            painter.setPen(QPen(QColor("#1FFFFF"), 3));
+            painter.drawEllipse(a->nodelist[i].x - 8, a->nodelist[i].y - 8, r, r);
 
             foreach (edge_ e, a->edgelist)
             {
                 if (e.first->path == a->nodelist[i].path)
                 {
                     counter += 1;
-                    painter.setPen(QPen(QColor("#734488"), 3));
+                    painter.setPen(QPen(QColor("#307672"), 3));
                     painter.drawLine(e.first->x, e.first->y, e.second->x, e.second->y);
                     painter.setPen(Qt::black);
                     painter.drawText(e.second->x,  e.second->y,  QString::number(counter));
@@ -141,6 +155,8 @@ void graphwidget::paintEvent(QPaintEvent *event)
             break;
         }
     }
+
+
     painter.end();
     qDebug() << "draw graph really finished";
 }
@@ -219,27 +235,21 @@ void graphwidget::wheelEvent(QWheelEvent *event)
 {
     if (event->delta() > 0) //如果滚轮往上滚
     {
+        z_temp = 1;
         rec.setWidth(rec.width() + 25); //设置宽度为原有基础上+25
         rec.setHeight(rec.height() + 15); //设置窗口高度为原有基础上+20
         this->setGeometry(rec);//然后设置窗口大小。
-        foreach (node_ n, a->nodelist)
-        {
-            n.x = n.x * 1.1;
-            n.y = n.y * 1.1;
-        }
+        this->update();
     }
     else  //同样的
     {
-        rec.setWidth(rec.width() - 25);
-        rec.setHeight(rec.height() - 15);
-        //如果缩小之后的窗口不小于设置的最小窗口尺寸，则执行缩放。
+        z_temp = -1;
+        rec.setWidth(rec.width() + 25); //设置宽度为原有基础上+25
+        rec.setHeight(rec.height() + 15); //设置窗口高度为原有基础上+20
+        this->setGeometry(rec);//然后设置窗口大小。
         if (this->minimumSize().height() < rec.height() && this->minimumSize().width() < rec.width())
             this->setGeometry(rec);
-        foreach (node_ n, a->nodelist)
-        {
-            n.x = n.x * 0.9;
-            n.y = n.y * 0.9;
-        }
+        this->update();
     }
 }
 
@@ -353,3 +363,22 @@ QString graphwidget::choosecolor(int i)
     }
 }
 
+void graphwidget::changepoint(int i)
+{
+    if (i == 1)
+    {
+        for (int b = 0; b < a->nodelist.count(); b++)
+        {
+            a->nodelist[b].x *= 1.1;
+            a->nodelist[b].y *= 1.1;
+        }
+    }
+    if (i == -1)
+    {
+        for (int b = 0; b < a->nodelist.count(); b++)
+        {
+            a->nodelist[b].x *= 0.9;
+            a->nodelist[b].y *= 0.9;
+        }
+    }
+}

@@ -37,6 +37,7 @@ public:
     void graph_change(int ch);
     int adjustViewScale(double k_);
     void setText(QString name, QString info);
+    void changepoint(int i);
     QString choosecolor(int i);
     graph_ *a;
     QTimer *timer;
@@ -46,7 +47,7 @@ protected:
     void mouseMoveEvent(QMouseEvent *event); //按下移动
     void mouseReleaseEvent(QMouseEvent *event); //松开
     void wheelEvent(QWheelEvent *event);
-    void  mouseDoubleClickEvent(QMouseEvent *event);
+    void mouseDoubleClickEvent(QMouseEvent *event);
 
 private:
     DBHelper *dbHelper;
@@ -58,9 +59,10 @@ private:
     QPoint h_Point;
     QLabel *labelName;
     QLabel *labelInfo;
-
+    int r = 20;
     QHBoxLayout *horLayout;
     QVBoxLayout *verlayout;
+    int z_temp;
 
 signals:
 
