@@ -42,7 +42,7 @@ signals:
     void fileUpdaterWait(unsigned long time);
 
 public slots:
-    void treeViewFocus(const QString &str);
+    void treeViewFocus(const QString &str, bool byPath = true);
     void fileNotFoundMsgBox();
 
 protected:
@@ -63,6 +63,8 @@ private slots:
     void showUpdaterProgress(int num);
     void showAnalyserProgress(int num);
     void showCalRelationProgress(int num, int total);
+    void showStartCalRelation();
+
     void showUpdaterDbProgress();
     void notifyIndexResult(int success, int fail);
     void updateFilesList(bool renew = false);
@@ -76,6 +78,7 @@ private slots:
     void onFinishInitToolkit();
 
     void setupView();
+    void reloadView();
 
     void on_treeView_clicked(const QModelIndex &index);
     void drawgraph();
@@ -97,6 +100,9 @@ private slots:
     void on_actionOpenFile_triggered();
     void on_actionOpenFolder_triggered();
     void showContextMenu(const QPoint &pos);
+    void focusFile();
+
+    void on_comboBoxTreeViewType_currentIndexChanged(int index);
 
 private:
     Ui::MainWindow *ui;

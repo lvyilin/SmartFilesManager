@@ -223,18 +223,14 @@ void DBHelper::setFileLabels(const FileProduct &fp, const QStringList &labels)
     QMap<int, QVector<int> > countMap; //计数每个关键词的标签所在领域
     for (int i = 0; i < labels.count(); ++i)
     {
-        query->prepare("select id, parent,is_leaf from labels where name=:name");
+        query->prepare("select id, parent from labels where name=:name and is_leaf=1");
         query->bindValue(":name", labels[i]);
         query->exec();
-        if (query->next())
+        while (query->next())
         {
             int id = query->value(0).toInt();
             int parentId = query->value(1).toInt();
-            bool isLeaf = query->value(2).toBool();
-            if (isLeaf)
-                countMap[parentId].append(id);
-            else
-                countMap[id].append(id);
+            countMap[parentId].append(id);
         }
     }
     QMapIterator<int, QVector<int> > iter(countMap);
@@ -491,6 +487,7 @@ void DBHelper::saveFileResults(QList<FileResult> &frs)
         }
     }
     working = false;
+    emit finishSaveFileResult();
 }
 
 void DBHelper::saveSingleFileResult(const FileResult &fr)
@@ -527,6 +524,7 @@ void DBHelper::saveSingleFileResult(const FileResult &fr)
         }
     }
     mutex.unlock();
+    emit finishSaveFileResult();
 }
 
 void DBHelper::getAllFieldLabels(QList<Label> &li)
@@ -560,6 +558,47 @@ void DBHelper::getAllFieldLabels(QList<Label> &li)
     }
 }
 
+QVector<QVector<Label> > DBHelper::getFieldLabels(const QList<File> &li)
+{
+    QVector<QVector<Label> > lbList(li.count());
+    for (int i = 0; i < li.count(); ++i)
+    {
+        int fileId = getFileId(li[i].path);
+        query->prepare("select name, level, parent, type, id from labels"
+                       " where id in(select label_id from file_labels where file_id=:id) and type='field'");
+        query->bindValue(":id", fileId);
+        query->exec();
+        QVector<int> parentIds;
+        QVector<int> ids;
+        while (query->next())
+        {
+            Label lb;
+            lb.name = query->value(0).toString();
+            lb.level = query->value(1).toInt();
+            lb.type = query->value(3).toString();
+            parentIds <<  query->value(2).toInt();
+            ids << query->value(4).toInt();
+            lbList[i] << lb;
+        }
+
+        for (int j = 0; j < parentIds.count(); ++j)
+        {
+            if (parentIds[j] != 0)
+            {
+                //reduce a db query
+                for (int k = 0; k < ids.count(); ++k)
+                {
+                    if (parentIds[j] == ids[k])
+                    {
+                        lbList[i][j].parentName = lbList[i][k].name;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    return lbList;
+}
 void DBHelper::abortProgress()
 {
     if (working)

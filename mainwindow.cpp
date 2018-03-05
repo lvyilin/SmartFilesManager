@@ -48,6 +48,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     //view
     setupView();
+    ui->pushButtonReload->setIcon(QIcon(":/images/icons/reload.png"));
+    ui->pushButtonReload->setMaximumSize(ui->comboBoxTreeViewType->height(), ui->comboBoxTreeViewType->height());
+    connect(ui->pushButtonReload, &QPushButton::clicked, this, &MainWindow::reloadView);
 
     //search
     searchBox = new SearchBox(&fileList, this);
@@ -394,6 +397,11 @@ void MainWindow::showCalRelationProgress(int num, int total)
     ui->statusBar->showMessage(tr("正在保存文件关系计算结果...(%1/%2)").arg(num).arg(total));
 }
 
+void MainWindow::showStartCalRelation()
+{
+    ui->statusBar->showMessage(tr("正在计算文件关系..."));
+}
+
 void MainWindow::notifyIndexResult(int success, int fail)
 {
     ui->statusBar->showMessage(tr("文件索引建立完成."));
@@ -445,13 +453,13 @@ void MainWindow::setupView()
     ui->tableWidgetRelation->setColumnCount(2);
     ui->tableWidgetRelation->setHorizontalHeaderLabels(QStringList() << "关联文件" << "关系度");
     ui->tableWidgetRelation->horizontalHeader()->setVisible(true);
+    connect(ui->tableWidgetRelation, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(focusFile()));
 
     int scrollBarWidth = fontWidth / 3.75;
     ui->tableWidgetRelation->setColumnWidth(0, ui->tableWidgetRelation->width() - fontWidth - scrollBarWidth);
     ui->tableWidgetRelation->setColumnWidth(1, fontWidth);
 
     QList<int> idList;
-
     connect(ui->treeView, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(showContextMenu(QPoint)));
     connect(ui->treeView, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(on_actionOpenFile_triggered()));
 
@@ -459,29 +467,58 @@ void MainWindow::setupView()
     //    ui->treeView->hide();
     if (fileTreeModel == nullptr)
     {
-        fileTreeModel = new FileTreeModel(fileList, this);
+        fileTreeModel = new FileTreeModel(fileList, dbHelper, this);
+        fileTreeModel->setupTypeModelData();
         ui->treeView->setModel(fileTreeModel);
     }
     else
     {
-        FileTreeModel *anotherModel = new FileTreeModel(fileList, this);
+        FileTreeModel *anotherModel = new FileTreeModel(fileList, dbHelper, this);
+        anotherModel->setupTypeModelData();
         ui->treeView->setModel(anotherModel);
         delete fileTreeModel;
         fileTreeModel = anotherModel;
     }
-    //<<< <<< < HEAD
-    //    ui->treeView->header()->hide();
-    // == == == =
-    // >>> >>> > 16afcd0eaf899c63ce79cd21857263b42b7d8178
     ui->treeView->show();
 }
 
-void MainWindow::treeViewFocus(const QString &str)
+void MainWindow::reloadView()
 {
+    QList<int> idList;
+    dbHelper->getAllFiles(fileList, idList);
+    int idx = ui->comboBoxTreeViewType->currentIndex();
+    //    ui->treeView->hide();
+    if (fileTreeModel == nullptr)
+    {
+        fileTreeModel = new FileTreeModel(fileList, dbHelper, this);
+        if (idx == 0)
+            fileTreeModel->setupTypeModelData();
+        else if (idx == 1)
+            fileTreeModel->setupFieldModelData();
+        ui->treeView->setModel(fileTreeModel);
+    }
+    else
+    {
+        FileTreeModel *anotherModel = new FileTreeModel(fileList, dbHelper, this);
+        if (idx == 0)
+            anotherModel->setupTypeModelData();
+        else if (idx == 1)
+            anotherModel->setupFieldModelData();
+        ui->treeView->setModel(anotherModel);
+        delete fileTreeModel;
+        fileTreeModel = anotherModel;
+    }
+    //    ui->treeView->setCurrentIndex(fileTreeModel->index(0, 0));
+    on_treeView_clicked(fileTreeModel->index(0, 0));
+}
 
+void MainWindow:: treeViewFocus(const QString &str, bool byPath)
+{
+    int role = byPath ? Qt::ToolTipRole
+               : Qt::DisplayRole;
     QModelIndexList idxs = fileTreeModel->match(
                                fileTreeModel->index(0, 0),
-                               Qt::ToolTipRole,
+                               role,
                                QVariant(str),
                                1,
                                Qt::MatchRecursive);
@@ -629,11 +666,17 @@ void MainWindow::startCalculateRelation()
     {
         relationCalculator = new RelationCalculator(dbHelper, this);
         connect(relationCalculator, &RelationCalculator::allTasksFinished, this, &MainWindow::notifyRelationFinished);
+        connect(relationCalculator, &RelationCalculator::startTask, this, &MainWindow::showStartCalRelation);
+        connect(dbHelper, &DBHelper::finishSaveFileResult, relationCalculator, &RelationCalculator::newTaskOk);
         relationCalculator->start();
     }
     else if (relationCalculator->isFinished())
     {
         relationCalculator->start();
+    }
+    else
+    {
+        QMessageBox::information(this, QCoreApplication::applicationName(), tr("当前计算任务尚未完成."));
     }
 }
 
@@ -730,6 +773,12 @@ void MainWindow::showContextMenu(const QPoint &pos)
     fileTreeMenu->exec(globalPos);
 }
 
+void MainWindow::focusFile()
+{
+    QString curPath = ui->tableWidgetRelation->currentIndex().data().toString();
+    treeViewFocus(curPath, false);
+}
+
 
 void MainWindow::drawwordcloud()
 {
@@ -743,4 +792,28 @@ void MainWindow::drawgraph()
     graphwidget *graphwidget_ = new graphwidget(this, dbHelper);
     ui->tabWidget_2->addTab(graphwidget_, "知识图谱类型视图");
     // ui->graph_view_2 = graphwidget_;
+}
+
+void MainWindow::on_comboBoxTreeViewType_currentIndexChanged(int index)
+{
+    if (fileTreeModel == nullptr)
+    {
+        fileTreeModel = new FileTreeModel(fileList, dbHelper, this);
+        if (index == 0)
+            fileTreeModel->setupTypeModelData();
+        else if (index == 1)
+            fileTreeModel->setupFieldModelData();
+        ui->treeView->setModel(fileTreeModel);
+    }
+    else
+    {
+        FileTreeModel *anotherModel = new FileTreeModel(fileList, dbHelper, this);
+        if (index == 0)
+            anotherModel->setupTypeModelData();
+        else if (index == 1)
+            anotherModel->setupFieldModelData();
+        ui->treeView->setModel(anotherModel);
+        delete fileTreeModel;
+        fileTreeModel = anotherModel;
+    }
 }

@@ -163,7 +163,6 @@ void AnalyserThread::generateKeywords(FileProduct &fpd)
 
 void AnalyserThread::generateFileLabels(FileProduct &fpd)
 {
-    //TODO: 是否需要再切词?
     qDebug() << "start generate labels, file: "
              << fpd.file.name;
     QMapIterator<QString, double> itr(fpd.keywords);
