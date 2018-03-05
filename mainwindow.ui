@@ -263,7 +263,6 @@
      <string>选项(&amp;O)</string>
     </property>
     <addaction name="actionSettings"/>
-    <addaction name="action_4"/>
     <addaction name="separator"/>
     <addaction name="actionExit"/>
     <addaction name="separator"/>
