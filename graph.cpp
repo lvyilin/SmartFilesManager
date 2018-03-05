@@ -1,7 +1,7 @@
 #include"graph.h"
 
-graph_::graph_(DBHelper *db):
-    dbHelper(db)
+graph_::graph_(DBHelper *db, ConfigHelper *cf):
+    dbHelper(db), configHelper(cf)
 {
 
 }
@@ -28,6 +28,9 @@ void graph_::start()
         n.keywords = frs[i].keywords;
         nodelist.append(n);
     }
+    double edgePercent = (double)configHelper->getDisplayEdgePercent();
+    edgePercent /= 100;
+    qDebug() << edgePercent;
     for (int i = 0; i < nodelist.count(); i++)
     {
         for (int c = 0 ; c < nodelist[i].relations.count(); c++)
@@ -39,7 +42,7 @@ void graph_::start()
                                 + nodelist[i].relations[c].labelDegree * LABEL_RELATION_WEIGHT
                                 + nodelist[i].relations[c].attributeDegree * ATTRIBUTE_RELATION_WEIGHT;
 
-                if (nodelist[i].relations[c].file.path == nodelist[b].path && weight >= 0.30)
+                if (nodelist[i].relations[c].file.path == nodelist[b].path && weight >= edgePercent)
                 {
                     e.first = &nodelist[i];
                     e.second = &nodelist[b];

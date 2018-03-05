@@ -19,6 +19,7 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include "QTimer"
+#include "confighelper.h"
 #define NORMALIZED_GRAPH_WIDTH_AND_HEIGHT 700
 #define NORMALIZED_GRAPH_WIDTH_AND_HEIGHT_HALF 400
 #define NORMALIZED_GRAPH_LEFT 40
@@ -29,7 +30,7 @@
 class graphwidget : public QWidget {
     Q_OBJECT
 public:
-    explicit graphwidget(QWidget *parent = nullptr, DBHelper *db = nullptr);
+    explicit graphwidget(QWidget *parent = nullptr, DBHelper *db = nullptr, ConfigHelper *cf = nullptr);
     ~graphwidget();
     void setgraph();
     void paintEvent(QPaintEvent *event);
@@ -51,6 +52,7 @@ protected:
 
 private:
     DBHelper *dbHelper;
+    ConfigHelper *configHelper;
     bool is_drawed = false;
     bool is_showinf = false;
     QPoint offset;//储存鼠标指针位置与窗口位置的差值

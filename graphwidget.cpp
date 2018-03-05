@@ -10,8 +10,8 @@
 using namespace ogdf;
 using namespace std;
 
-graphwidget::graphwidget(QWidget *parent, DBHelper *db) :
-    QWidget(parent), dbHelper(db)
+graphwidget::graphwidget(QWidget *parent, DBHelper *db, ConfigHelper *cf) :
+    QWidget(parent), dbHelper(db), configHelper(cf)
 {
     setMinimumSize(208, 427);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding); //可选;
@@ -48,7 +48,7 @@ void graphwidget::paintEvent(QPaintEvent *event)
     painter.setRenderHint(QPainter::Antialiasing, true);
     if (is_drawed == false)
     {
-        a = new graph_(dbHelper);
+        a = new graph_(dbHelper, configHelper);
         a->start();
         dolayout();
         is_drawed = true;

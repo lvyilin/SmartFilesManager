@@ -24,6 +24,7 @@ void ConfigHelper::readSettings()
     fileIndexFinished = settings->value("FileIndexFinished", QVariant(false)).toBool();
     interruptionType = static_cast<InterruptionType>(settings->value("InterruptionType", QVariant(static_cast<int>(NoInterrupt))).toInt());
     autoCalculateRelation = settings->value("AutoCalRelation", QVariant(true)).toBool();
+    displayEdgePercent = settings->value("DisplayEdgePercent", QVariant(40)).toInt();
     //detact termination
     settings->setValue("InterruptionType", QVariant(static_cast<int>(TerminateInterrupt)));
 
@@ -49,6 +50,7 @@ void ConfigHelper::saveSettings()
     settings->setValue("TimeTriggerPoint", QVariant(timeTriggerPoint));
     settings->setValue("ScanIntervalHours", QVariant(scanIntervalHours));
     settings->setValue("AutoCalRelation", QVariant(autoCalculateRelation));
+    settings->setValue("DisplayEdgePercent", QVariant(displayEdgePercent));
 
     int pathSize = pathModel->rowCount();
     qDebug() << "[saveSettings] path size: " << pathSize;
@@ -92,22 +94,24 @@ int ConfigHelper::getScanInterval() const
     return scanIntervalHours;
 }
 
-void ConfigHelper::setSettings(bool st, int cpuPct, int intv, bool autoCal)
+void ConfigHelper::setSettings(bool st, int cpuPct, int intv, bool autoCal, int edgePct)
 {
     startAtBoot = st;
     cpuTriggerPercent = cpuPct;
     scanIntervalHours = intv;
     runningStrategy = CpuTrigger;
     autoCalculateRelation = autoCal;
+    displayEdgePercent = edgePct;
 }
 
-void ConfigHelper::setSettings(bool st, const QTime &timeTriPt, int intv, bool autoCal)
+void ConfigHelper::setSettings(bool st, const QTime &timeTriPt, int intv, bool autoCal, int edgePct)
 {
     startAtBoot = st;
     timeTriggerPoint = timeTriPt;
     scanIntervalHours = intv;
     runningStrategy = TimeTrigger;
     autoCalculateRelation = autoCal;
+    displayEdgePercent = edgePct;
 }
 
 bool ConfigHelper::hasLastInterrupted() const
@@ -145,4 +149,9 @@ bool ConfigHelper::isFileIndexFinished() const
 bool ConfigHelper::isAutoCalRelation() const
 {
     return autoCalculateRelation;
+}
+
+int ConfigHelper::getDisplayEdgePercent() const
+{
+    return displayEdgePercent;
 }

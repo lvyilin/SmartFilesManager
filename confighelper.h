@@ -23,8 +23,8 @@ public:
     QTime &getTimeTriggerPoint();
     int getScanInterval() const;
 
-    void setSettings(bool st, int cpuPct, int intv, bool autoCal);
-    void setSettings(bool st, const QTime &timeTriPt, int intv, bool autoCal);
+    void setSettings(bool st, int cpuPct, int intv, bool autoCal, int edgePct);
+    void setSettings(bool st, const QTime &timeTriPt, int intv, bool autoCal, int edgePct);
 
     bool hasLastInterrupted() const;
     InterruptionType getInterruptionType() const;
@@ -38,6 +38,8 @@ public:
     bool isFileIndexFinished() const;
     bool isAutoCalRelation() const;
 
+    int getDisplayEdgePercent() const;
+
 signals:
 public slots:
 
@@ -50,6 +52,7 @@ private:
     QTime timeTriggerPoint;
     int scanIntervalHours;
     bool fileIndexFinished;
+    int displayEdgePercent;
 
     QSettings *settings;
     static const QString pathProfix;

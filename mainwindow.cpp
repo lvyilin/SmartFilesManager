@@ -824,7 +824,7 @@ void MainWindow::drawwordcloud()
 
 void MainWindow::drawgraph()
 {
-    graphwidget *graphwidget_ = new graphwidget(this, dbHelper);
+    graphwidget *graphwidget_ = new graphwidget(this, dbHelper, configHelper);
     ui->tabWidget_2->addTab(graphwidget_, "知识图谱类型视图");
     // ui->graph_view_2 = graphwidget_;
 }

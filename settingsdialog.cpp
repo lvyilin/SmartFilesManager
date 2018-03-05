@@ -24,6 +24,7 @@ SettingsDialog::SettingsDialog(ConfigHelper *ch, QWidget *parent) :
     ui->timeEdit->setTime(configHelper->getTimeTriggerPoint());
     ui->spinBoxScanInterval->setValue(configHelper->getScanInterval());
     ui->checkBoxAutoCalRelation->setChecked(configHelper->isAutoCalRelation());
+    ui->spinBoxDisplayEdge->setValue(configHelper->getDisplayEdgePercent());
 
     connect(ui->radioButtonCpu, SIGNAL(clicked(bool)), this, SLOT(radioBtnCpuToggle()));
     connect(ui->radioButtonCpu, SIGNAL(clicked(bool)), this, SLOT(onChanged()));
@@ -31,6 +32,7 @@ SettingsDialog::SettingsDialog(ConfigHelper *ch, QWidget *parent) :
     connect(ui->radioButtonTime, SIGNAL(clicked(bool)), this, SLOT(onChanged()));
     connect(ui->spinBoxScanInterval, SIGNAL(valueChanged(int)), this, SLOT(onChanged()));
     connect(ui->pathView, SIGNAL(clicked(QModelIndex)), this, SLOT(checkRemoveButtonStatus(QModelIndex)));
+
 
     if (configHelper->getRunningStrategy() == CpuTrigger)
     {
@@ -48,7 +50,7 @@ SettingsDialog::SettingsDialog(ConfigHelper *ch, QWidget *parent) :
     connect(ui->spinBoxCpu, SIGNAL(valueChanged(int)), this, SLOT(onChanged()));
     connect(ui->timeEdit, SIGNAL(timeChanged(QTime)), this, SLOT(onChanged()));
     connect(ui->checkBoxAutoCalRelation, SIGNAL(stateChanged(int)), this, SLOT(onChanged()));
-
+    connect(ui->spinBoxDisplayEdge, SIGNAL(valueChanged(int)), this, SLOT(onChanged()));
     ui->buttonBox->button(QDialogButtonBox::Save)->setEnabled(false);
 }
 
@@ -69,14 +71,16 @@ void SettingsDialog::onAccepted()
         configHelper->setSettings(ui->checkBoxStartAtBoot->isChecked(),
                                   ui->spinBoxCpu->value(),
                                   ui->spinBoxScanInterval->value(),
-                                  ui->checkBoxAutoCalRelation->isChecked());
+                                  ui->checkBoxAutoCalRelation->isChecked(),
+                                  ui->spinBoxDisplayEdge->value());
     }
     else if (ui->radioButtonTime->isChecked())
     {
         configHelper->setSettings(ui->checkBoxStartAtBoot->isChecked(),
                                   ui->timeEdit->time(),
                                   ui->spinBoxScanInterval->value(),
-                                  ui->checkBoxAutoCalRelation->isChecked());
+                                  ui->checkBoxAutoCalRelation->isChecked(),
+                                  ui->spinBoxDisplayEdge->value());
     }
     configHelper->saveSettings();
 

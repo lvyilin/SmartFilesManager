@@ -8,6 +8,7 @@
 #include "dbhelper.h"
 #include "qdebug.h"
 #include <ogdf/basic/Graph.h>
+#include "confighelper.h"
 
 class graph_ {
 public:
@@ -15,7 +16,7 @@ public:
     QList<FileResult> frs;
     QList<node_> nodelist;
     QList<edge_> edgelist;
-    graph_(DBHelper *db);
+    graph_(DBHelper *db, ConfigHelper *cf);
     ~graph_();
     void setnode();
     void setedge();
@@ -23,7 +24,7 @@ public:
     void setnodecoordinate();
 private:
     DBHelper *dbHelper;
-
+    ConfigHelper *configHelper;
 
 };
 
