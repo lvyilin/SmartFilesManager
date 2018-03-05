@@ -58,13 +58,13 @@ void graphwidget::paintEvent(QPaintEvent *event)
     for (int i = 0; i < a->nodelist.count(); i++)
     {
         painter.setBrush(QColor(choosecolor(i % 50)));
-        painter.setPen(QColor(choosecolor(i % 50)));
+        painter.setPen(QPen(QColor(choosecolor(i % 50)), 3));
         for (int j = 0; j < a->edgelist.count(); j++)
         {
             if (a->edgelist[j].first->path == a->nodelist[i].path)
             {
-                painter.drawEllipse(a->nodelist[i].x, a->nodelist[i].y, 20, 20);
-                painter.drawEllipse(a->edgelist[j].second->x, a->edgelist[j].second->y, 20, 20);
+                painter.drawEllipse(a->nodelist[i].x - 8, a->nodelist[i].y - 8, 20, 20);
+                painter.drawEllipse(a->edgelist[j].second->x - 8, a->edgelist[j].second->y - 8, 20, 20);
                 painter.drawLine(a->nodelist[i].x, a->nodelist[i].y, a->edgelist[j].second->x, a->edgelist[j].second->y);
             }
         }
@@ -119,14 +119,14 @@ void graphwidget::paintEvent(QPaintEvent *event)
                 temp++;
             }
 
-            painter.drawEllipse(a->nodelist[i].x, a->nodelist[i].y, 30, 30);
+            painter.drawEllipse(a->nodelist[i].x - 8, a->nodelist[i].y - 8, 25, 25);
 
             foreach (edge_ e, a->edgelist)
             {
                 if (e.first->path == a->nodelist[i].path)
                 {
                     counter += 1;
-                    painter.setPen(QColor("#734488"));
+                    painter.setPen(QPen(QColor("#734488"), 3));
                     painter.drawLine(e.first->x, e.first->y, e.second->x, e.second->y);
                     painter.setPen(Qt::black);
                     painter.drawText(e.second->x,  e.second->y,  QString::number(counter));

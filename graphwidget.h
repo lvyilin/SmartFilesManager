@@ -19,10 +19,10 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include "QTimer"
-#define NORMALIZED_GRAPH_WIDTH_AND_HEIGHT 500
-#define NORMALIZED_GRAPH_WIDTH_AND_HEIGHT_HALF 250
-#define NORMALIZED_GRAPH_LEFT 30
-#define NORMALIZED_GRAPH_TOP 60
+#define NORMALIZED_GRAPH_WIDTH_AND_HEIGHT 700
+#define NORMALIZED_GRAPH_WIDTH_AND_HEIGHT_HALF 400
+#define NORMALIZED_GRAPH_LEFT 40
+#define NORMALIZED_GRAPH_TOP 80
 #define transformX(x) (((x)+viewCenterX)*viewScale)
 #define transformY(y) (((y)+viewCenterY)*viewScale)
 
