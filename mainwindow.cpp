@@ -49,6 +49,7 @@ MainWindow::MainWindow(QWidget *parent) :
     //view
     setupView();
     ui->pushButtonReload->setIcon(QIcon(":/images/icons/reload.png"));
+    ui->pushButtonReload->setToolTip("刷新");
     ui->pushButtonReload->setMaximumSize(ui->comboBoxTreeViewType->height(), ui->comboBoxTreeViewType->height());
     connect(ui->pushButtonReload, &QPushButton::clicked, this, &MainWindow::reloadView);
 
@@ -110,19 +111,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(toolkitInitThread, &ToolkitInitThread::startInit, this, &MainWindow::onStartInitToolkit);
     connect(toolkitInitThread, &ToolkitInitThread::finishInit, this, &MainWindow::onFinishInitToolkit);
     connect(this, &MainWindow::quitWorkingThread, toolkitInitThread, &ToolkitInitThread::quit);
-
-    toolkitInitThread->start(QThread::LowPriority);
-
-    //draw graph
-    drawgraph();
-
-    //draw wordcloud
-    drawwordcloud();
-
-
     toolkitInitThread->start(QThread::LowPriority);*/
-
-
 
     //draw graph
     drawgraph();
@@ -759,18 +748,64 @@ void MainWindow::on_actionOpenFolder_triggered()
     QProcess::startDetached(command);
 }
 
+void MainWindow::on_actionArrange_triggered()
+{
+    FileItem *item =  static_cast<FileItem *>(ui->treeView->currentIndex().internalPointer());
+    if (item->childCount() == 0) return;
+    const QString directoryName =
+        QFileDialog::getExistingDirectory(this,
+                                          tr("选择保存路径"),
+                                          QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation));
+    if (directoryName.isEmpty())
+    {
+        return;
+    }
+    QString pathPrefix = QDir::toNativeSeparators(directoryName) +
+                         QDir::separator() +
+                         item->data(0).toString() +
+                         QDir::separator();
+    if (!QDir(pathPrefix).exists())
+    {
+        QDir().mkpath(pathPrefix);
+    }
+    for (int i = 0; i < item->childCount(); ++i)
+    {
+        QString path = item->child(i)->data(1).toString();
+        QFileInfo info(path);
+        if (QFileInfo(path).exists())
+        {
+            QFile::copy(path, pathPrefix + info.fileName());
+        }
+    }
+    QDesktopServices::openUrl(QUrl::fromLocalFile(pathPrefix));
+}
+
 void MainWindow::showContextMenu(const QPoint &pos)
 {
     QPoint globalPos = ui->treeView->mapToGlobal(pos);
     QModelIndex index = ui->treeView->indexAt(pos);
     if (!index.isValid() || index.data(Qt::ToolTipRole).toString().isEmpty())
-        return;
-    if (fileTreeMenu != nullptr)
-        delete fileTreeMenu;
-    fileTreeMenu = new QMenu(this);
-    fileTreeMenu->addAction(ui->actionOpenFile);
-    fileTreeMenu->addAction(ui->actionOpenFolder);
-    fileTreeMenu->exec(globalPos);
+    {
+        FileItem *item =  static_cast<FileItem *>(index.internalPointer());
+        if (item->childCount() == 0) return;
+        if (!item->child(0)->data(1).toString().isEmpty())
+        {
+            if (fileTreeMenu != nullptr)
+                delete fileTreeMenu;
+            fileTreeMenu = new QMenu(this);
+            fileTreeMenu->addAction(ui->actionArrange);
+            fileTreeMenu->exec(globalPos);
+        }
+    }
+    else
+    {
+        if (fileTreeMenu != nullptr)
+            delete fileTreeMenu;
+        fileTreeMenu = new QMenu(this);
+        fileTreeMenu->addAction(ui->actionOpenFile);
+        fileTreeMenu->addAction(ui->actionOpenFolder);
+        fileTreeMenu->exec(globalPos);
+    }
 }
 
 void MainWindow::focusFile()
@@ -816,4 +851,9 @@ void MainWindow::on_comboBoxTreeViewType_currentIndexChanged(int index)
         delete fileTreeModel;
         fileTreeModel = anotherModel;
     }
+}
+
+void MainWindow::on_actionArrangeInfo_triggered()
+{
+    QMessageBox::information(this, QCoreApplication::applicationName(), "请从文件浏览窗格任选一个分类，单击右键进行整理。");
 }

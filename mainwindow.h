@@ -104,6 +104,10 @@ private slots:
 
     void on_comboBoxTreeViewType_currentIndexChanged(int index);
 
+    void on_actionArrange_triggered();
+
+    void on_actionArrangeInfo_triggered();
+
 private:
     Ui::MainWindow *ui;
     bool calculateRelationSeparately = true;
