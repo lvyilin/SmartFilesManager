@@ -317,7 +317,8 @@ QString MainWindow::fileSizeHumanReadable(qint64 num)
 
 QMap<QString, QStringList> &MainWindow::getLabelFilesMap()
 {
-    return fileTreeModel->labelFilesMap;
+
+    return fileTreeFieldModel->labelFilesMap;
 }
 
 void MainWindow::updateFilesList(bool renew)
@@ -460,20 +461,27 @@ void MainWindow::setupView()
 
     dbHelper->getAllFiles(fileList, idList);
     //    ui->treeView->hide();
-    if (fileTreeModel == nullptr)
+    if (fileTreeFormatModel == nullptr)
     {
-        fileTreeModel = new FileTreeModel(fileList, dbHelper, this);
-        fileTreeModel->setupTypeModelData();
-        ui->treeView->setModel(fileTreeModel);
+        fileTreeFormatModel = new FileTreeModel(fileList, dbHelper, this);
+        fileTreeFormatModel->setupTypeModelData();
+        ui->treeView->setModel(fileTreeFormatModel);
     }
     else
     {
         FileTreeModel *anotherModel = new FileTreeModel(fileList, dbHelper, this);
         anotherModel->setupTypeModelData();
         ui->treeView->setModel(anotherModel);
-        delete fileTreeModel;
-        fileTreeModel = anotherModel;
+        delete fileTreeFormatModel;
+        fileTreeFormatModel = anotherModel;
     }
+
+    if (fileTreeFieldModel == nullptr)
+    {
+        fileTreeFieldModel = new FileTreeModel(fileList, dbHelper, this);
+        fileTreeFieldModel->setupFieldModelData();
+    }
+
     ui->treeView->show();
 }
 
@@ -483,36 +491,39 @@ void MainWindow::reloadView()
     dbHelper->getAllFiles(fileList, idList);
     int idx = ui->comboBoxTreeViewType->currentIndex();
     //    ui->treeView->hide();
-    if (fileTreeModel == nullptr)
+    FileTreeModel *anotherModel = new FileTreeModel(fileList, dbHelper, this);
+    if (idx == 0)
     {
-        fileTreeModel = new FileTreeModel(fileList, dbHelper, this);
-        if (idx == 0)
-            fileTreeModel->setupTypeModelData();
-        else if (idx == 1)
-            fileTreeModel->setupFieldModelData();
-        ui->treeView->setModel(fileTreeModel);
-    }
-    else
-    {
-        FileTreeModel *anotherModel = new FileTreeModel(fileList, dbHelper, this);
-        if (idx == 0)
-            anotherModel->setupTypeModelData();
-        else if (idx == 1)
-            anotherModel->setupFieldModelData();
+        anotherModel->setupTypeModelData();
         ui->treeView->setModel(anotherModel);
-        delete fileTreeModel;
-        fileTreeModel = anotherModel;
+        delete fileTreeFormatModel;
+        fileTreeFormatModel = anotherModel;
     }
-    //    ui->treeView->setCurrentIndex(fileTreeModel->index(0, 0));
-    on_treeView_clicked(fileTreeModel->index(0, 0));
+    else if (idx == 1)
+    {
+        anotherModel->setupFieldModelData();
+        ui->treeView->setModel(anotherModel);
+        delete fileTreeFieldModel;
+        fileTreeFieldModel = anotherModel;
+    }
+
+    on_treeView_clicked(anotherModel->index(0, 0));
 }
 
 void MainWindow:: treeViewFocus(const QString &str, bool byPath)
 {
+    int idx = ui->comboBoxTreeViewType->currentIndex();
+    FileTreeModel *model;
+    if (idx == 0)
+        model = fileTreeFormatModel;
+    else if (idx == 1)
+        model = fileTreeFieldModel;
+    else;
+
     int role = byPath ? Qt::ToolTipRole
                : Qt::DisplayRole;
-    QModelIndexList idxs = fileTreeModel->match(
-                               fileTreeModel->index(0, 0),
+    QModelIndexList idxs = model->match(
+                               model->index(0, 0),
                                role,
                                QVariant(str),
                                1,
@@ -853,14 +864,14 @@ void MainWindow::drawgraph()
 
 void MainWindow::on_comboBoxTreeViewType_currentIndexChanged(int index)
 {
-    if (fileTreeModel == nullptr)
+    if (fileTreeFormatModel == nullptr)
     {
-        fileTreeModel = new FileTreeModel(fileList, dbHelper, this);
+        fileTreeFormatModel = new FileTreeModel(fileList, dbHelper, this);
         if (index == 0)
-            fileTreeModel->setupTypeModelData();
+            fileTreeFormatModel->setupTypeModelData();
         else if (index == 1)
-            fileTreeModel->setupFieldModelData();
-        ui->treeView->setModel(fileTreeModel);
+            fileTreeFormatModel->setupFieldModelData();
+        ui->treeView->setModel(fileTreeFormatModel);
     }
     else
     {
@@ -870,8 +881,8 @@ void MainWindow::on_comboBoxTreeViewType_currentIndexChanged(int index)
         else if (index == 1)
             anotherModel->setupFieldModelData();
         ui->treeView->setModel(anotherModel);
-        delete fileTreeModel;
-        fileTreeModel = anotherModel;
+        delete fileTreeFormatModel;
+        fileTreeFormatModel = anotherModel;
     }
 }
 

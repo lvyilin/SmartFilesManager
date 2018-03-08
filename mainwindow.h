@@ -131,7 +131,8 @@ private:
     DBHelper *dbHelper;
     QTimer *triggerTimer;
     Analyser *analyser;
-    FileTreeModel *fileTreeModel = nullptr;
+    FileTreeModel *fileTreeFormatModel = nullptr;
+    FileTreeModel *fileTreeFieldModel = nullptr;
     RelationCalculator *relationCalculator = nullptr;
 
     SearchBox *searchBox;
