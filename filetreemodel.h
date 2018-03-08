@@ -2,6 +2,7 @@
 #define FILETREEMODEL_H
 
 #include <QAbstractItemModel>
+#include <QMap>
 #include "utils.h"
 #include "fileitem.h"
 #include "dbhelper.h"
@@ -28,6 +29,8 @@ public:
 
     void setupTypeModelData();
     void setupFieldModelData();
+
+    QMap<QString, QStringList> labelFilesMap;//for convenience
 private:
     FileItem *getTypeItem(const QString &format, const QVector<FileItem *> &typeItems);
     FileItem *getParentFieldItem(const QString &parentName, const QVector<FileItem *> &fieldItems);

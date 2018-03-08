@@ -315,6 +315,11 @@ QString MainWindow::fileSizeHumanReadable(qint64 num)
     return QString().setNum((float)num, 'f', 2) + " " + unit;
 }
 
+QMap<QString, QStringList> &MainWindow::getLabelFilesMap()
+{
+    return fileTreeModel->labelFilesMap;
+}
+
 void MainWindow::updateFilesList(bool renew)
 {
     ui->statusBar->showMessage(tr("正在更新文件列表..."));

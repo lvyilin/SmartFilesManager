@@ -120,8 +120,9 @@ private:
     void setTrigger();
     void processWorkList(bool triggered = false);
     void startCalculateRelation();
-
     QString fileSizeHumanReadable(qint64 num);
+
+    QMap<QString, QStringList> &getLabelFilesMap();
 
     ConfigHelper *configHelper;
     QSystemTrayIcon *trayIcon;
@@ -139,6 +140,7 @@ private:
 
     QMenu *fileTreeMenu = nullptr;
     QMenu *fieldMenu = nullptr;
+
 };
 
 #endif // MAINWINDOW_H
