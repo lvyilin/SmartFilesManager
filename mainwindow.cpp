@@ -853,7 +853,7 @@ void MainWindow::drawgraph()
 
 void MainWindow::drawlabelspie()
 {
-    labelswideget *labelswideget_ = new labelswideget(this, dbHelper, configHelper);
+    labelswideget *labelswideget_ = new labelswideget(getLabelFilesMap(), this, dbHelper, configHelper);
     ui->tabWidget_2->addTab(labelswideget_, "标签饼状图视图");
 }
 

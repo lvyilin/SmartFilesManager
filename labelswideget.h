@@ -19,9 +19,10 @@
 class labelswideget : public QWidget {
     Q_OBJECT
 public:
-    explicit labelswideget(QWidget *parent = nullptr, DBHelper *db = nullptr, ConfigHelper *cf = nullptr);
+    explicit labelswideget(QMap<QString, QStringList> &labels_, QWidget *parent = nullptr, DBHelper *db = nullptr, ConfigHelper *cf = nullptr);
     void paintEvent(QPaintEvent *event);
     QString choosecolor(int i);
+    QMap<QString, QStringList> labels;
 
 protected:
     void mousePressEvent(QMouseEvent *event); //按下

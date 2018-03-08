@@ -1,6 +1,6 @@
 #include "labelswideget.h"
 
-labelswideget::labelswideget(QWidget *parent, DBHelper *db, ConfigHelper *cf) :
+labelswideget::labelswideget(QMap<QString, QStringList> &labels_, QWidget *parent, DBHelper *db, ConfigHelper *cf) :
     QWidget(parent), dbHelper(db), configHelper(cf)
 {
     setMinimumSize(208, 427);
@@ -14,6 +14,7 @@ labelswideget::labelswideget(QWidget *parent, DBHelper *db, ConfigHelper *cf) :
     verlayout->addWidget(labelName);
     verlayout->addWidget(labelInfo);
     dbHelper = db;
+    labels = labels_;
 }
 
 void labelswideget::paintEvent(QPaintEvent *event)
@@ -21,13 +22,26 @@ void labelswideget::paintEvent(QPaintEvent *event)
     Q_UNUSED(event);
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing, true);
-    for (int i = 0; i <  ; i++)
+    QMap<QString, QStringList>::const_iterator it;
+    int sum = 0;
+    int a = 0;
+
+    qDebug() << labels.count();
+
+    for (int i = 0 ; i < labels.values().count() ; i++)
+    {
+        sum += labels.values()[i].count();
+    }
+
+    for (int i = 0 ; i < labels.values().count() ; i++)
     {
         painter.setBrush(QColor(choosecolor(i % 50)));
         painter.setPen(choosecolor(i % 50));
-        painter.drawPie(300, 300, 100, 100, 0, 360 * 16 * 1 /);
-        painter.end();
+        painter.drawPie(400, 300, 200, 200, a, 360 * 16 * (it.value().count() / sum));
+        a += 360 * 16 * (it.value().count() / sum);
     }
+
+    painter.end();
 }
 
 
