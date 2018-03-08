@@ -202,6 +202,8 @@ void FileTreeModel::setupFieldModelData()
                 new FileItem(fileList[i], parentItem);
             }
         }
+        QString lbName = parentItem->data(0).toString();
+        labelFilesMap[lbName].append(fileList[i].name);
     }
 }
 
