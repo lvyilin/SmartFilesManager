@@ -262,7 +262,7 @@ void SearchDialog::on_pushButtonSearch_clicked()
 
     for (auto fr : result)
     {
-        QListWidgetItem *item = new QListWidgetItem(fr.file.name, ui->listWidgetResult);
+        new QListWidgetItem(fr.file.name, ui->listWidgetResult);
     }
     ui->labelResultNum->setText(QString("共%1个结果").arg(result.count()));
 }

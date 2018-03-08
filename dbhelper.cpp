@@ -341,6 +341,7 @@ void DBHelper::getFileResultByPath(const QString &path, FileResult &fr)
     getFileResultById(fr, fileId);
 }
 
+
 void DBHelper::getFileResultById(FileResult &fr, int fileId)
 {
     //get keywords
@@ -412,6 +413,7 @@ void DBHelper::getFileResultById(FileResult &fr, int fileId)
 
 }
 
+
 void DBHelper::getFileById(File &f, int fileId)
 {
     query->prepare("select * from files where id=:id");
@@ -427,6 +429,16 @@ void DBHelper::getFileById(File &f, int fileId)
         f.modifyTime = query->value(6).toDateTime();
         f.isFinished = query->value(7).toBool();
     }
+}
+
+int DBHelper::getLabelId(const QString &label)
+{
+    query->prepare("select id from labels where name=? and type='field'");
+    query->addBindValue(label);
+    query->exec();
+    if (query->next())
+        return query->value(0).toInt();
+    else return 0;
 }
 
 void DBHelper::getFileResults(QList<FileResult> &frs, bool finished)
@@ -599,6 +611,46 @@ QVector<QVector<Label> > DBHelper::getFieldLabels(const QList<File> &li)
     }
     return lbList;
 }
+
+void DBHelper::getFilesHaveLabel(QList<File> &list, const QString &label)
+{
+    int labelId = getLabelId(label);
+    if (labelId == 0)return;
+
+    query->prepare("select * from files where id in (select file_id from file_labels where label_id=?)");
+    query->addBindValue(labelId);
+    query->exec();
+    while (query->next())
+    {
+        File temp;
+        temp.name = query->value(1).toString();
+        temp.format = query->value(2).toString();
+        temp.path = query->value(3).toString();
+        temp.size = query->value(4).toLongLong();
+        temp.createTime = query->value(5).toDateTime();
+        temp.modifyTime = query->value(6).toDateTime();
+        temp.isFinished = query->value(7).toBool();
+        list << temp;
+    }
+}
+
+void DBHelper::getFileResultsHaveLabel(QList<FileResult> &list, const QString &label)
+{
+    int labelId = getLabelId(label);
+    if (labelId == 0)return;
+
+    query->prepare("select file_id from file_labels where label_id=?");
+    query->addBindValue(labelId);
+    query->exec();
+    while (query->next())
+    {
+        int fileId = query->value(0).toInt();
+        FileResult fr;
+        getFileResultById(fr, fileId);
+        list << fr;
+    }
+}
+
 void DBHelper::abortProgress()
 {
     if (working)

@@ -449,8 +449,9 @@ void MainWindow::setupView()
     ui->tableWidgetRelation->setColumnWidth(1, fontWidth);
 
     QList<int> idList;
-    connect(ui->treeView, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(showContextMenu(QPoint)));
+    connect(ui->treeView, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(showFileContextMenu(QPoint)));
     connect(ui->treeView, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(on_actionOpenFile_triggered()));
+    connect(ui->treeWidgetField, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(showFieldContextMenu(QPoint)));
 
     dbHelper->getAllFiles(fileList, idList);
     //    ui->treeView->hide();
@@ -780,11 +781,13 @@ void MainWindow::on_actionArrange_triggered()
     QDesktopServices::openUrl(QUrl::fromLocalFile(pathPrefix));
 }
 
-void MainWindow::showContextMenu(const QPoint &pos)
+void MainWindow::showFileContextMenu(const QPoint &pos)
 {
     QPoint globalPos = ui->treeView->mapToGlobal(pos);
     QModelIndex index = ui->treeView->indexAt(pos);
-    if (!index.isValid() || index.data(Qt::ToolTipRole).toString().isEmpty())
+    if (!index.isValid())
+        return;
+    if (index.data(Qt::ToolTipRole).toString().isEmpty())
     {
         FileItem *item =  static_cast<FileItem *>(index.internalPointer());
         if (item->childCount() == 0) return;
@@ -806,6 +809,20 @@ void MainWindow::showContextMenu(const QPoint &pos)
         fileTreeMenu->addAction(ui->actionOpenFolder);
         fileTreeMenu->exec(globalPos);
     }
+}
+
+void MainWindow::showFieldContextMenu(const QPoint &pos)
+{
+    QPoint globalPos = ui->treeWidgetField->mapToGlobal(pos);
+    QModelIndex index = ui->treeWidgetField->indexAt(pos);
+    if (!index.isValid())
+        return;
+
+    if (fieldMenu != nullptr)
+        delete fieldMenu;
+    fieldMenu = new QMenu(this);
+    fieldMenu->addAction(ui->actionFieldFile);
+    fieldMenu->exec(globalPos);
 }
 
 void MainWindow::focusFile()
@@ -856,4 +873,9 @@ void MainWindow::on_comboBoxTreeViewType_currentIndexChanged(int index)
 void MainWindow::on_actionArrangeInfo_triggered()
 {
     QMessageBox::information(this, QCoreApplication::applicationName(), "请从文件浏览窗格任选一个分类，单击右键进行整理。");
+}
+
+void MainWindow::on_actionFieldFile_triggered()
+{
+
 }

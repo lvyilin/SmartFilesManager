@@ -99,7 +99,8 @@ private slots:
 
     void on_actionOpenFile_triggered();
     void on_actionOpenFolder_triggered();
-    void showContextMenu(const QPoint &pos);
+    void showFileContextMenu(const QPoint &pos);
+    void showFieldContextMenu(const QPoint &pos);
     void focusFile();
 
     void on_comboBoxTreeViewType_currentIndexChanged(int index);
@@ -107,6 +108,8 @@ private slots:
     void on_actionArrange_triggered();
 
     void on_actionArrangeInfo_triggered();
+
+    void on_actionFieldFile_triggered();
 
 private:
     Ui::MainWindow *ui;
@@ -135,7 +138,7 @@ private:
     SearchDialog *searchDialog = nullptr;
 
     QMenu *fileTreeMenu = nullptr;
-
+    QMenu *fieldMenu = nullptr;
 };
 
 #endif // MAINWINDOW_H
