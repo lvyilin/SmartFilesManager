@@ -6,6 +6,7 @@
 
 QT       += core gui sql xml
 
+
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = SmartFilesManager
@@ -48,7 +49,8 @@ SOURCES += \
     numerictablewidgetitem.cpp \
     searchdialog.cpp \
     searchbox.cpp \
-    searchpopup.cpp
+    searchpopup.cpp \
+    labelswideget.cpp
 
 HEADERS += \
     settingsdialog.h \
@@ -109,7 +111,8 @@ HEADERS += \
     numerictablewidgetitem.h \
     searchdialog.h \
     searchbox.h \
-    searchpopup.h
+    searchpopup.h \
+    labelswideget.h
 
 FORMS += \
     settingsdialog.ui \

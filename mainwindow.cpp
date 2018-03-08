@@ -115,7 +115,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     //draw graph
     drawgraph();
-
+    drawlabelspie();
 }
 
 MainWindow::~MainWindow()
@@ -844,6 +844,12 @@ void MainWindow::drawgraph()
     graphwidget *graphwidget_ = new graphwidget(this, dbHelper, configHelper);
     ui->tabWidget_2->addTab(graphwidget_, "知识图谱类型视图");
     // ui->graph_view_2 = graphwidget_;
+}
+
+void MainWindow::drawlabelspie()
+{
+    labelswideget *labelswideget_ = new labelswideget(this, dbHelper, configHelper);
+    ui->tabWidget_2->addTab(labelswideget_, "标签饼状图视图");
 }
 
 void MainWindow::on_comboBoxTreeViewType_currentIndexChanged(int index)

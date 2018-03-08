@@ -80,6 +80,7 @@ public:
      * @brief getFinishedFileResults 获得所有已完成文件的FileResult
      * @param frs 空的FileResult List的引用, 用于储存返回结果
      */
+
     void getFileResults(QList<FileResult> &frs, bool finished = true);
 
     void saveFileResults(QList<FileResult> &frs);

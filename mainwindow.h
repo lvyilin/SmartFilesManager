@@ -17,6 +17,7 @@
 
 #include "filetreemodel.h"
 #include "graphwidget.h"
+#include "labelswideget.h"
 #include "wordcloudwidget.h"
 #include "relationcalculator.h"
 #include "searchdialog.h"
@@ -82,7 +83,7 @@ private slots:
 
     void on_treeView_clicked(const QModelIndex &index);
     void drawgraph();
-
+    void drawlabelspie();
     void drawwordcloud();
 
     void notifyRelationFinished();

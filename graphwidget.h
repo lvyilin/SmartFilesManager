@@ -49,7 +49,6 @@ protected:
     void mouseReleaseEvent(QMouseEvent *event); //松开
     void wheelEvent(QWheelEvent *event);
     void mouseDoubleClickEvent(QMouseEvent *event);
-
 private:
     DBHelper *dbHelper;
     ConfigHelper *configHelper;
