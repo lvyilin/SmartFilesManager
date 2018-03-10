@@ -59,7 +59,7 @@
     <rect>
      <x>30</x>
      <y>210</y>
-     <width>301</width>
+     <width>303</width>
      <height>31</height>
     </rect>
    </property>
@@ -250,6 +250,9 @@
       <width>451</width>
       <height>111</height>
      </rect>
+    </property>
+    <property name="contextMenuPolicy">
+     <enum>Qt::DefaultContextMenu</enum>
     </property>
    </widget>
    <widget class="QLabel" name="labelResultNum">

@@ -73,7 +73,7 @@ void wordlabelwidget::paintEvent(QPaintEvent *event)
                             rec.width() * 0.05,
                             rec.width() * 0.05);
         painter.drawText(rec.center().x() - rec.width() * 0.1 + rec.width() * 0.075 + r * qCos(360 * (i + 1) / labellist.count()),
-                         rec.center().y() - rec.height() * 0.1 + rec.width() * 0.075  + r * qSin(360 * (i + 1) / labellist.count()),
+                         rec.center().y() - rec.height() * 0.1 + rec.width() * 0.075 + r * qSin(360 * (i + 1) / labellist.count()),
                          labellist[i].name);
     }
 
@@ -81,9 +81,9 @@ void wordlabelwidget::paintEvent(QPaintEvent *event)
 
     for (int i = 0 ; i < labellist.count(); i++)
     {
-        if (qPow(h_Point.x() - (rec.center().x() - rec.width() * 0.1 + r * qCos(360 * (i + 1) / labellist.count())), 2)
+        if (qPow(h_Point.x() - (rec.center().x() - rec.width() * 0.1 + rec.width() * 0.075 + r * qCos(360 * (i + 1) / labellist.count())), 2)
                 +
-                qPow(h_Point.y() - ((rec.center().y() - rec.height() * 0.1) + r * qSin(360 * (i + 1) / labellist.count())), 2)
+                qPow(h_Point.y() - ((rec.center().y() - rec.height() * 0.1) + rec.width() * 0.075 + r * qSin(360 * (i + 1) / labellist.count())), 2)
                 <=
                 qPow(rec.width() * 0.05, 2)
            )

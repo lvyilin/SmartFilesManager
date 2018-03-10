@@ -40,6 +40,7 @@ public:
     QString choosecolor(int i);
     graph_ *a;
     QTimer *timer;
+    QListWidget *list;
 
 
 protected:

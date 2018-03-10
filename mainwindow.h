@@ -22,6 +22,8 @@
 #include "searchdialog.h"
 #include "searchbox.h"
 
+#include "labelgraphwidget.h"
+#include "wordlabelwidget.h"
 
 
 class SettingsDialog;
@@ -81,10 +83,8 @@ private slots:
     void reloadView();
 
     void on_treeView_clicked(const QModelIndex &index);
-    void drawgraph();
+    //    void drawgraph();
     void drawlabelspie();
-    void drawwordlabel(QString path);
-    void drawlabelgraph(QString name);
 
     void notifyRelationFinished();
 
@@ -111,6 +111,8 @@ private slots:
     void on_actionArrangeInfo_triggered();
 
     void on_actionFieldFile_triggered();
+
+    void on_actionImagine_triggered();
 
 private:
     Ui::MainWindow *ui;
@@ -142,7 +144,8 @@ private:
 
     QMenu *fileTreeMenu = nullptr;
     QMenu *fieldMenu = nullptr;
-
+    labelgraphwidget *labelgraphwidget_ = nullptr;
+    wordlabelwidget *wordlabelwidget_ = nullptr;
 };
 
 #endif // MAINWINDOW_H

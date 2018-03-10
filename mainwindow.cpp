@@ -9,8 +9,6 @@
 
 #include "graphwidget.h"
 #include "labelswideget.h"
-#include "labelgraphwidget.h"
-#include "wordlabelwidget.h"
 #include "numerictablewidgetitem.h"
 
 
@@ -115,12 +113,11 @@ MainWindow::MainWindow(QWidget *parent) :
     toolkitInitThread->start(QThread::LowPriority);*/
 
     //draw graph
-    drawgraph();
-    drawlabelspie();
-    drawlabelgraph("计算机");
-    drawwordlabel("E:/课件/高级程序设计训练课程材料/高级程序设计训练实验文档命名规范.docx");
-}
+    graphwidget *graphwidget_ = new graphwidget(this, dbHelper, configHelper);
+    ui->tabWidget_2->addTab(graphwidget_, "知识图谱类型视图");
 
+    drawlabelspie();
+}
 MainWindow::~MainWindow()
 {
     delete ui;
@@ -723,7 +720,10 @@ void MainWindow::on_actionQuickSearch_triggered()
 void MainWindow::on_actionAdvancedSearch_triggered()
 {
     if (searchDialog == nullptr)
+    {
         searchDialog = new SearchDialog(dbHelper, this);
+        connect(searchDialog, SIGNAL(searchResult(QString, bool)), this, SLOT(treeViewFocus(QString, bool)));
+    }
     searchDialog->show();
 }
 
@@ -826,6 +826,8 @@ void MainWindow::showFileContextMenu(const QPoint &pos)
         fileTreeMenu = new QMenu(this);
         fileTreeMenu->addAction(ui->actionOpenFile);
         fileTreeMenu->addAction(ui->actionOpenFolder);
+        fileTreeMenu->addSeparator();
+        fileTreeMenu->addAction(ui->actionImagine);
         fileTreeMenu->exec(globalPos);
     }
 }
@@ -850,31 +852,6 @@ void MainWindow::focusFile()
     treeViewFocus(curPath, false);
 }
 
-
-void MainWindow::drawwordlabel(QString path)
-{
-    QWidget *widget = new QWidget(this);
-    wordlabelwidget *wordlabelwidget_ = new wordlabelwidget(this, dbHelper, configHelper);
-
-    wordlabelwidget_->setpath(path);
-
-    QHBoxLayout *wordlabelLayout = new QHBoxLayout(widget);
-    wordlabelLayout->addWidget(wordlabelwidget_, 3);
-    QListWidget *wordlabelListWidget = new QListWidget(widget);
-    wordlabelLayout->addWidget(wordlabelListWidget, 1);
-    widget->setLayout(wordlabelLayout);
-    wordlabelwidget_->list = wordlabelListWidget;
-    ui->tabWidget_2->addTab(widget, "标签词云展示");
-    // ui->word_cloud_4 = wordcloudwidget_;
-}
-
-void MainWindow::drawgraph()
-{
-    graphwidget *graphwidget_ = new graphwidget(this, dbHelper, configHelper);
-    ui->tabWidget_2->addTab(graphwidget_, "知识图谱类型视图");
-    // ui->graph_view_2 = graphwidget_;
-}
-
 void MainWindow::drawlabelspie()
 {
     QWidget *widget = new QWidget(this);
@@ -887,14 +864,6 @@ void MainWindow::drawlabelspie()
     labelswideget_->tree = pieTreeWidget;
     ui->tabWidget_2->addTab(widget, "标签饼状图视图");
 }
-
-void MainWindow::drawlabelgraph(QString name)
-{
-    labelgraphwidget *labelgraphwidget_ = new labelgraphwidget(this, dbHelper, configHelper);
-    labelgraphwidget_->setname(name);
-    ui->tabWidget_2->addTab(labelgraphwidget_, "指定标签下的知识图谱类型视图");
-}
-
 void MainWindow::on_comboBoxTreeViewType_currentIndexChanged(int index)
 {
     if (fileTreeFormatModel == nullptr)
@@ -926,5 +895,43 @@ void MainWindow::on_actionArrangeInfo_triggered()
 
 void MainWindow::on_actionFieldFile_triggered()
 {
+    QString str = ui->treeWidgetField->currentItem()->text(0);
+    if (labelgraphwidget_ == nullptr)
+    {
+        labelgraphwidget_ = new labelgraphwidget(this, dbHelper, configHelper);
+    }
 
+    QDialog *labelDialog = new QDialog(this);
+    labelgraphwidget_->list = new QListWidget(labelDialog);
+    labelgraphwidget_->setname(str);
+    QHBoxLayout *fieldlabelLayout = new QHBoxLayout(labelDialog);
+    fieldlabelLayout->addWidget(labelgraphwidget_, 3);
+    fieldlabelLayout->addWidget(labelgraphwidget_->list, 1);
+
+    labelDialog->setWindowTitle(ui->treeWidgetField->currentItem()->text(0));
+    labelDialog->setLayout(fieldlabelLayout);
+    labelDialog->exec();
+}
+
+void MainWindow::on_actionImagine_triggered()
+{
+    QString path = ui->treeView->currentIndex().data(Qt::ToolTipRole).toString();
+    if (path.isEmpty())return;
+
+    if (wordlabelwidget_ == nullptr)
+    {
+        wordlabelwidget_ = new wordlabelwidget(this, dbHelper, configHelper);
+    }
+
+    wordlabelwidget_->setpath(path);
+
+    QDialog *imagineDialog = new QDialog(this);
+    QHBoxLayout *wordlabelLayout = new QHBoxLayout(imagineDialog);
+    QListWidget *wordlabelListWidget = new QListWidget(imagineDialog);
+    wordlabelLayout->addWidget(wordlabelwidget_, 3);
+    wordlabelLayout->addWidget(wordlabelListWidget, 1);
+    wordlabelwidget_->list = wordlabelListWidget;
+    imagineDialog->setWindowTitle(ui->treeView->currentIndex().data(Qt::DisplayRole).toString());
+    imagineDialog->setLayout(wordlabelLayout);
+    imagineDialog->exec();
 }

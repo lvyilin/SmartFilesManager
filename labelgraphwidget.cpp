@@ -31,6 +31,7 @@ labelgraphwidget::~labelgraphwidget()
 void labelgraphwidget::setname(QString name)
 {
     labelname_ = name;
+    is_drawed = false;
     this->update();
 }
 
