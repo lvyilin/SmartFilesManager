@@ -23,9 +23,9 @@
 class wordlabelwidget : public QWidget {
     Q_OBJECT
 public:
-    explicit wordlabelwidget(QString filepath_, QWidget *parent, DBHelper *db, ConfigHelper *cf);
+    explicit wordlabelwidget(QWidget *parent, DBHelper *db, ConfigHelper *cf);
     ~wordlabelwidget();
-    void set();
+    void setpath(QString filepath_);
     void paintEvent(QPaintEvent *event);
     void setText(QString name, QString info);
     QListWidget *list;

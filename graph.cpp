@@ -68,8 +68,6 @@ void graph_::start(QString labelname)
                 frs_.append(frs[i]);
         }
     }
-    qDebug() << frs.count();
-    qDebug() << frs_.count();
 
     for (int i = 0; i < frs_.count(); i++)
     {

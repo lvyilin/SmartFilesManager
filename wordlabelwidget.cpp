@@ -1,7 +1,7 @@
 #include "wordlabelwidget.h"
 #include "QtMath"
 
-wordlabelwidget::wordlabelwidget(QString filepath_, QWidget *parent, DBHelper *db, ConfigHelper *cf) :
+wordlabelwidget::wordlabelwidget(QWidget *parent, DBHelper *db, ConfigHelper *cf) :
     QWidget(parent), dbHelper(db), configHelper(cf)
 {
     setMinimumSize(208, 427);
@@ -16,7 +16,7 @@ wordlabelwidget::wordlabelwidget(QString filepath_, QWidget *parent, DBHelper *d
     verlayout->addWidget(labelInfo);
     dbHelper = db;
     db->getFileResults(frs);
-    filepath = filepath_;
+
 }
 
 wordlabelwidget::~wordlabelwidget()
@@ -24,8 +24,9 @@ wordlabelwidget::~wordlabelwidget()
 
 }
 
-void wordlabelwidget::set()
+void wordlabelwidget::setpath(QString filepath_)
 {
+    filepath = filepath_;
     for (int i = 0; i < frs.count(); i++)
     {
         if (frs[i].file.path == filepath)
@@ -37,6 +38,7 @@ void wordlabelwidget::set()
         }
     }
     is_drawed = false;
+    this->update();
 }
 
 void wordlabelwidget::paintEvent(QPaintEvent *event)
@@ -55,8 +57,6 @@ void wordlabelwidget::paintEvent(QPaintEvent *event)
     QTextOption option(Qt::AlignLeft | Qt::AlignVCenter);
     option.setWrapMode(QTextOption::WordWrap);
     painter.setFont(font1);
-    if (is_drawed == false)
-        set();
     painter.setBrush(Qt::gray);
     QRect filerec;
     filerec.setX(rec.center().x() - rec.width() * 0.1);
@@ -133,6 +133,7 @@ void wordlabelwidget::mouseReleaseEvent(QMouseEvent *event)
     //或者直接用自带恢复鼠标指针形状的函数为：QApplication::restoreOverrideCursor();
     //但是需要前面设置哪个是默认的光标形状，用这个函数setOverrideCursor()函数
 }
+
 
 void wordlabelwidget::wheelEvent(QWheelEvent *event)
 {

@@ -854,7 +854,10 @@ void MainWindow::focusFile()
 void MainWindow::drawwordlabel(QString path)
 {
     QWidget *widget = new QWidget(this);
-    wordlabelwidget *wordlabelwidget_ = new wordlabelwidget(path, this, dbHelper, configHelper);
+    wordlabelwidget *wordlabelwidget_ = new wordlabelwidget(this, dbHelper, configHelper);
+
+    wordlabelwidget_->setpath(path);
+
     QHBoxLayout *wordlabelLayout = new QHBoxLayout(widget);
     wordlabelLayout->addWidget(wordlabelwidget_, 3);
     QListWidget *wordlabelListWidget = new QListWidget(widget);
@@ -887,7 +890,8 @@ void MainWindow::drawlabelspie()
 
 void MainWindow::drawlabelgraph(QString name)
 {
-    labelgraphwidget *labelgraphwidget_ = new labelgraphwidget(name, this, dbHelper, configHelper);
+    labelgraphwidget *labelgraphwidget_ = new labelgraphwidget(this, dbHelper, configHelper);
+    labelgraphwidget_->setname(name);
     ui->tabWidget_2->addTab(labelgraphwidget_, "指定标签下的知识图谱类型视图");
 }
 
