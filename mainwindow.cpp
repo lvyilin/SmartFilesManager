@@ -114,7 +114,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     //draw graph
     graphwidget *graphwidget_ = new graphwidget(this, dbHelper, configHelper);
-    ui->tabWidget_2->addTab(graphwidget_, "知识图谱类型视图");
+    ui->tabWidget_2->addTab(graphwidget_, "知识图谱视图");
 
     drawlabelspie();
 }
@@ -242,7 +242,12 @@ void MainWindow::openSettings()
 void MainWindow::about()
 {
     QMessageBox::about(this, tr("关于"),
-                       tr("这是一段对智能文件管家的介绍"));
+                       tr("本项目即开发一款针对个人电脑内电子资源的智能管理软件。"
+                          "采用自然语言处理、机器学习等技术从各种电子资源中提取知识，"
+                          "识别领域实体，进行多维度的实体画像，抽取实体之间的语义关系，判别实体关系的类别，"
+                          "度量实体关系的强度，从而最终形成具有一定规模的领域知识图谱，并建立知识图谱与电子资源之间的关联；"
+                          "同时，通过资源文件之间的特征信息，建立起电子资源之间的关联。"
+                          "以此为基础，实现对电子资源的分类，关联，归并、智能检索等功能。"));
 }
 
 void MainWindow::rebuildFilesList()
@@ -862,7 +867,7 @@ void MainWindow::drawlabelspie()
     pieLayout->addWidget(pieTreeWidget, 1);
     widget->setLayout(pieLayout);
     labelswideget_->tree = pieTreeWidget;
-    ui->tabWidget_2->addTab(widget, "标签饼状图视图");
+    ui->tabWidget_2->addTab(widget, "统计视图");
 }
 void MainWindow::on_comboBoxTreeViewType_currentIndexChanged(int index)
 {
