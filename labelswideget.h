@@ -2,6 +2,7 @@
 #define LABELSWIDEGET_H
 
 #include <QWidget>
+#include <QTreeWidget>
 #include <QPainter>
 #include "qdebug.h"
 #include "dbhelper.h"
@@ -23,12 +24,14 @@ public:
     void paintEvent(QPaintEvent *event);
     QString choosecolor(int i);
     QMap<QString, QStringList> labels;
+    QTreeWidget *tree = nullptr;
 
 protected:
     void mousePressEvent(QMouseEvent *event); //按下
     void mouseMoveEvent(QMouseEvent *event); //按下移动
     void mouseReleaseEvent(QMouseEvent *event); //松开
     void mouseDoubleClickEvent(QMouseEvent *event);
+    void wheelEvent(QWheelEvent *event);
 
 private:
     DBHelper *dbHelper;
@@ -41,6 +44,7 @@ private:
     QPoint offset;//储存鼠标指针位置与窗口位置的差值
     QCursor cursor;//创建光标，保存默认光标形状
     bool is_drawed = false;
+    QPoint h_Point;
 signals:
 
 public slots:

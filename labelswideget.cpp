@@ -1,4 +1,5 @@
 #include "labelswideget.h"
+#include "QtMath"
 
 labelswideget::labelswideget(QMap<QString, QStringList> &labels_, QWidget *parent, DBHelper *db, ConfigHelper *cf) :
     QWidget(parent), dbHelper(db), configHelper(cf)
@@ -19,31 +20,56 @@ labelswideget::labelswideget(QMap<QString, QStringList> &labels_, QWidget *paren
 
 void labelswideget::paintEvent(QPaintEvent *event)
 {
+    rec = this->geometry(); //获取窗口的位置以及大小并保存在rec中。
     Q_UNUSED(event);
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing, true);
     QMap<QString, QStringList>::const_iterator it;
-    int sum = 0;
-    int a = 0;
-
-    qDebug() << labels.count();
-
+    double sum = 0;
+    double  a = 0;
+    int *counter = new int[labels.values().count()];
     for (int i = 0 ; i < labels.values().count() ; i++)
     {
         sum += labels.values()[i].count();
+        counter[i] = labels.values()[i].count();
     }
-
-    for (int i = 0 ; i < labels.values().count() ; i++)
+    QFont font1;
+    font1.setFamily("Microsoft YaHei");
+    // 大小
+    font1.setPointSize(8);
+    font1.setLetterSpacing(QFont::AbsoluteSpacing, 1);
+    QTextOption option(Qt::AlignLeft | Qt::AlignVCenter);
+    option.setWrapMode(QTextOption::WordWrap);
+    double c = 5;
+    double centerx = rec.width() * 0.35, centery = rec.height() * 0.3;
+    tree->setHeaderLabel("标签文件列表");
+    QTreeWidgetItem *lisiroot[50];
+    for (int i = 0 ; i < labels.count() ; i++)
     {
         painter.setBrush(QColor(choosecolor(i % 50)));
         painter.setPen(choosecolor(i % 50));
-        painter.drawPie(400, 300, 200, 200, a, 360 * 16 * (it.value().count() / sum));
-        a += 360 * 16 * (it.value().count() / sum);
+        painter.drawPie(centerx, centery, rec.height() * 0.4, rec.height() * 0.4, a, 360 * 16 * counter[i] / sum);
+        painter.drawRect(0, c, rec.height() * 0.03, rec.height() * 0.03);
+        painter.setFont(font1);
+        painter.drawText(rec.height() * 0.04, (c + rec.height() * 0.018), labels.keys()[i] + "  " + QString::number(counter[i]) + "  " + QString::number((counter[i] / sum) * 1.0 * 100) + "%");
+        a += 360 * 16 * counter[i] / sum;
+        c += rec.height() * 0.03;
+        if (is_drawed == false)
+        {
+            QStringList temp;
+            temp << labels.keys()[i];
+            lisiroot[i] = new QTreeWidgetItem(tree, temp);
+            for (int j = 0 ; j < labels.values()[i].count(); j++)
+            {
+                QStringList te;
+                te << labels.values()[i][j];
+                lisiroot[i]->addChild(new QTreeWidgetItem(lisiroot[i], te));
+            }
+        }
     }
-
+    is_drawed = true;
     painter.end();
 }
-
 
 
 void labelswideget::mousePressEvent(QMouseEvent *event)
@@ -59,11 +85,6 @@ void labelswideget::mousePressEvent(QMouseEvent *event)
     }
 }
 
-void labelswideget::mouseDoubleClickEvent(QMouseEvent *event)
-{
-
-    this->update();
-}
 
 void labelswideget::mouseMoveEvent(QMouseEvent *event)
 {
@@ -82,6 +103,31 @@ void labelswideget::mouseReleaseEvent(QMouseEvent *event)
     setCursor(cursor);
     //或者直接用自带恢复鼠标指针形状的函数为：QApplication::restoreOverrideCursor();
     //但是需要前面设置哪个是默认的光标形状，用这个函数setOverrideCursor()函数
+}
+
+void labelswideget::wheelEvent(QWheelEvent *event)
+{
+    if (event->delta() > 0) //如果滚轮往上滚
+    {
+        rec.setWidth(rec.width() + 25); //设置宽度为原有基础上+25
+        rec.setHeight(rec.height() + 15); //设置窗口高度为原有基础上+20
+        this->setGeometry(rec);//然后设置窗口大小。
+        this->update();
+    }
+    else  //同样的
+    {
+        rec.setWidth(rec.width() - 25); //设置宽度为原有基础上+25
+        rec.setHeight(rec.height() - 15); //设置窗口高度为原有基础上+20
+        if (this->minimumSize().height() < rec.height() && this->minimumSize().width() < rec.width())
+            this->setGeometry(rec);
+        this->update();
+    }
+}
+
+void labelswideget::mouseDoubleClickEvent(QMouseEvent *event)
+{
+    h_Point = event->pos();
+    this->update();
 }
 
 QString labelswideget::choosecolor(int i)

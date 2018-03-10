@@ -7,9 +7,10 @@
 #include "ui_mainwindow.h"
 #include "fileupdaterthread.h"
 
-#include "wordcloudwidget.h"
 #include "graphwidget.h"
-
+#include "labelswideget.h"
+#include "labelgraphwidget.h"
+#include "wordlabelwidget.h"
 #include "numerictablewidgetitem.h"
 
 
@@ -116,6 +117,8 @@ MainWindow::MainWindow(QWidget *parent) :
     //draw graph
     drawgraph();
     drawlabelspie();
+    drawlabelgraph("计算机");
+    drawwordlabel("E:/课件/高级程序设计训练课程材料/高级程序设计训练实验文档命名规范.docx");
 }
 
 MainWindow::~MainWindow()
@@ -848,10 +851,17 @@ void MainWindow::focusFile()
 }
 
 
-void MainWindow::drawwordcloud()
+void MainWindow::drawwordlabel(QString path)
 {
-    wordcloudwidget *wordcloudwidget_ = new wordcloudwidget();
-    ui->tabWidget_2->addTab(wordcloudwidget_, "标签词云展示");
+    QWidget *widget = new QWidget(this);
+    wordlabelwidget *wordlabelwidget_ = new wordlabelwidget(path, this, dbHelper, configHelper);
+    QHBoxLayout *wordlabelLayout = new QHBoxLayout(widget);
+    wordlabelLayout->addWidget(wordlabelwidget_, 3);
+    QListWidget *wordlabelListWidget = new QListWidget(widget);
+    wordlabelLayout->addWidget(wordlabelListWidget, 1);
+    widget->setLayout(wordlabelLayout);
+    wordlabelwidget_->list = wordlabelListWidget;
+    ui->tabWidget_2->addTab(widget, "标签词云展示");
     // ui->word_cloud_4 = wordcloudwidget_;
 }
 
@@ -864,8 +874,21 @@ void MainWindow::drawgraph()
 
 void MainWindow::drawlabelspie()
 {
+    QWidget *widget = new QWidget(this);
     labelswideget *labelswideget_ = new labelswideget(getLabelFilesMap(), this, dbHelper, configHelper);
-    ui->tabWidget_2->addTab(labelswideget_, "标签饼状图视图");
+    QHBoxLayout *pieLayout = new QHBoxLayout(widget);
+    pieLayout->addWidget(labelswideget_, 3);
+    QTreeWidget *pieTreeWidget = new QTreeWidget(widget);
+    pieLayout->addWidget(pieTreeWidget, 1);
+    widget->setLayout(pieLayout);
+    labelswideget_->tree = pieTreeWidget;
+    ui->tabWidget_2->addTab(widget, "标签饼状图视图");
+}
+
+void MainWindow::drawlabelgraph(QString name)
+{
+    labelgraphwidget *labelgraphwidget_ = new labelgraphwidget(name, this, dbHelper, configHelper);
+    ui->tabWidget_2->addTab(labelgraphwidget_, "指定标签下的知识图谱类型视图");
 }
 
 void MainWindow::on_comboBoxTreeViewType_currentIndexChanged(int index)

@@ -1,16 +1,11 @@
-﻿#if defined(_MSC_VER) && (_MSC_VER >= 1600)
-#pragma execution_character_set("utf-8")
-#endif    //解决MSVC编译UTF-8(BOM)导致的中文编码问题
-
-#include "graphwidget.h"
+#include "labelgraphwidget.h"
 #include "qfont.h"
 #include "qmath.h"
 #include"qtimer.h"
 #include <ogdf/energybased/FMMMLayout.h>
 using namespace ogdf;
 using namespace std;
-
-graphwidget::graphwidget(QWidget *parent, DBHelper *db, ConfigHelper *cf) :
+labelgraphwidget::labelgraphwidget(QString thelabelname, QWidget *parent, DBHelper *db, ConfigHelper *cf) :
     QWidget(parent), dbHelper(db), configHelper(cf)
 {
     setMinimumSize(208, 427);
@@ -27,13 +22,14 @@ graphwidget::graphwidget(QWidget *parent, DBHelper *db, ConfigHelper *cf) :
     connect(timer, SIGNAL(timeout()), this, SLOT(update()));
     timer->start(10000);
     dbHelper = db;
+    labelname_ = thelabelname;
 }
 
-graphwidget::~graphwidget()
+labelgraphwidget::~labelgraphwidget()
 {
 }
 
-void graphwidget::setText(QString name, QString info)
+void labelgraphwidget::setText(QString name, QString info)
 {
     labelName->setText(name);
     labelInfo->setText(info);
@@ -41,7 +37,7 @@ void graphwidget::setText(QString name, QString info)
 
 
 //draw graph
-void graphwidget::paintEvent(QPaintEvent *event)
+void labelgraphwidget::paintEvent(QPaintEvent *event)
 {
     Q_UNUSED(event);
     QPainter painter(this);
@@ -49,11 +45,10 @@ void graphwidget::paintEvent(QPaintEvent *event)
     if (is_drawed == false)
     {
         a = new graph_(dbHelper, configHelper);
-        a->start();
+        a->start(labelname_);
         dolayout();
         is_drawed = true;
     }
-
     changepoint(z_temp);
     z_temp = 0;
 
@@ -154,7 +149,7 @@ void graphwidget::paintEvent(QPaintEvent *event)
     qDebug() << "draw graph really finished";
 }
 
-void graphwidget::dolayout()
+void labelgraphwidget::dolayout()
 {
     Graph G;
     for (int i = 0; i < a->nodelist.count() ; i++)
@@ -185,7 +180,7 @@ void graphwidget::dolayout()
     }
 }
 
-void graphwidget::mousePressEvent(QMouseEvent *event)
+void labelgraphwidget::mousePressEvent(QMouseEvent *event)
 {
     if (event->buttons() == Qt::LeftButton) //如果鼠标按下的是左键
     {
@@ -198,13 +193,13 @@ void graphwidget::mousePressEvent(QMouseEvent *event)
     }
 }
 
-void graphwidget::mouseDoubleClickEvent(QMouseEvent *event)
+void labelgraphwidget::mouseDoubleClickEvent(QMouseEvent *event)
 {
     h_Point = event->pos();
     this->update();
 }
 
-void graphwidget::mouseMoveEvent(QMouseEvent *event)
+void labelgraphwidget::mouseMoveEvent(QMouseEvent *event)
 {
     if (event->buttons() == Qt::LeftButton) //如果鼠标按下的是左键
     {
@@ -215,7 +210,7 @@ void graphwidget::mouseMoveEvent(QMouseEvent *event)
     }
 }
 
-void graphwidget::mouseReleaseEvent(QMouseEvent *event)
+void labelgraphwidget::mouseReleaseEvent(QMouseEvent *event)
 {
     //拖动完成后，光标恢复默认形状
     setCursor(cursor);
@@ -224,7 +219,7 @@ void graphwidget::mouseReleaseEvent(QMouseEvent *event)
 }
 
 
-void graphwidget::wheelEvent(QWheelEvent *event)
+void labelgraphwidget::wheelEvent(QWheelEvent *event)
 {
     if (event->delta() > 0) //如果滚轮往上滚
     {
@@ -247,7 +242,7 @@ void graphwidget::wheelEvent(QWheelEvent *event)
 }
 
 
-QString graphwidget::choosecolor(int i)
+QString labelgraphwidget::choosecolor(int i)
 {
     switch (i)
     {
@@ -356,7 +351,7 @@ QString graphwidget::choosecolor(int i)
     }
 }
 
-void graphwidget::changepoint(int i)
+void labelgraphwidget::changepoint(int i)
 {
     if (i == 1)
     {
@@ -375,3 +370,4 @@ void graphwidget::changepoint(int i)
         }
     }
 }
+

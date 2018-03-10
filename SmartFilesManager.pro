@@ -41,16 +41,16 @@ SOURCES += \
     graph.cpp \
     node.cpp \
     edge.cpp \
-    wordcloud.cpp \
     graphwidget.cpp \
-    wordcloudwidget.cpp \
     relationcalculatetask.cpp \
     relationcalculator.cpp \
     numerictablewidgetitem.cpp \
     searchdialog.cpp \
     searchbox.cpp \
     searchpopup.cpp \
-    labelswideget.cpp
+    labelswideget.cpp \
+    labelgraphwidget.cpp \
+    wordlabelwidget.cpp
 
 HEADERS += \
     settingsdialog.h \
@@ -103,16 +103,16 @@ HEADERS += \
     graph.h \
     edge.h \
     node.h \
-    wordcloud.h \
     graphwidget.h \
-    wordcloudwidget.h \
     relationcalculatetask.h \
     relationcalculator.h \
     numerictablewidgetitem.h \
     searchdialog.h \
     searchbox.h \
     searchpopup.h \
-    labelswideget.h
+    labelswideget.h \
+    labelgraphwidget.h \
+    wordlabelwidget.h
 
 FORMS += \
     settingsdialog.ui \
