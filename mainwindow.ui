@@ -407,6 +407,11 @@
     <string>查看领域下文件(&amp;C)</string>
    </property>
   </action>
+  <action name="actionImagine">
+   <property name="text">
+    <string>文件联想(&amp;I)</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources>
