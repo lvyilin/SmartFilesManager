@@ -4,10 +4,12 @@
 
 #include "analyserthread.h"
 #include <qDebug>
+#include "toolkit.h"
+#include <QProcess>
+#include <QTemporaryDir>
 
-AnalyserThread::AnalyserThread(DBHelper *db, const QStringList &li, const QList<File> &f, QObject *parent) :
+AnalyserThread::AnalyserThread(DBHelper *db, const QList<File> &f, QObject *parent) :
     dbHelper(db),
-    supportedFormat(li),
     fileList(f),
     QThread(parent)
 {
@@ -22,20 +24,30 @@ void AnalyserThread::run()
     {
         if (abortFlag)
             return;
-        if (processFile(file))
+
+        ProcessingResult result = processFile(file);
+        switch (result)
         {
+        case ProcessAborted:
+            return;
+        case NoException:
             ++successCount;
-            mutex.lock();
-            dbHelper->setFinish(file, true);
-            mutex.unlock();
-        }
-        else
-        {
+            dbHelper->setFinished(file, true);
+            break;
+
+        case FileNotFoundException:
+        case FileAccessException:
+        case FileReadException:
+        case FileFormatNotSupported:
+        case DocExtractException:
+        case PdfExtractException:
             ++failCount;
-            mutex.lock();
             dbHelper->setValid(file, false);
-            mutex.unlock();
+            break;
+        default:
+            break;
         }
+        finishOne();
     }
     emit resultReady(successCount, failCount);
 }
@@ -46,79 +58,127 @@ void AnalyserThread::abortProgress()
     emit aborted();
 }
 
-bool AnalyserThread::processFile(const File &file)
+ProcessingResult AnalyserThread::processFile(const File &file)
 {
     QFileInfo checkFile(file.path);
     if (!(checkFile.exists() && checkFile.isReadable()))
     {
         qDebug() << "【AnalyserThread】file not exist or unreadable!";
-        return false;
-    }
-    if (!isSupportedFormat(file.format))
-    {
-        qDebug() << "【AnalyserThread】not supported file format";
-        return false;
-    }
-    QMimeType mime = mimeDb.mimeTypeForFile(file.name);
-    if (!mime.isValid())
-    {
-        qDebug() << "【AnalyserThread】process file is not a valid format: " << file.name;
-        return false;
+        return FileNotFoundException;
     }
 
-    //文本文件提取文本
+    if (abortFlag) return ProcessAborted;
+
     QString textContent;
     //纯文本文件
-    if (mime.inherits("text/plain"))
+    if (file.format == "txt")
     {
-        if (abortFlag)
-            return false;
         QFile f(file.path);
         if (!f.open(QFile::ReadOnly | QFile::Text))
-            return false;
+            return FileAccessException;
+
         QTextStream in(&f);
-        textContent = in.readAll();
+        textContent = in.readAll();//TODO:可优化，如果文件过大
         if (textContent.isNull())
         {
-            qDebug() << "【Analyser】extract file failed" << file.name;
-            return false;
+            qDebug() << "【Analyser】extract txt file failed" << file.name;
+            return FileReadException;
         }
         f.close();
-        qDebug() << "【Analyser】 text file read success! size:" << file.name << file.size;
+        qDebug() << "【Analyser】 extract txt file success! " << file.name;
     }
     //DOCX文件
     else if (file.format == "docx")
     {
-        if (abortFlag)
-            return false;
         textContent = docxExtract(file);
         if (textContent.isNull())
         {
-            qDebug() << "【Analyser】extract file failed" << file.name;
-            return false;
+            qDebug() << "【Analyser】extract docx file failed" << file.name;
+            return DocExtractException;
         }
     }
-    else;
-    /*QFile saveFile(file.name + ".txt");
-    saveFile.open(QIODevice::WriteOnly | QIODevice::Text);
-    QTextStream out(&saveFile);
-    out << textContent;
-    saveFile.close();*/
-    return true;
+    else if (file.format == "doc")
+    {
+        textContent = docExtract(file);
+        if (textContent.isNull())
+        {
+            qDebug() << "【Analyser】extract doc file failed" << file.name;
+            return DocExtractException;
+        }
+    }
+    else if (file.format == "pdf")
+    {
+        textContent = pdfExtract(file);
+        if (textContent.isNull())
+        {
+            qDebug() << "【Analyser】extract pdf file failed" << file.name;
+            return PdfExtractException;
+        }
+    }
+    else return FileFormatNotSupported;
+
+    if (abortFlag) return ProcessAborted;
+    //
+    //开始对文件内容进行处理
+    //
+    FileProduct fileProduct;
+    fileProduct.file = file;
+    fileProduct.contents = textContent;
+
+    generateKeywords(fileProduct);
+    if (abortFlag) return ProcessAborted;
+    dbHelper->setFileProduct(fileProduct);
+    if (abortFlag) return ProcessAborted;
+    generateFileLabels(fileProduct);
+    if (abortFlag) return ProcessAborted;
+    return NoException;
 }
 
-bool AnalyserThread::isSupportedFormat(QString format) const
+void AnalyserThread::generateKeywords(FileProduct &fpd)
 {
-    //支持所有纯文本文件
-    if (mimeDb.mimeTypeForFile("*." + format).inherits("text/plain"))
-        return true;
-    else return supportedFormat.contains(format);
+    //TODO: qmap use pointer
+
+    qDebug() << "start generate keywords, file: "
+             << fpd.file.name;
+    fpd.keywords = Toolkit::getInstance().getKeywords(fpd.contents);
+    if (abortFlag) return;
+    QMap<QString, double> filenameMap =
+        Toolkit::getInstance().getKeywords(fpd.file.name.split(".", QString::SkipEmptyParts).at(0));
+    QMapIterator<QString, double> itr(filenameMap);
+    while (!abortFlag && itr.hasNext())
+    {
+        itr.next();
+        double weight = itr.value() * FILENAME_WEIGHTED_VARIANCE;
+        if (fpd.keywords.contains(itr.key()))
+        {
+            fpd.keywords[itr.key()] += weight;
+        }
+        else
+        {
+            fpd.keywords[itr.key()] = weight;
+        }
+    }
+    qDebug() << "generate done";
+}
+
+void AnalyserThread::generateFileLabels(FileProduct &fpd)
+{
+    qDebug() << "start generate labels, file: "
+             << fpd.file.name;
+    QMapIterator<QString, double> itr(fpd.keywords);
+    QStringList keywords;
+    while (!abortFlag && itr.hasNext())
+    {
+        itr.next();
+
+        keywords.append(itr.key());
+    }
+    if (abortFlag)return;
+    dbHelper->setFileLabels(fpd, keywords);
 }
 
 QString AnalyserThread::docxExtract(const File &file)
 {
-    if (abortFlag)
-        return QString();
     QuaZip zipper(file.path);
     if (!zipper.open(QuaZip::mdUnzip))
     {
@@ -132,6 +192,9 @@ QString AnalyserThread::docxExtract(const File &file)
         zipper.close();
         return QString();
     }
+
+    if (abortFlag) return QString();
+
     QuaZipFile searchFile(&zipper);
     if (!searchFile.open(QIODevice::ReadOnly))
     {
@@ -141,10 +204,15 @@ QString AnalyserThread::docxExtract(const File &file)
         zipper.close();
         return QString();
     }
+
+    if (abortFlag) return QString();
+
     QByteArray content = searchFile.readAll();
     qDebug() << "【Analyser】extract docx file success! size:" << file.name << content.size();
     searchFile.close();
     zipper.close();
+
+    if (abortFlag) return QString();
 
     QString ret;
     QDomDocument xmlReader("mydoc");
@@ -152,7 +220,94 @@ QString AnalyserThread::docxExtract(const File &file)
     QDomNodeList qnl = xmlReader.elementsByTagName("w:t");
     for (int i = 0; i < qnl.count(); i++)
     {
+        if (abortFlag) return QString();
         ret += qnl.item(i).toElement().text();
     }
     return ret;
+}
+
+QString AnalyserThread::docExtract(const File &file)
+{
+    const QString DOC2TXT = "/deps/doc2txt.exe";
+
+    QString curPath = QDir::currentPath();
+    QString exePath = curPath + DOC2TXT;
+    QString prefix;
+    if (QFileInfo(exePath).exists())
+        prefix = curPath;
+    else
+    {
+        QDir dir = curPath;
+        dir.cd("../SmartFilesManager/");
+        if (dir.exists() && QFileInfo(dir.absolutePath() + DOC2TXT).exists())
+            prefix = dir.absolutePath();
+        else
+        {
+            qDebug() << "cannot find doc2txt!";
+            return QString();
+        }
+    }
+    QStringList args;
+    QTemporaryDir tmpDir;
+    QString tmpTxtFilePath = tmpDir.filePath("doc_extract.txt");
+    if (!tmpDir.isValid())
+        return QString();
+    args << QDir::toNativeSeparators(file.path)
+         << tmpTxtFilePath;
+    QProcess exProgress;
+    exProgress.start(prefix + DOC2TXT, args);
+    if (exProgress.waitForFinished(10000))
+    {
+        QFile docFile(tmpTxtFilePath);
+        if (!docFile.open(QIODevice::ReadOnly | QIODevice::Text))
+            return QString();
+        QTextStream stream(&docFile);
+        QString ret =  stream.readAll();
+        docFile.close();
+        return ret;
+    }
+    return QString();
+}
+
+QString AnalyserThread::pdfExtract(const File &file)
+{
+    const QString PDF2TXT = "/deps/pdftotext.exe";
+
+    QString curPath = QDir::currentPath();
+    QString exePath = curPath + PDF2TXT;
+    QString prefix;
+    if (QFileInfo(exePath).exists())
+        prefix = curPath;
+    else
+    {
+        QDir dir = curPath;
+        dir.cd("../SmartFilesManager/");
+        if (dir.exists() && QFileInfo(dir.absolutePath() + PDF2TXT).exists())
+            prefix = dir.absolutePath();
+        else
+        {
+            qDebug() << "cannot find doc2txt!";
+            return QString();
+        }
+    }
+    QStringList args;
+    QTemporaryDir tmpDir;
+    QString tmpTxtFilePath = tmpDir.filePath("pdf_extract.txt");
+    if (!tmpDir.isValid())
+        return QString();
+    args << QDir::toNativeSeparators(file.path)
+         << tmpTxtFilePath;
+    QProcess exProgress;
+    exProgress.start(prefix + PDF2TXT, args);
+    if (exProgress.waitForFinished(10000))
+    {
+        QFile pdfFile(tmpTxtFilePath);
+        if (!pdfFile.open(QIODevice::ReadOnly | QIODevice::Text))
+            return QString();
+        QTextStream stream(&pdfFile);
+        QString ret =  stream.readAll();
+        pdfFile.close();
+        return ret;
+    }
+    return QString();
 }

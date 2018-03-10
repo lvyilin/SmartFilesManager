@@ -2,14 +2,14 @@
 #define ANALYSER_H
 
 #include <QObject>
-#include "dbhelper.h"
 #include "analyserthread.h"
+#include "utils.h"
 #include <QFile>
 #include <qDebug>
 #include <QList>
 #include <QMutex>
 
-const int  MAX_THREAD_COUNT = 10;
+//用于分配AnalyserThread线程
 class Analyser : public QObject {
     Q_OBJECT
 public:
@@ -17,27 +17,33 @@ public:
 
     QStringList getSupportedFormatsList() const;
     QStringList getSupportedFormatsFilter() const;
-    void processFileList(const QList<File> &fileList);
 
+    /**
+     * @brief processFileList 为param分配工作线程
+     * @param fileList
+     */
+    void processFileList(const QList<File> &fileList);
+    int getThreadCount();
     void quitAll();
 signals:
     void processFinished(int sc, int fc);
     void threadQuit();
     void threadWait(unsigned long time);
     void interrupted();
+    void analyseProgress(int num);
 
 public slots:
     void handleResult(int success, int fail);
     void analyserInterrupted();
+    void threadProgressAdded();
 
 private:
-    const QStringList supportedFormat = {"docx", "txt"};
-    const QStringList supportedFormatFilter = {"*.docx", "*.txt"};
     DBHelper *dbHelper;
     int successCount;
     int failCount;
     int threadCount;
     QMutex mutex;
+    int finishCount;
 
 };
 

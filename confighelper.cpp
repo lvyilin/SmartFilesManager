@@ -1,5 +1,6 @@
 ﻿#include "confighelper.h"
 #include <qDebug>
+
 ConfigHelper::ConfigHelper(QObject *parent) : QObject(parent)
 {
     settings = new QSettings(
@@ -22,6 +23,8 @@ void ConfigHelper::readSettings()
     scanIntervalHours = settings->value("ScanIntervalHours", QVariant(12)).toInt();
     fileIndexFinished = settings->value("FileIndexFinished", QVariant(false)).toBool();
     interruptionType = static_cast<InterruptionType>(settings->value("InterruptionType", QVariant(static_cast<int>(NoInterrupt))).toInt());
+    autoCalculateRelation = settings->value("AutoCalRelation", QVariant(true)).toBool();
+    displayEdgePercent = settings->value("DisplayEdgePercent", QVariant(40)).toInt();
     //detact termination
     settings->setValue("InterruptionType", QVariant(static_cast<int>(TerminateInterrupt)));
 
@@ -46,6 +49,8 @@ void ConfigHelper::saveSettings()
     settings->setValue("CpuTriggerPercent", QVariant(static_cast<int>(cpuTriggerPercent)));
     settings->setValue("TimeTriggerPoint", QVariant(timeTriggerPoint));
     settings->setValue("ScanIntervalHours", QVariant(scanIntervalHours));
+    settings->setValue("AutoCalRelation", QVariant(autoCalculateRelation));
+    settings->setValue("DisplayEdgePercent", QVariant(displayEdgePercent));
 
     int pathSize = pathModel->rowCount();
     qDebug() << "[saveSettings] path size: " << pathSize;
@@ -69,7 +74,7 @@ bool ConfigHelper::isStartAtBoot() const
     return startAtBoot;
 }
 
-ConfigHelper::RunningStrategy ConfigHelper::getRunningStrategy() const
+RunningStrategy ConfigHelper::getRunningStrategy() const
 {
     return runningStrategy;
 }
@@ -89,22 +94,24 @@ int ConfigHelper::getScanInterval() const
     return scanIntervalHours;
 }
 
-void ConfigHelper::setSettings(bool st, int cpuPct, int intv)
+void ConfigHelper::setSettings(bool st, int cpuPct, int intv, bool autoCal, int edgePct)
 {
     startAtBoot = st;
     cpuTriggerPercent = cpuPct;
     scanIntervalHours = intv;
     runningStrategy = CpuTrigger;
-
+    autoCalculateRelation = autoCal;
+    displayEdgePercent = edgePct;
 }
 
-void ConfigHelper::setSettings(bool st, const QTime &timeTriPt, int intv)
+void ConfigHelper::setSettings(bool st, const QTime &timeTriPt, int intv, bool autoCal, int edgePct)
 {
     startAtBoot = st;
     timeTriggerPoint = timeTriPt;
     scanIntervalHours = intv;
     runningStrategy = TimeTrigger;
-
+    autoCalculateRelation = autoCal;
+    displayEdgePercent = edgePct;
 }
 
 bool ConfigHelper::hasLastInterrupted() const
@@ -112,12 +119,12 @@ bool ConfigHelper::hasLastInterrupted() const
     return !(interruptionType == NoInterrupt);
 }
 
-ConfigHelper::InterruptionType ConfigHelper::getInterruptionType() const
+InterruptionType ConfigHelper::getInterruptionType() const
 {
     return interruptionType;
 }
 
-void ConfigHelper::setInterruptionType(ConfigHelper::InterruptionType it)
+void ConfigHelper::setInterruptionType(InterruptionType it)
 {
     interruptionType = it;
 }
@@ -137,4 +144,14 @@ void ConfigHelper::setFileIndexFinished(bool value)
 bool ConfigHelper::isFileIndexFinished() const
 {
     return fileIndexFinished;
+}
+
+bool ConfigHelper::isAutoCalRelation() const
+{
+    return autoCalculateRelation;
+}
+
+int ConfigHelper::getDisplayEdgePercent() const
+{
+    return displayEdgePercent;
 }

@@ -8,40 +8,41 @@ Analyser::Analyser(DBHelper *dh, QObject *parent) :
     QObject(parent),
     dbHelper(dh)
 {
-    successCount = failCount = 0;
+    successCount = failCount = finishCount = 0;
     threadCount = 0;
-}
-
-
-
-QStringList Analyser::getSupportedFormatsList() const
-{
-    return supportedFormat;
-}
-
-QStringList Analyser::getSupportedFormatsFilter() const
-{
-    return supportedFormatFilter;
 }
 
 void Analyser::processFileList(const QList<File> &fileList)
 {
-    if (MAX_THREAD_COUNT <= threadCount)
+    if (fileList.isEmpty())
+    {
+        qDebug() << "[processWorkList] worklist is empty.";
+        emit processFinished(0, 0);
+        return;
+    }
+    if (MAX_THREAD_NUM <= threadCount)
     {
         qDebug() << "[processWorkList] thread number exceeds.";
         emit processFinished(0, 0);
         return;
     }
-    successCount = failCount = 0;
-    AnalyserThread *workerThread = new AnalyserThread(dbHelper, getSupportedFormatsList(), fileList, this);
+    AnalyserThread *workerThread = new AnalyserThread(dbHelper, fileList, this);
     ++threadCount;
+    successCount = failCount = 0;
     connect(workerThread, &AnalyserThread::resultReady, this, &Analyser::handleResult);
     connect(workerThread, &AnalyserThread::finished, workerThread, &QObject::deleteLater);
     connect(workerThread, &AnalyserThread::aborted, this, &Analyser::analyserInterrupted);
     connect(this, &Analyser::threadQuit, workerThread, &AnalyserThread::abortProgress);
     connect(this, &Analyser::threadWait, workerThread, &AnalyserThread::wait);
+    connect(workerThread, &AnalyserThread::finishOne, this, &Analyser::threadProgressAdded);
+
     workerThread->start();
     qDebug() << "[Analyser] total threads now: " << threadCount;
+}
+
+int Analyser::getThreadCount()
+{
+    return threadCount;
 }
 
 void Analyser::handleResult(int success, int fail)
@@ -51,10 +52,11 @@ void Analyser::handleResult(int success, int fail)
     successCount += success;
     failCount += fail;
     mutex.unlock();
-    //BUG:可能出现提示多次的情况
+    emit analyseProgress(successCount + failCount);
     if (threadCount == 0)
     {
         emit processFinished(successCount, failCount);
+        successCount = failCount = 0;
     }
 }
 
@@ -63,17 +65,14 @@ void Analyser::analyserInterrupted()
     emit interrupted();
 }
 
+void Analyser::threadProgressAdded()
+{
+    emit analyseProgress(++finishCount);
+}
+
 void Analyser::quitAll()
 {
     qDebug() << "[analyser] start quiting thread...total:" << threadCount;
     emit threadQuit();
     emit threadWait(2000);
-    /* qDebug() << "【】" << (*threadList[0])->isRunning();
-     for (int i = 0; i < threadCount; i++)
-     {
-         if (threadList[i] && (*threadList[i])->isRunning())
-         {
-             (*threadList[i])->quit();
-         }
-     }*/
 }
