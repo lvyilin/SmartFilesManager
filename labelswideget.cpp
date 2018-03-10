@@ -44,7 +44,7 @@ void labelswideget::paintEvent(QPaintEvent *event)
     double centerx = rec.width() * 0.35, centery = rec.height() * 0.3;
     tree->setHeaderLabel("标签文件列表");
     QTreeWidgetItem *lisiroot[50];
-    for (int i = 0 ; i < labels.count() ; i++)
+    for (int i = labels.count() - 1 ; i >= 0 ; --i)
     {
         painter.setBrush(QColor(choosecolor(i % 50)));
         painter.setPen(choosecolor(i % 50));

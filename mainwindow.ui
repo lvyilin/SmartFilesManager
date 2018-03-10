@@ -22,7 +22,7 @@
       </property>
       <widget class="QWidget" name="file_view_2">
        <attribute name="title">
-        <string>文件类型视图</string>
+        <string>基础视图</string>
        </attribute>
        <layout class="QHBoxLayout" name="horizontalLayout_2">
         <item>
