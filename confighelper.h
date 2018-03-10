@@ -60,6 +60,8 @@ private:
     InterruptionType interruptionType;
 
     bool autoCalculateRelation;
+
+    void setupStartAtBootState(bool start);
 };
 
 #endif // CONFIGHELPER_H

@@ -1,5 +1,9 @@
 ﻿#include "confighelper.h"
 #include <qDebug>
+#include <QCoreApplication>
+#include <QStandardPaths>
+#include <QFileInfo>
+#include <QDir>
 
 ConfigHelper::ConfigHelper(QObject *parent) : QObject(parent)
 {
@@ -96,6 +100,7 @@ int ConfigHelper::getScanInterval() const
 
 void ConfigHelper::setSettings(bool st, int cpuPct, int intv, bool autoCal, int edgePct)
 {
+    setupStartAtBootState(st);
     startAtBoot = st;
     cpuTriggerPercent = cpuPct;
     scanIntervalHours = intv;
@@ -106,6 +111,7 @@ void ConfigHelper::setSettings(bool st, int cpuPct, int intv, bool autoCal, int 
 
 void ConfigHelper::setSettings(bool st, const QTime &timeTriPt, int intv, bool autoCal, int edgePct)
 {
+    setupStartAtBootState(st);
     startAtBoot = st;
     timeTriggerPoint = timeTriPt;
     scanIntervalHours = intv;
@@ -154,4 +160,30 @@ bool ConfigHelper::isAutoCalRelation() const
 int ConfigHelper::getDisplayEdgePercent() const
 {
     return displayEdgePercent;
+}
+
+void ConfigHelper::setupStartAtBootState(bool start)
+{
+    if (start == startAtBoot)
+        return;
+    QFileInfo fileInfo(QCoreApplication::applicationFilePath());
+    if (start)
+    {
+        QFile::link(QCoreApplication::applicationFilePath(),
+                    QStandardPaths::writableLocation(QStandardPaths::ApplicationsLocation) +
+                    QDir::separator() +
+                    "Startup" +
+                    QDir::separator() +
+                    fileInfo.completeBaseName() +
+                    ".lnk");
+    }
+    else
+    {
+        QFile(QStandardPaths::writableLocation(QStandardPaths::ApplicationsLocation) +
+              QDir::separator() +
+              "Startup" +
+              QDir::separator() +
+              fileInfo.completeBaseName() +
+              ".lnk").remove();
+    }
 }
