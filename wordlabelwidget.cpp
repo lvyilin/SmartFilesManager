@@ -65,15 +65,15 @@ void wordlabelwidget::paintEvent(QPaintEvent *event)
     filerec.setHeight(rec.width() * 0.15);
     painter.drawRect(filerec);
     painter.drawText(filerec, filename, option);
-    int r = rec.height() * 0.30;
+    double r = rec.height() * 0.30;
     for (int i = 0; i < labellist.count(); i++)
     {
-        painter.drawEllipse(rec.center().x() - rec.width() * 0.1 + r * qCos(360 * (i + 1) / labellist.count()),
-                            rec.center().y() - rec.height() * 0.1 + r * qSin(360 * (i + 1) / labellist.count()),
+        painter.drawEllipse(rec.center().x() - rec.width() * 0.1 + rec.width() * 0.075 + r * qCos(360 * (i + 1) / labellist.count()),
+                            rec.center().y() - rec.height() * 0.1 + rec.width() * 0.075 + r * qSin(360 * (i + 1) / labellist.count()),
                             rec.width() * 0.05,
                             rec.width() * 0.05);
-        painter.drawText(rec.center().x() - rec.width() * 0.1 + r * qCos(360 * (i + 1) / labellist.count()),
-                         rec.center().y() - rec.height() * 0.1 + r * qSin(360 * (i + 1) / labellist.count()),
+        painter.drawText(rec.center().x() - rec.width() * 0.1 + rec.width() * 0.075 + r * qCos(360 * (i + 1) / labellist.count()),
+                         rec.center().y() - rec.height() * 0.1 + rec.width() * 0.075  + r * qSin(360 * (i + 1) / labellist.count()),
                          labellist[i].name);
     }
 
