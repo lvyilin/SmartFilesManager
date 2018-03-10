@@ -1,6 +1,6 @@
 <RCC>
     <qresource prefix="/images">
-        <file>icons/tray.png</file>
+        <file>icons/tray.jpg</file>
         <file>icons/index.png</file>
         <file>icons/relation.png</file>
         <file>icons/search.png</file>
@@ -8,5 +8,6 @@
         <file>icons/add.png</file>
         <file>icons/trashbin.png</file>
         <file>icons/reload.png</file>
+        <file>icons/sfm.ico</file>
     </qresource>
 </RCC>
