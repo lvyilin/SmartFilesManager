@@ -899,12 +899,12 @@ void MainWindow::on_actionFieldFile_triggered()
     if (labelgraphwidget_ == nullptr)
     {
         labelgraphwidget_ = new labelgraphwidget(this, dbHelper, configHelper);
+        labelgraphwidget_->list = new QListWidget(labelDialog);
     }
     labelgraphwidget_->setname(str);
 
     QDialog *labelDialog = new QDialog(this);
     QHBoxLayout *fieldlabelLayout = new QHBoxLayout(labelDialog);
-    QListWidget *fieldabelListWidget = new QListWidget(labelDialog);
     fieldlabelLayout->addWidget(labelgraphwidget_, 3);
     fieldlabelLayout->addWidget(fieldabelListWidget, 1);
 
