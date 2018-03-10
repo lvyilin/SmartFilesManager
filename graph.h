@@ -22,6 +22,7 @@ public:
     void setedge();
     void start();
     void setnodecoordinate();
+    void start(QString labelname);
 private:
     DBHelper *dbHelper;
     ConfigHelper *configHelper;

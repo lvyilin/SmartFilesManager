@@ -1,9 +1,5 @@
-﻿#if defined(_MSC_VER) && (_MSC_VER >= 1600)
-#pragma execution_character_set("utf-8")
-#endif    //解决MSVC编译UTF-8(BOM)导致的中文编码问题
-
-#ifndef GRAPHWIDGET_H
-#define GRAPHWIDGET_H
+#ifndef LABELGRAPHWIDGET_H
+#define LABELGRAPHWIDGET_H
 
 #include <QWidget>
 #include <QListWidget>
@@ -21,18 +17,18 @@
 #include <QHBoxLayout>
 #include "QTimer"
 #include "confighelper.h"
-#define NORMALIZED_GRAPH_WIDTH_AND_HEIGHT 700
-#define NORMALIZED_GRAPH_WIDTH_AND_HEIGHT_HALF 400
-#define NORMALIZED_GRAPH_LEFT 40
-#define NORMALIZED_GRAPH_TOP 80
+#define NORMALIZED_GRAPH_WIDTH_AND_HEIGHT 400
+#define NORMALIZED_GRAPH_WIDTH_AND_HEIGHT_HALF 300
+#define NORMALIZED_GRAPH_LEFT 30
+#define NORMALIZED_GRAPH_TOP 60
 #define transformX(x) (((x)+viewCenterX)*viewScale)
 #define transformY(y) (((y)+viewCenterY)*viewScale)
 
-class graphwidget : public QWidget {
+class labelgraphwidget : public QWidget {
     Q_OBJECT
 public:
-    explicit graphwidget(QWidget *parent = nullptr, DBHelper *db = nullptr, ConfigHelper *cf = nullptr);
-    ~graphwidget();
+    explicit labelgraphwidget(QString thelabelname, QWidget *parent = nullptr, DBHelper *db = nullptr, ConfigHelper *cf = nullptr);
+    ~labelgraphwidget();
     void setgraph();
     void paintEvent(QPaintEvent *event);
     void dolayout();
@@ -51,6 +47,7 @@ protected:
     void mouseReleaseEvent(QMouseEvent *event); //松开
     void wheelEvent(QWheelEvent *event);
     void mouseDoubleClickEvent(QMouseEvent *event);
+
 private:
     DBHelper *dbHelper;
     ConfigHelper *configHelper;
@@ -66,10 +63,8 @@ private:
     QHBoxLayout *horLayout;
     QVBoxLayout *verlayout;
     int z_temp;
-
-signals:
+    QString labelname_;
 
 public slots:
 };
-
-#endif // GRAPHWIDGET_H
+#endif // LABELGRAPHWIDGET_H
