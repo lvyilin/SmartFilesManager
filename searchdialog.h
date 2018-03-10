@@ -17,6 +17,8 @@ class SearchDialog : public QDialog {
 public:
     explicit SearchDialog(DBHelper *db, QWidget *parent = 0);
     ~SearchDialog();
+signals:
+    void searchResult(const QString &str, bool byPath);
 
 private slots:
     void on_checkBoxFormat_toggled(bool checked);
@@ -35,6 +37,7 @@ private slots:
     void on_pushButtonCancel_clicked();
 
     void on_pushButtonSearch_clicked();
+    void resultSelected(QModelIndex index);
 
 private:
     Ui::SearchDialog *ui;

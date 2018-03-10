@@ -39,6 +39,7 @@ SearchDialog::SearchDialog(DBHelper *db, QWidget *parent) :
     }
     connect(ui->comboBoxField, SIGNAL(activated(QString)), this, SLOT(fieldChanged(QString)));
 
+    connect(ui->listWidgetResult, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(resultSelected(QModelIndex)));
     init();
 }
 
@@ -265,6 +266,15 @@ void SearchDialog::on_pushButtonSearch_clicked()
         new QListWidgetItem(fr.file.name, ui->listWidgetResult);
     }
     ui->labelResultNum->setText(QString("共%1个结果").arg(result.count()));
+}
+
+void SearchDialog::resultSelected(QModelIndex index)
+{
+    if (index.isValid())
+    {
+        emit searchResult(index.data(0).toString(), false);
+        this->hide();
+    }
 }
 
 void SearchDialog::init()

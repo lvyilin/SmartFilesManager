@@ -720,7 +720,10 @@ void MainWindow::on_actionQuickSearch_triggered()
 void MainWindow::on_actionAdvancedSearch_triggered()
 {
     if (searchDialog == nullptr)
+    {
         searchDialog = new SearchDialog(dbHelper, this);
+        connect(searchDialog, SIGNAL(searchResult(QString, bool)), this, SLOT(treeViewFocus(QString, bool)));
+    }
     searchDialog->show();
 }
 
