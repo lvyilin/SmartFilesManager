@@ -180,7 +180,7 @@ void MainWindow::createTrayIcon()
     trayIconMenu->addSeparator();
     trayIconMenu->addAction(tr("退出程序"), this, &MainWindow::readyQuit);
 
-    trayIcon = new QSystemTrayIcon(QIcon(":/images/icons/tray.png"), this);
+    trayIcon = new QSystemTrayIcon(QIcon(":/images/icons/tray.jpg"), this);
 
     trayIcon->setContextMenu(trayIconMenu);
     trayIcon->setToolTip("打开" + QCoreApplication::applicationName());
