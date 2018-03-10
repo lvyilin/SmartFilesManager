@@ -25,6 +25,8 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 win32:RC_ICONS += icons/sfm.ico
 
+CONFIG += static
+
 SOURCES += \
         main.cpp \
     settingsdialog.cpp \
