@@ -45,6 +45,8 @@ void labelgraphwidget::setText(QString name, QString info)
 //draw graph
 void labelgraphwidget::paintEvent(QPaintEvent *event)
 {
+    inf.clear();
+    list->clear();
     Q_UNUSED(event);
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing, true);
@@ -116,14 +118,13 @@ void labelgraphwidget::paintEvent(QPaintEvent *event)
             QTextOption option(Qt::AlignLeft | Qt::AlignVCenter);
             option.setWrapMode(QTextOption::WordWrap);
             painter.setPen(Qt::black);
-            painter.drawText(h_Point.x() + 225, h_Point.y() + 4, "name: " + a->nodelist[i].name + "\n");
-            painter.drawText(h_Point.x() + 225, h_Point.y() + 26, + "labels: " + labels + "\n");
+            inf.append("name: " + a->nodelist[i].name);
+            inf.append("labels: " + labels);
             for (it = a->nodelist[i].keywords.constBegin(); it != a->nodelist[i].keywords.constEnd(); ++it)
             {
                 keywords = it.key() + "    value:  " + QString::number(it.value());
                 painter.setPen(Qt::black);
-                painter.drawText(h_Point.x() + 225, h_Point.y() + 48 + temp * 16, "keywords:  " + keywords);
-                painter.drawText(h_Point.x() + 225, h_Point.y() + 48 + temp * 16, "keywords:  " + keywords);
+                inf.append("keywords:  " + keywords);
                 temp++;
             }
             painter.setPen(QPen(QColor("#1FFFFF"), 3));
@@ -137,9 +138,8 @@ void labelgraphwidget::paintEvent(QPaintEvent *event)
                     painter.setPen(QPen(QColor("#307672"), 3));
                     painter.drawLine(e.first->x, e.first->y, e.second->x, e.second->y);
                     painter.setPen(Qt::black);
-                    painter.drawText(e.second->x,  e.second->y,  QString::number(counter));
                     edge_inf = "This node connect to node " + QString::number(counter) + ": " + e.second->name + "weight :" + QString::number(e.weight);
-                    painter.drawText(h_Point.x() + 225, h_Point.y() - 18 * counter, edge_inf);
+                    inf.append(QString::number(counter) + edge_inf);
                 }
             }
             /*(h_Point.x() + 220,
@@ -150,7 +150,7 @@ void labelgraphwidget::paintEvent(QPaintEvent *event)
         }
     }
 
-
+    list->addItems(inf);
     painter.end();
     qDebug() << "draw graph really finished";
 }

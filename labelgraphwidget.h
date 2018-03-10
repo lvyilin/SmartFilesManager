@@ -17,6 +17,7 @@
 #include <QHBoxLayout>
 #include "QTimer"
 #include "confighelper.h"
+#include "QStringList"
 #define NORMALIZED_GRAPH_WIDTH_AND_HEIGHT 400
 #define NORMALIZED_GRAPH_WIDTH_AND_HEIGHT_HALF 300
 #define NORMALIZED_GRAPH_LEFT 30
@@ -66,6 +67,7 @@ private:
     QVBoxLayout *verlayout;
     int z_temp;
     QString labelname_;
+    QStringList inf;
 
 public slots:
 };
