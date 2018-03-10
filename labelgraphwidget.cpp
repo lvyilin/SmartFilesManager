@@ -5,7 +5,7 @@
 #include <ogdf/energybased/FMMMLayout.h>
 using namespace ogdf;
 using namespace std;
-labelgraphwidget::labelgraphwidget(QString thelabelname, QWidget *parent, DBHelper *db, ConfigHelper *cf) :
+labelgraphwidget::labelgraphwidget(QWidget *parent, DBHelper *db, ConfigHelper *cf) :
     QWidget(parent), dbHelper(db), configHelper(cf)
 {
     setMinimumSize(208, 427);
@@ -22,11 +22,16 @@ labelgraphwidget::labelgraphwidget(QString thelabelname, QWidget *parent, DBHelp
     connect(timer, SIGNAL(timeout()), this, SLOT(update()));
     timer->start(10000);
     dbHelper = db;
-    labelname_ = thelabelname;
 }
 
 labelgraphwidget::~labelgraphwidget()
 {
+}
+
+void labelgraphwidget::setname(QString name)
+{
+    labelname_ = name;
+    this->update();
 }
 
 void labelgraphwidget::setText(QString name, QString info)

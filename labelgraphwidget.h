@@ -27,12 +27,13 @@
 class labelgraphwidget : public QWidget {
     Q_OBJECT
 public:
-    explicit labelgraphwidget(QString thelabelname, QWidget *parent = nullptr, DBHelper *db = nullptr, ConfigHelper *cf = nullptr);
+    explicit labelgraphwidget(QWidget *parent = nullptr, DBHelper *db = nullptr, ConfigHelper *cf = nullptr);
     ~labelgraphwidget();
     void setgraph();
     void paintEvent(QPaintEvent *event);
     void dolayout();
     void graph_change(int ch);
+    void setname(QString thelabelname);
     int adjustViewScale(double k_);
     void setText(QString name, QString info);
     void changepoint(int i);
