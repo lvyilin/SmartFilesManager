@@ -24,7 +24,6 @@ void labelswideget::paintEvent(QPaintEvent *event)
     Q_UNUSED(event);
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing, true);
-    QMap<QString, QStringList>::const_iterator it;
     double sum = 0;
     double  a = 0;
     int *counter = new int[labels.values().count()];

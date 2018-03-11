@@ -7,8 +7,6 @@
 #include "ui_mainwindow.h"
 #include "fileupdaterthread.h"
 
-#include "graphwidget.h"
-#include "labelswideget.h"
 #include "numerictablewidgetitem.h"
 
 
@@ -113,8 +111,9 @@ MainWindow::MainWindow(QWidget *parent) :
     toolkitInitThread->start(QThread::LowPriority);*/
 
     //draw graph
-    graphwidget *graphwidget_ = new graphwidget(this, dbHelper, configHelper);
+    graphwidget_ = new graphwidget(this, dbHelper, configHelper);
     ui->tabWidget_2->addTab(graphwidget_, "知识图谱视图");
+    //    connect(ui->tabWidget_2, SIGNAL(tabBarClicked(int)), this, SLOT(updateView()));
 
     drawlabelspie();
 }
@@ -405,6 +404,9 @@ void MainWindow::showStartCalRelation()
 void MainWindow::notifyIndexResult(int success, int fail)
 {
     ui->statusBar->showMessage(tr("文件索引建立完成."));
+    updateFieldTreeModel();
+    //    reloadView();
+    updatePie();
     if (configHelper->isAutoCalRelation())
     {
         calculateRelationSeparately = false;
@@ -511,8 +513,8 @@ void MainWindow::reloadView()
         delete fileTreeFieldModel;
         fileTreeFieldModel = anotherModel;
     }
-
-    on_treeView_clicked(anotherModel->index(0, 0));
+    if (anotherModel->index(0, 0).isValid())
+        on_treeView_clicked(anotherModel->index(0, 0));
 }
 
 void MainWindow:: treeViewFocus(const QString &str, bool byPath)
@@ -679,6 +681,7 @@ void MainWindow::startCalculateRelation()
         connect(relationCalculator, &RelationCalculator::allTasksFinished, this, &MainWindow::notifyRelationFinished);
         connect(relationCalculator, &RelationCalculator::startTask, this, &MainWindow::showStartCalRelation);
         connect(dbHelper, &DBHelper::finishSaveFileResult, relationCalculator, &RelationCalculator::newTaskOk);
+        connect(dbHelper, &DBHelper::finishSaveFileResult, this, &MainWindow::updateGraph);
         relationCalculator->start();
     }
     else if (relationCalculator->isFinished())
@@ -860,7 +863,7 @@ void MainWindow::focusFile()
 void MainWindow::drawlabelspie()
 {
     QWidget *widget = new QWidget(this);
-    labelswideget *labelswideget_ = new labelswideget(getLabelFilesMap(), this, dbHelper, configHelper);
+    labelswideget_ = new labelswideget(getLabelFilesMap(), this, dbHelper, configHelper);
     QHBoxLayout *pieLayout = new QHBoxLayout(widget);
     pieLayout->addWidget(labelswideget_, 3);
     QTreeWidget *pieTreeWidget = new QTreeWidget(widget);
@@ -874,23 +877,25 @@ void MainWindow::on_comboBoxTreeViewType_currentIndexChanged(int index)
     if (fileTreeFormatModel == nullptr)
     {
         fileTreeFormatModel = new FileTreeModel(fileList, dbHelper, this);
-        if (index == 0)
-            fileTreeFormatModel->setupTypeModelData();
-        else if (index == 1)
-            fileTreeFormatModel->setupFieldModelData();
-        ui->treeView->setModel(fileTreeFormatModel);
+        fileTreeFormatModel->setupTypeModelData();
     }
-    else
+    if (fileTreeFieldModel == nullptr)
     {
-        FileTreeModel *anotherModel = new FileTreeModel(fileList, dbHelper, this);
-        if (index == 0)
-            anotherModel->setupTypeModelData();
-        else if (index == 1)
-            anotherModel->setupFieldModelData();
-        ui->treeView->setModel(anotherModel);
-        delete fileTreeFormatModel;
-        fileTreeFormatModel = anotherModel;
+        fileTreeFieldModel = new FileTreeModel(fileList, dbHelper, this);
+        fileTreeFieldModel->setupFieldModelData();
     }
+    if (index == 0)
+        ui->treeView->setModel(fileTreeFormatModel);
+    else if (index == 1)
+        ui->treeView->setModel(fileTreeFormatModel);
+    /* FileTreeModel *anotherModel = new FileTreeModel(fileList, dbHelper, this);
+     if (index == 0)
+         anotherModel->setupTypeModelData();
+     else if (index == 1)
+         anotherModel->setupFieldModelData();
+     ui->treeView->setModel(anotherModel);
+     delete fileTreeFormatModel;
+     fileTreeFormatModel = anotherModel;*/
 }
 
 void MainWindow::on_actionArrangeInfo_triggered()
@@ -939,4 +944,26 @@ void MainWindow::on_actionImagine_triggered()
     imagineDialog->setWindowTitle(ui->treeView->currentIndex().data(Qt::DisplayRole).toString());
     imagineDialog->setLayout(wordlabelLayout);
     imagineDialog->exec();
+}
+
+void MainWindow::updateGraph()
+{
+    graphwidget_->is_drawed = false;
+}
+
+void MainWindow::updatePie()
+{
+    labelswideget_->labels = getLabelFilesMap();
+    labelswideget_->update();
+}
+
+void MainWindow::updateFieldTreeModel()
+{
+    QList<int> idList;
+    dbHelper->getAllFiles(fileList, idList);
+    FileTreeModel *anotherModel = new FileTreeModel(fileList, dbHelper, this);
+    anotherModel->setupFieldModelData();
+    ui->treeView->setModel(anotherModel);
+    delete fileTreeFieldModel;
+    fileTreeFieldModel = anotherModel;
 }

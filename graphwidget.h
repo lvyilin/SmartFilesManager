@@ -44,6 +44,7 @@ public:
     graph_ *a;
     QTimer *timer;
 
+    bool is_drawed = false;
 
 protected:
     void mousePressEvent(QMouseEvent *event); //按下
@@ -54,7 +55,6 @@ protected:
 private:
     DBHelper *dbHelper;
     ConfigHelper *configHelper;
-    bool is_drawed = false;
     bool is_showinf = false;
     QPoint offset;//储存鼠标指针位置与窗口位置的差值
     QCursor cursor;//创建光标，保存默认光标形状

@@ -24,6 +24,8 @@
 
 #include "labelgraphwidget.h"
 #include "wordlabelwidget.h"
+#include "graphwidget.h"
+#include "labelswideget.h"
 
 
 class SettingsDialog;
@@ -114,6 +116,10 @@ private slots:
 
     void on_actionImagine_triggered();
 
+    void updateGraph();
+    void updatePie();
+    void updateFieldTreeModel();
+
 private:
     Ui::MainWindow *ui;
     bool calculateRelationSeparately = true;
@@ -146,6 +152,8 @@ private:
     QMenu *fieldMenu = nullptr;
     labelgraphwidget *labelgraphwidget_ = nullptr;
     wordlabelwidget *wordlabelwidget_ = nullptr;
+    graphwidget *graphwidget_ ;
+    labelswideget *labelswideget_;
 };
 
 #endif // MAINWINDOW_H
