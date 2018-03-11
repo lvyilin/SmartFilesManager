@@ -537,7 +537,7 @@ void MainWindow:: treeViewFocus(const QString &str, bool byPath)
                                Qt::MatchRecursive);
     if (idxs.isEmpty())
     {
-        fileNotFoundMsgBox();
+        //        fileNotFoundMsgBox();
         return;
     }
     ui->treeView->setCurrentIndex(idxs[0]);
@@ -887,15 +887,16 @@ void MainWindow::on_comboBoxTreeViewType_currentIndexChanged(int index)
     if (index == 0)
         ui->treeView->setModel(fileTreeFormatModel);
     else if (index == 1)
-        ui->treeView->setModel(fileTreeFormatModel);
-    /* FileTreeModel *anotherModel = new FileTreeModel(fileList, dbHelper, this);
-     if (index == 0)
-         anotherModel->setupTypeModelData();
-     else if (index == 1)
-         anotherModel->setupFieldModelData();
-     ui->treeView->setModel(anotherModel);
-     delete fileTreeFormatModel;
-     fileTreeFormatModel = anotherModel;*/
+        ui->treeView->setModel(fileTreeFieldModel);
+
+    /*FileTreeModel *anotherModel = new FileTreeModel(fileList, dbHelper, this);
+    if (index == 0)
+        anotherModel->setupTypeModelData();
+    else if (index == 1)
+        anotherModel->setupFieldModelData();
+    ui->treeView->setModel(anotherModel);
+    delete fileTreeFormatModel;
+    fileTreeFormatModel = anotherModel;*/
 }
 
 void MainWindow::on_actionArrangeInfo_triggered()
@@ -963,7 +964,6 @@ void MainWindow::updateFieldTreeModel()
     dbHelper->getAllFiles(fileList, idList);
     FileTreeModel *anotherModel = new FileTreeModel(fileList, dbHelper, this);
     anotherModel->setupFieldModelData();
-    ui->treeView->setModel(anotherModel);
     delete fileTreeFieldModel;
     fileTreeFieldModel = anotherModel;
 }
