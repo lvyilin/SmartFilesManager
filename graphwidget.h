@@ -43,8 +43,8 @@ public:
     QString choosecolor(int i);
     graph_ *a;
     QTimer *timer;
-
     bool is_drawed = false;
+
 
 protected:
     void mousePressEvent(QMouseEvent *event); //按下
@@ -52,6 +52,7 @@ protected:
     void mouseReleaseEvent(QMouseEvent *event); //松开
     void wheelEvent(QWheelEvent *event);
     void mouseDoubleClickEvent(QMouseEvent *event);
+
 private:
     DBHelper *dbHelper;
     ConfigHelper *configHelper;

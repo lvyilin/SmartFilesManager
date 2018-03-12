@@ -916,7 +916,7 @@ void MainWindow::on_actionFieldFile_triggered()
     labelgraphwidget_->list = new QListWidget(labelDialog);
     labelgraphwidget_->setname(str);
     QHBoxLayout *fieldlabelLayout = new QHBoxLayout(labelDialog);
-    fieldlabelLayout->addWidget(labelgraphwidget_, 3);
+    fieldlabelLayout->addWidget(labelgraphwidget_, 2);
     fieldlabelLayout->addWidget(labelgraphwidget_->list, 1);
 
     labelDialog->setWindowTitle("当前知识图谱领域：" + ui->treeWidgetField->currentItem()->text(0));
@@ -939,7 +939,7 @@ void MainWindow::on_actionImagine_triggered()
     QDialog *imagineDialog = new QDialog(this);
     QHBoxLayout *wordlabelLayout = new QHBoxLayout(imagineDialog);
     QListWidget *wordlabelListWidget = new QListWidget(imagineDialog);
-    wordlabelLayout->addWidget(wordlabelwidget_, 3);
+    wordlabelLayout->addWidget(wordlabelwidget_, 2);
     wordlabelLayout->addWidget(wordlabelListWidget, 1);
     wordlabelwidget_->list = wordlabelListWidget;
     imagineDialog->setWindowTitle(ui->treeView->currentIndex().data(Qt::DisplayRole).toString());
