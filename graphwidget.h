@@ -45,7 +45,6 @@ public:
     QTimer *timer;
     bool is_drawed = false;
 
-    bool is_drawed = false;
 
 protected:
     void mousePressEvent(QMouseEvent *event); //按下
