@@ -1,5 +1,6 @@
 #include "wordlabelwidget.h"
 #include "QtMath"
+#define PI 3.1415926535
 
 wordlabelwidget::wordlabelwidget(QWidget *parent, DBHelper *db, ConfigHelper *cf) :
     QWidget(parent), dbHelper(db), configHelper(cf)
@@ -68,12 +69,16 @@ void wordlabelwidget::paintEvent(QPaintEvent *event)
     double r = rec.height() * 0.30;
     for (int i = 0; i < labellist.count(); i++)
     {
-        painter.drawEllipse(rec.center().x() - rec.width() * 0.1 + rec.width() * 0.075 + r * qCos(360 * (i + 1) / labellist.count()),
-                            rec.center().y() - rec.height() * 0.1 + rec.width() * 0.075 + r * qSin(360 * (i + 1) / labellist.count()),
+        painter.drawEllipse(filerec.center().x() + r * qCos(PI / 180 * 360 * (i + 1) / labellist.count()),
+                            filerec.center().y() + r * qSin(PI / 180 * 360 * (i + 1) / labellist.count()),
                             rec.width() * 0.05,
                             rec.width() * 0.05);
-        painter.drawText(rec.center().x() - rec.width() * 0.1 + rec.width() * 0.075 + r * qCos(360 * (i + 1) / labellist.count()),
-                         rec.center().y() - rec.height() * 0.1 + rec.width() * 0.075 + r * qSin(360 * (i + 1) / labellist.count()),
+        /*painter.drawLine(filerec.center().x(),
+                         filerec.center().y(),
+                         filerec.center().x() + r * qCos(360 * (i + 1) / labellist.count()),
+                         filerec.center().y() + r * qSin(360 * (i + 1) / labellist.count()));*/
+        painter.drawText(rec.center().x() - rec.width() * 0.1 + rec.width() * 0.075 + r * qCos(PI / 180 * 360 * (i + 1) / labellist.count()),
+                         rec.center().y() - rec.height() * 0.1 + rec.width() * 0.075 + r * qSin(PI / 180 * 360 * (i + 1) / labellist.count()),
                          labellist[i].name);
     }
 
@@ -81,9 +86,9 @@ void wordlabelwidget::paintEvent(QPaintEvent *event)
 
     for (int i = 0 ; i < labellist.count(); i++)
     {
-        if (qPow(h_Point.x() - (rec.center().x() - rec.width() * 0.1 + rec.width() * 0.075 + r * qCos(360 * (i + 1) / labellist.count())), 2)
+        if (qPow(h_Point.x() - (rec.center().x() - rec.width() * 0.1 + rec.width() * 0.075 + r * qCos(PI / 180 * 360 * (i + 1) / labellist.count())), 2)
                 +
-                qPow(h_Point.y() - ((rec.center().y() - rec.height() * 0.1) + rec.width() * 0.075 + r * qSin(360 * (i + 1) / labellist.count())), 2)
+                qPow(h_Point.y() - ((rec.center().y() - rec.height() * 0.1) + rec.width() * 0.075 + r * qSin(PI / 180 * 360 * (i + 1) / labellist.count())), 2)
                 <=
                 qPow(rec.width() * 0.05, 2)
            )

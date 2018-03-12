@@ -43,6 +43,7 @@ public:
     QString choosecolor(int i);
     graph_ *a;
     QTimer *timer;
+    bool is_drawed = false;
 
 
 protected:
@@ -51,10 +52,10 @@ protected:
     void mouseReleaseEvent(QMouseEvent *event); //松开
     void wheelEvent(QWheelEvent *event);
     void mouseDoubleClickEvent(QMouseEvent *event);
+
 private:
     DBHelper *dbHelper;
     ConfigHelper *configHelper;
-    bool is_drawed = false;
     bool is_showinf = false;
     QPoint offset;//储存鼠标指针位置与窗口位置的差值
     QCursor cursor;//创建光标，保存默认光标形状
