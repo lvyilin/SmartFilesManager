@@ -4,6 +4,7 @@
 #include <QFileInfo>
 #include <QDir>
 #include <QDebug>
+#include <QCoreApplication>
 
 Toolkit &Toolkit::getInstance()
 {
@@ -65,7 +66,10 @@ Toolkit::Toolkit()
         if (dir.exists() && QFileInfo(dir.absolutePath() + DICT_PATH).exists())
             prefix = dir.absolutePath();
         else
+        {
             qDebug() << "cannot find toolkit dict!";
+            QCoreApplication::exit(1);
+        }
     }
     jieba = new cppjieba::Jieba(QString(prefix + DICT_PATH).toStdString(),
                                 QString(prefix + HMM_PATH).toStdString(),
