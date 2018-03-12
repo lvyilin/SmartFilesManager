@@ -179,7 +179,7 @@ void MainWindow::createTrayIcon()
     trayIconMenu->addSeparator();
     trayIconMenu->addAction(tr("退出程序"), this, &MainWindow::readyQuit);
 
-    trayIcon = new QSystemTrayIcon(QIcon(":/images/icons/tray.jpg"), this);
+    trayIcon = new QSystemTrayIcon(QIcon(":/images/icons/tray.png"), this);
 
     trayIcon->setContextMenu(trayIconMenu);
     trayIcon->setToolTip("打开" + QCoreApplication::applicationName());
@@ -919,7 +919,7 @@ void MainWindow::on_actionFieldFile_triggered()
     fieldlabelLayout->addWidget(labelgraphwidget_, 3);
     fieldlabelLayout->addWidget(labelgraphwidget_->list, 1);
 
-    labelDialog->setWindowTitle(ui->treeWidgetField->currentItem()->text(0));
+    labelDialog->setWindowTitle("当前知识图谱领域：" + ui->treeWidgetField->currentItem()->text(0));
     labelDialog->setLayout(fieldlabelLayout);
     labelDialog->exec();
 }
