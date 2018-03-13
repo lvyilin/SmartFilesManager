@@ -66,7 +66,7 @@ private:
     QPoint h_Point;
     QLabel *labelName;
     QLabel *labelInfo;
-    int r = 20;
+    int r = 5;
     QHBoxLayout *horLayout;
     QVBoxLayout *verlayout;
     int z_temp;

@@ -65,13 +65,13 @@ void labelgraphwidget::paintEvent(QPaintEvent *event)
     for (int i = 0; i < a->nodelist.count(); i++)
     {
         painter.setBrush(QColor(choosecolor(i % 50)));
-        painter.setPen(QPen(QColor(choosecolor(i % 50)), 3));
+        painter.setPen(QPen(QColor(choosecolor(i % 50)), 1));
         for (int j = 0; j < a->edgelist.count(); j++)
         {
             if (a->edgelist[j].first->path == a->nodelist[i].path)
             {
-                painter.drawEllipse(a->edgelist[j].first->x - 8, a->edgelist[j].first->y - 8, r, r);
-                painter.drawEllipse(a->edgelist[j].second->x - 8, a->edgelist[j].second->y - 8, r, r);
+                painter.drawEllipse(a->edgelist[j].first->x - 2, a->edgelist[j].first->y - 2, r, r);
+                painter.drawEllipse(a->edgelist[j].second->x - 2, a->edgelist[j].second->y - 2, r, r);
                 painter.drawLine(a->nodelist[i].x, a->nodelist[i].y, a->edgelist[j].second->x, a->edgelist[j].second->y);
             }
         }
@@ -127,8 +127,8 @@ void labelgraphwidget::paintEvent(QPaintEvent *event)
                 inf.append("keywords:  " + keywords);
                 temp++;
             }
-            painter.setPen(QPen(QColor("#1FFFFF"), 3));
-            painter.drawEllipse(a->nodelist[i].x - 8, a->nodelist[i].y - 8, r, r);
+            painter.setPen(QPen(QColor("#1FFFFF"), 1));
+            painter.drawEllipse(a->nodelist[i].x - 2, a->nodelist[i].y - 2, r, r);
 
             foreach (edge_ e, a->edgelist)
             {
