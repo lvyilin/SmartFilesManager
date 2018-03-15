@@ -21,9 +21,9 @@ void ConfigHelper::readSettings()
     firstTimeUsing = settings->value("FirstTimeUsing", QVariant(true)).toBool();
     startAtBoot = settings->value("StartAtBoot", QVariant(false)).toBool();
     onlyOneInstace = settings->value("OnlyOneInstance", QVariant(true)).toBool();
-    runningStrategy = static_cast<RunningStrategy>(settings->value("RunningStrategy", QVariant(static_cast<int>(CpuTrigger))).toInt());
+    runningStrategy = static_cast<RunningStrategy>(settings->value("RunningStrategy", QVariant(static_cast<int>(TimeTrigger))).toInt());
     cpuTriggerPercent = settings->value("CpuTriggerPercent", QVariant(10)).toInt();
-    timeTriggerPoint = settings->value("TimeTriggerPoint", QVariant(QTime(12, 0))).toTime();
+    timeTriggerPoint = settings->value("TimeTriggerPoint", QVariant(QTime(23, 0))).toTime();
     scanIntervalHours = settings->value("ScanIntervalHours", QVariant(12)).toInt();
     fileIndexFinished = settings->value("FileIndexFinished", QVariant(false)).toBool();
     interruptionType = static_cast<InterruptionType>(settings->value("InterruptionType", QVariant(static_cast<int>(NoInterrupt))).toInt());

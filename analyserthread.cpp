@@ -272,6 +272,7 @@ QString AnalyserThread::docExtract(const File &file)
 QString AnalyserThread::pdfExtract(const File &file)
 {
     const QString PDF2TXT = "/deps/pdftotext.exe";
+    QString xpdfconfig = "/deps/xpdf/xpdfrc";
 
     QString curPath = QDir::currentPath();
     QString exePath = curPath + PDF2TXT;
@@ -283,10 +284,13 @@ QString AnalyserThread::pdfExtract(const File &file)
         QDir dir = curPath;
         dir.cd("../SmartFilesManager/");
         if (dir.exists() && QFileInfo(dir.absolutePath() + PDF2TXT).exists())
+        {
             prefix = dir.absolutePath();
+            xpdfconfig = "/deps/xpdf/xpdfrcd";
+        }
         else
         {
-            qDebug() << "cannot find doc2txt!";
+            qDebug() << "cannot find pdftotext!";
             return QString();
         }
     }
@@ -295,18 +299,33 @@ QString AnalyserThread::pdfExtract(const File &file)
     QString tmpTxtFilePath = tmpDir.filePath("pdf_extract.txt");
     if (!tmpDir.isValid())
         return QString();
-    args << QDir::toNativeSeparators(file.path)
+    args << "-cfg"
+         << prefix + xpdfconfig
+         << "-enc"
+         << "UTF-8"
+         << QDir::toNativeSeparators(file.path)
          << tmpTxtFilePath;
     QProcess exProgress;
     exProgress.start(prefix + PDF2TXT, args);
     if (exProgress.waitForFinished(10000))
     {
         QFile pdfFile(tmpTxtFilePath);
+        //debug
+        /*QFile testPdf("D:/testpdf/" + file.name + ".txt");
+        testPdf.open(QIODevice::ReadWrite);
+        QTextStream testStr(&testPdf);*/
+        //-----
+
         if (!pdfFile.open(QIODevice::ReadOnly | QIODevice::Text))
             return QString();
         QTextStream stream(&pdfFile);
+        stream.setCodec("UTF-8");
         QString ret =  stream.readAll();
         pdfFile.close();
+        //debug
+        //        testStr << ret;
+        //        testPdf.close();
+        //-----
         return ret;
     }
     return QString();

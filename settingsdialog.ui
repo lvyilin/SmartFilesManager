@@ -30,7 +30,7 @@
       <item row="0" column="0">
        <widget class="QCheckBox" name="checkBoxStartAtBoot">
         <property name="text">
-         <string>开机运行</string>
+         <string>开机启动</string>
         </property>
        </widget>
       </item>
