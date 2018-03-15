@@ -431,9 +431,14 @@ void DBHelper::getFileById(File &f, int fileId)
     }
 }
 
-int DBHelper::getLabelId(const QString &label)
+int DBHelper::getLabelId(const QString &label, int type)
 {
-    query->prepare("select id from labels where name=? and type='field'");
+    if (type == 1)
+        query->prepare("select id from labels where name=? and type='field'");
+    else if (type == 2)
+        query->prepare("select id from labels where name=? and type='keyword'");
+    else
+        query->prepare("select id from labels where name=?");
     query->addBindValue(label);
     query->exec();
     if (query->next())
@@ -649,6 +654,34 @@ void DBHelper::getFileResultsHaveLabel(QList<FileResult> &list, const QString &l
         getFileResultById(fr, fileId);
         list << fr;
     }
+}
+
+bool DBHelper::addLabel(const QString &name, const QString &parentName)
+{
+    if (name.isEmpty() || name == "请输入" || parentName == "请输入")return false;
+    int parentId = getLabelId(parentName);
+    if (parentId == 0)return false;
+
+    //若已存在标签，不添加
+    int nameId = getLabelId(name, 2);
+    if (nameId != 0) return false;
+
+    query->prepare("insert into labels(name, level, parent, is_leaf, type) "
+                   "values(:name, :lvl, :parent, :is_leaf, :type)");
+    query->bindValue(":name", name);
+    query->bindValue(":lvl", 3);
+    query->bindValue(":parent", parentId);
+    query->bindValue(":is_leaf", true);
+    query->bindValue(":type", "keyword");
+    return  query->exec();
+
+}
+
+bool DBHelper::removeLabel(const QString &name)
+{
+    query->prepare("delete from labels where name=? and type='keyword'");
+    query->addBindValue(name);
+    return query->exec();
 }
 
 void DBHelper::abortProgress()

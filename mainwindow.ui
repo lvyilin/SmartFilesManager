@@ -136,7 +136,11 @@
              </widget>
             </item>
             <item row="4" column="0">
-             <widget class="QListWidget" name="listWidgetKw"/>
+             <widget class="QListWidget" name="listWidgetKw">
+              <property name="contextMenuPolicy">
+               <enum>Qt::CustomContextMenu</enum>
+              </property>
+             </widget>
             </item>
             <item row="1" column="0">
              <widget class="QLabel" name="label_4">
@@ -267,6 +271,7 @@
     </property>
     <addaction name="actionSettings"/>
     <addaction name="actionArrangeInfo"/>
+    <addaction name="actionLabelMaintain"/>
     <addaction name="separator"/>
     <addaction name="actionExit"/>
     <addaction name="separator"/>
@@ -410,6 +415,16 @@
   <action name="actionImagine">
    <property name="text">
     <string>文件联想(&amp;I)</string>
+   </property>
+  </action>
+  <action name="actionLabelMaintain">
+   <property name="text">
+    <string>标签维护(&amp;L)</string>
+   </property>
+  </action>
+  <action name="actionAddLabel">
+   <property name="text">
+    <string>添加标签(&amp;E)</string>
    </property>
   </action>
  </widget>

@@ -26,6 +26,7 @@
 #include "wordlabelwidget.h"
 #include "graphwidget.h"
 #include "labelswideget.h"
+#include "labeldialog.h"
 
 
 class SettingsDialog;
@@ -104,6 +105,7 @@ private slots:
     void on_actionOpenFolder_triggered();
     void showFileContextMenu(const QPoint &pos);
     void showFieldContextMenu(const QPoint &pos);
+    void showLabelMaintainMenu(const QPoint &pos);
     void focusFile();
 
     void on_comboBoxTreeViewType_currentIndexChanged(int index);
@@ -119,6 +121,10 @@ private slots:
     void updateGraph();
     void updatePie();
     void updateFieldTreeModel();
+
+    void on_actionLabelMaintain_triggered();
+
+    void on_actionAddLabel_triggered();
 
 private:
     Ui::MainWindow *ui;
@@ -150,10 +156,12 @@ private:
 
     QMenu *fileTreeMenu = nullptr;
     QMenu *fieldMenu = nullptr;
+    QMenu *labelMaintainMenu = nullptr;
     labelgraphwidget *labelgraphwidget_ = nullptr;
     wordlabelwidget *wordlabelwidget_ = nullptr;
     graphwidget *graphwidget_ ;
     labelswideget *labelswideget_;
+    LabelDialog *labelDialog;
 };
 
 #endif // MAINWINDOW_H

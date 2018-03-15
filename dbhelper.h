@@ -90,6 +90,8 @@ public:
 
     void getFilesHaveLabel(QList<File> &list, const QString &label);
     void getFileResultsHaveLabel(QList<FileResult> &list, const QString &label);
+    bool addLabel(const QString &name, const QString &parentName);
+    bool removeLabel(const QString &name);
 
 signals:
     void calRelationProgress(int num, int total);
@@ -103,7 +105,7 @@ private:
     void getFileAndIdByPath(const QString &path, File &file, int &id);
     void getFileResultById(FileResult &fr, int fileId);
     void getFileById(File &f, int fileId);
-    int getLabelId(const QString &label);
+    int getLabelId(const QString &label, int type = 1);//1:field only; 2:kw only 3:all
     QSqlDatabase db;
     QSqlQuery *query;
     QMutex mutex;

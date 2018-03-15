@@ -116,6 +116,10 @@ MainWindow::MainWindow(QWidget *parent) :
     //    connect(ui->tabWidget_2, SIGNAL(tabBarClicked(int)), this, SLOT(updateView()));
 
     drawlabelspie();
+
+    labelDialog = new LabelDialog(dbHelper, this);
+    labelDialog->setWindowTitle("标签维护");
+    connect(ui->listWidgetKw, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(showLabelMaintainMenu(QPoint)));
 }
 MainWindow::~MainWindow()
 {
@@ -854,6 +858,21 @@ void MainWindow::showFieldContextMenu(const QPoint &pos)
     fieldMenu->exec(globalPos);
 }
 
+void MainWindow::showLabelMaintainMenu(const QPoint &pos)
+{
+    QPoint globalPos = ui->listWidgetKw->mapToGlobal(pos);
+    QModelIndex index = ui->listWidgetKw->indexAt(pos);
+    if (!index.isValid())
+        return;
+
+    if (labelMaintainMenu != nullptr)
+        delete labelMaintainMenu;
+    labelMaintainMenu = new QMenu(this);
+    labelMaintainMenu->addAction(ui->actionAddLabel);
+    labelMaintainMenu->exec(globalPos);
+
+}
+
 void MainWindow::focusFile()
 {
     QString curPath = ui->tableWidgetRelation->currentIndex().data().toString();
@@ -966,4 +985,16 @@ void MainWindow::updateFieldTreeModel()
     anotherModel->setupFieldModelData();
     delete fileTreeFieldModel;
     fileTreeFieldModel = anotherModel;
+}
+
+void MainWindow::on_actionLabelMaintain_triggered()
+{
+    labelDialog->show();
+}
+
+void MainWindow::on_actionAddLabel_triggered()
+{
+    QString t = ui->listWidgetKw->currentIndex().data(0).toString();
+    labelDialog->setLineText(t);
+    labelDialog->show();
 }

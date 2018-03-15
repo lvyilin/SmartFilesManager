@@ -53,7 +53,8 @@ SOURCES += \
     searchpopup.cpp \
     labelswideget.cpp \
     labelgraphwidget.cpp \
-    wordlabelwidget.cpp
+    wordlabelwidget.cpp \
+    labeldialog.cpp
 
 HEADERS += \
     settingsdialog.h \
@@ -115,12 +116,14 @@ HEADERS += \
     searchpopup.h \
     labelswideget.h \
     labelgraphwidget.h \
-    wordlabelwidget.h
+    wordlabelwidget.h \
+    labeldialog.h
 
 FORMS += \
     settingsdialog.ui \
     mainwindow.ui \
-    searchdialog.ui
+    searchdialog.ui \
+    labeldialog.ui
 
 RESOURCES += \
     images.qrc
